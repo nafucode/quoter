@@ -88,9 +88,39 @@ const Quote = () => {
   }, [grandTotal, exchangeRate]);
 
   const componentRef = useRef(null);
+
+  const pageStyle = `
+    @media print {
+      @page {
+        size: auto;
+        margin: 20mm;
+      }
+      .page-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 10px;
+        color: #666;
+      }
+      .page-number:after {
+        counter-increment: page;
+        content: "Page " counter(page);
+      }
+      body {
+        counter-reset: page;
+      }
+      .break-inside-avoid {
+        break-inside: avoid;
+      }
+    }
+  `;
+
   const handlePrint = useReactToPrint({
-    contentRef: componentRef,
+    content: () => componentRef.current,
     documentTitle: `${companyName} - ${quotationNo}`,
+    pageStyle: pageStyle,
     onAfterPrint: () => console.log('printed'),
   });
 
@@ -277,39 +307,49 @@ const Quote = () => {
 
                     return (
                       <div className="text-sm">
-                        <h4 id="preview-basic-spec" className={`text-md font-semibold mt-2 border-b px-2 py-1 ${focusedSection === 'basic-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>I. Basic specification</h4>
-                        {renderSpec('Description', selectedElevator.description)}
-                        {renderSpec('Type', selectedElevator.type)}
-                        {renderSpec('Capacity (KG)', selectedElevator.capacity)}
-                        {renderSpec('Speed (M/S)', selectedElevator.speed)}
-                        {renderSpec('Floors/Stops', selectedElevator.floorsStops)}
-                        {renderSpec('Control System', selectedElevator.controlSystem)}
-                        {renderSpec('Drive System', selectedElevator.driveSystem)}
+                        <div className="break-inside-avoid">
+                          <h4 id="preview-basic-spec" className={`text-md font-semibold mt-2 border-b px-2 py-1 ${focusedSection === 'basic-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>I. Basic specification</h4>
+                          {renderSpec('Description', selectedElevator.description)}
+                          {renderSpec('Type', selectedElevator.type)}
+                          {renderSpec('Capacity (KG)', selectedElevator.capacity)}
+                          {renderSpec('Speed (M/S)', selectedElevator.speed)}
+                          {renderSpec('Floors/Stops', selectedElevator.floorsStops)}
+                          {renderSpec('Control System', selectedElevator.controlSystem)}
+                          {renderSpec('Drive System', selectedElevator.driveSystem)}
+                        </div>
                         
-                        <h4 id="preview-hoistway-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'hoistway-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>II. Hoistway specification</h4>
-                        {renderSpec('Headroom (mm)', selectedElevator.headroom)}
-                        {renderSpec('Pit Depth (mm)', selectedElevator.pitDepth)}
-                        {renderSpec('Shaft Size (W x D mm)', selectedElevator.shaftSize)}
-                        {renderSpec('Machine Room Size (W x D x H mm)', selectedElevator.machineRoomSize)}
+                        <div className="break-inside-avoid">
+                          <h4 id="preview-hoistway-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'hoistway-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>II. Hoistway specification</h4>
+                          {renderSpec('Headroom (mm)', selectedElevator.headroom)}
+                          {renderSpec('Pit Depth (mm)', selectedElevator.pitDepth)}
+                          {renderSpec('Shaft Size (W x D mm)', selectedElevator.shaftSize)}
+                          {renderSpec('Machine Room Size (W x D x H mm)', selectedElevator.machineRoomSize)}
+                        </div>
 
-                        <h4 id="preview-door-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'door-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>III. Door specification</h4>
-                        {renderSpec('Door Opening Type', selectedElevator.doorOpeningType)}
-                        {renderSpec('Door Opening Size (W x H mm)', selectedElevator.doorOpeningSize)}
-                        {renderSpec('Door Header Type', selectedElevator.doorHeaderType)}
-                        {renderSpec('1st Floor Door Decoration', selectedElevator.firstFloorDoor)}
-                        {renderSpec('Other Floors Door Decoration', selectedElevator.otherFloorsDoor)}
+                        <div className="break-inside-avoid">
+                          <h4 id="preview-door-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'door-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>III. Door specification</h4>
+                          {renderSpec('Door Opening Type', selectedElevator.doorOpeningType)}
+                          {renderSpec('Door Opening Size (W x H mm)', selectedElevator.doorOpeningSize)}
+                          {renderSpec('Door Header Type', selectedElevator.doorHeaderType)}
+                          {renderSpec('1st Floor Door Decoration', selectedElevator.firstFloorDoor)}
+                          {renderSpec('Other Floors Door Decoration', selectedElevator.otherFloorsDoor)}
+                        </div>
 
-                        <h4 id="preview-cabin-deco" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'cabin-deco' ? 'bg-yellow-200' : 'bg-gray-100'}`}>IV. Cabin Decoration</h4>
-                        {renderSpec('Car Wall', selectedElevator.carWall)}
-                        {renderSpec('Car Ceiling', selectedElevator.carCeiling)}
-                        {renderSpec('Car Floor', selectedElevator.carFloor)}
-                        {renderSpec('Car Handrail', selectedElevator.carHandrail)}
+                        <div className="break-inside-avoid">
+                          <h4 id="preview-cabin-deco" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'cabin-deco' ? 'bg-yellow-200' : 'bg-gray-100'}`}>IV. Cabin Decoration</h4>
+                          {renderSpec('Car Wall', selectedElevator.carWall)}
+                          {renderSpec('Car Ceiling', selectedElevator.carCeiling)}
+                          {renderSpec('Car Floor', selectedElevator.carFloor)}
+                          {renderSpec('Car Handrail', selectedElevator.carHandrail)}
+                        </div>
 
-                        <h4 id="preview-function-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'function-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>V. Function</h4>
-                        {renderSpec('COP/LOP', selectedElevator.copLop)}
-                        {selectedElevator.otherFunctions.map((func: any) => 
-                          func.checked && renderSpec(func.name, 'Included')
-                        )}
+                        <div className="break-inside-avoid">
+                          <h4 id="preview-function-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'function-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>V. Function</h4>
+                          {renderSpec('COP/LOP', selectedElevator.copLop)}
+                          {selectedElevator.otherFunctions.map((func: any) => 
+                            func.checked && renderSpec(func.name, 'Included')
+                          )}
+                        </div>
                       </div>
                     );
                   })()}
@@ -317,6 +357,13 @@ const Quote = () => {
                 
                 <div className="mt-4 pt-4 border-t text-right text-sm text-gray-500">
                   <p>Quotation Date: {quotationDate}</p>
+                </div>
+
+                <div className="page-footer hidden print:block">
+                  <p>Suzhou Xinfuji Electromechanical Co., Ltd.</p>
+                  <p>ADD:Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China</p>
+                  <p>E-mail: info@xinfuji.com</p>
+                  <p className="page-number"></p>
                 </div>
               </div>
             </div>
