@@ -91,8 +91,8 @@ const Quote = () => {
   }, [grandTotal, exchangeRate]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="container mx-auto p-4">
+    <div className="min-h-screen bg-gray-100">
+      <div className="p-4">
         <div className="flex flex-col md:flex-row md:space-x-4">
           {/* Left Side - Inputs */}
           <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md no-print">
@@ -202,7 +202,7 @@ const Quote = () => {
 
                 <div className="mt-4 pt-4 border-t">
                   <h3 className="text-lg font-semibold mb-2">Price - Currency: USD</h3>
-                  <table className="w-full text-sm text-left">
+                  <table className="w-full text-sm text-left printable-table">
                     <thead className="bg-gray-200">
                       <tr>
                         <th className="p-2">Description</th>
@@ -246,7 +246,7 @@ const Quote = () => {
                   </table>
                 </div>
 
-                <div className="mt-4 pt-4 border-t">
+                <div className="mt-4 pt-4 border-t overflow-x-auto">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-lg font-semibold">Specifications</h3>
                     <div className="flex space-x-1">
