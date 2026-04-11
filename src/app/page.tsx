@@ -503,7 +503,6 @@ const Quote = () => {
               <Header />
               <div className="p-4">
                 <h2 className="text-2xl font-bold mb-4 border-b pb-2">Quotation</h2>
-                <h2 className="text-2xl font-bold mb-4 border-b pb-2">Quotation</h2>
                 <div className="space-y-2">
                   <p><span className="font-semibold">Company:</span> {companyName}</p>
                   <p><span className="font-semibold">Quotation No:</span> {quotationNo}</p>
