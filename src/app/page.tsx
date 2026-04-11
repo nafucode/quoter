@@ -1,3 +1,4 @@
+"use client";
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import Header from '@/components/Header';
@@ -89,8 +90,6 @@ const Quote = () => {
   const componentRef = useRef(null);
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
-    documentTitle: `${companyName} - ${quotationNo}`,
-    removeAfterPrint: true,
   });
 
   return (
