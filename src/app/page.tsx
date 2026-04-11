@@ -6,13 +6,21 @@ export default function Home() {
   const [companyName, setCompanyName] = useState('');
   const [quotationNo, setQuotationNo] = useState('');
   const [projectName, setProjectName] = useState('');
-  const [type, setType] = useState('');
-  const [capacity, setCapacity] = useState(450);
-  const [speed, setSpeed] = useState(0.63);
-  const [unitPrice, setUnitPrice] = useState(0);
+
+  // Price
+  const [description, setDescription] = useState('Passenger Lift');
+  const [unitPrice, setUnitPrice] = useState(8900);
   const [qty, setQty] = useState(1);
+  const [freightDestination, setFreightDestination] = useState('YIWU YY CARGO WAREHOUSE');
+  const [freightCost, setFreightCost] = useState(600);
+  const [quotationType, setQuotationType] = useState('FOB');
+  const [exchangeRate, setExchangeRate] = useState(1430);
+  const [targetCurrency, setTargetCurrency] = useState('NGN');
 
   // Basic Specification
+  const [type, setType] = useState('TKJW 450/0.63-VF');
+  const [capacity, setCapacity] = useState(450);
+  const [speed, setSpeed] = useState(0.63);
   const [tractionMotorAndDrive, setTractionMotorAndDrive] = useState('Gearless motor, with VVVF control, Mona drive');
   const [carGroup, setCarGroup] = useState('Simplex Control');
   const [floorsStops, setFloorsStops] = useState('4/4');
@@ -48,9 +56,17 @@ export default function Home() {
   const [rightCarWall, setRightCarWall] = useState('Hairline Stainless steel 1.2mm');
   const [rearCarWall, setRearCarWall] = useState('Hairline Stainless steel 1.2mm');
 
-  const total = useMemo(() => {
+  const itemTotal = useMemo(() => {
     return unitPrice * qty;
   }, [unitPrice, qty]);
+
+  const grandTotal = useMemo(() => {
+    return itemTotal + freightCost;
+  }, [itemTotal, freightCost]);
+
+  const convertedTotal = useMemo(() => {
+    return grandTotal * exchangeRate;
+  }, [grandTotal, exchangeRate]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -64,7 +80,6 @@ export default function Home() {
                 <label className="block text-sm font-medium text-gray-700">Company Name</label>
                 <input
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Company Name"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                 />
@@ -73,27 +88,92 @@ export default function Home() {
                 <label className="block text-sm font-medium text-gray-700">Quotation No</label>
                 <input
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Quotation No"
                   value={quotationNo}
                   onChange={(e) => setQuotationNo(e.target.value)}
                 />
               </div>
-              <div>
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Project Name</label>
                 <input
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Project Name"
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Type</label>
+            </div>
+
+            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Price</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Description</label>
                 <input
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Type"
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Unit Price</label>
+                <input
+                  type="number"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  value={unitPrice}
+                  onChange={(e) => setUnitPrice(Number(e.target.value))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Qty</label>
+                <input
+                  type="number"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  value={qty}
+                  onChange={(e) => setQty(Number(e.target.value))}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Freight Destination</label>
+                <input
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  value={freightDestination}
+                  onChange={(e) => setFreightDestination(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Freight Cost</label>
+                <input
+                  type="number"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  value={freightCost}
+                  onChange={(e) => setFreightCost(Number(e.target.value))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Quotation Type</label>
+                <select
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  value={quotationType}
+                  onChange={(e) => setQuotationType(e.target.value)}
+                >
+                  <option>EXW</option>
+                  <option>FOB</option>
+                  <option>CIF</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Target Currency</label>
+                <input
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  value={targetCurrency}
+                  onChange={(e) => setTargetCurrency(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Exchange Rate</label>
+                <input
+                  type="number"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  value={exchangeRate}
+                  onChange={(e) => setExchangeRate(Number(e.target.value))}
                 />
               </div>
             </div>
@@ -101,11 +181,18 @@ export default function Home() {
             <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">I. Basic specification</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
+                <label className="block text-sm font-medium text-gray-700">Type</label>
+                <input
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Capacity (kg)</label>
                 <input
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Capacity"
                   value={capacity}
                   onChange={(e) => setCapacity(Number(e.target.value))}
                 />
@@ -116,7 +203,6 @@ export default function Home() {
                   type="number"
                   step="0.01"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Speed"
                   value={speed}
                   onChange={(e) => setSpeed(Number(e.target.value))}
                 />
@@ -378,30 +464,6 @@ export default function Home() {
                 />
               </div>
             </div>
-
-            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Price</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Unit Price</label>
-                <input
-                  type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Unit Price"
-                  value={unitPrice}
-                  onChange={(e) => setUnitPrice(Number(e.target.value))}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Qty</label>
-                <input
-                  type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Qty"
-                  value={qty}
-                  onChange={(e) => setQty(Number(e.target.value))}
-                />
-              </div>
-            </div>
           </div>
 
           {/* 右侧 */}
@@ -411,7 +473,49 @@ export default function Home() {
               <p><span className="font-semibold">Company:</span> {companyName}</p>
               <p><span className="font-semibold">Quotation No:</span> {quotationNo}</p>
               <p><span className="font-semibold">Project Name:</span> {projectName}</p>
-              <p><span className="font-semibold">Type:</span> {type}</p>
+              <p><span className="font-semibold">Quotation Type:</span> {quotationType}</p>
+            </div>
+
+            <div className="mt-4 pt-4 border-t">
+              <h3 className="text-lg font-semibold mb-2">Price - Currency: USD</h3>
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="p-2">Description</th>
+                    <th className="p-2">Type</th>
+                    <th className="p-2">Loading</th>
+                    <th className="p-2">Speed</th>
+                    <th className="p-2">F/S/D</th>
+                    <th className="p-2">QTY</th>
+                    <th className="p-2 text-right">Unit Price</th>
+                    <th className="p-2 text-right">Total Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="p-2">{description}</td>
+                    <td className="p-2">{type}</td>
+                    <td className="p-2">{capacity}KG</td>
+                    <td className="p-2">{speed} M/S</td>
+                    <td className="p-2">{floorsStops}</td>
+                    <td className="p-2">{qty}</td>
+                    <td className="p-2 text-right">{unitPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                    <td className="p-2 text-right">{itemTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                  </tr>
+                  <tr>
+                    <td colSpan={7} className="p-2 text-right font-semibold">Local fee and Freight from factory to {freightDestination} :</td>
+                    <td className="p-2 text-right">{freightCost.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                  </tr>
+                  <tr className="font-bold bg-gray-100">
+                    <td colSpan={7} className="p-2 text-right">Total amount :</td>
+                    <td className="p-2 text-right">{grandTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                  </tr>
+                  <tr className="font-bold">
+                     <td colSpan={7} className="p-2 text-right">=</td>
+                     <td className="p-2 text-right">{convertedTotal.toLocaleString('en-US', { style: 'currency', currency: targetCurrency })}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
 
             <div className="mt-4 pt-4 border-t">
@@ -459,10 +563,6 @@ export default function Home() {
                 <p><span className="font-semibold">Right Car Wall:</span></p><p>{rightCarWall}</p>
                 <p><span className="font-semibold">Rear Car Wall:</span></p><p>{rearCarWall}</p>
               </div>
-            </div>
-
-            <div className="mt-4 pt-4 border-t">
-              <p className="text-lg font-bold text-right">Total: {total.toFixed(2)} USD</p>
             </div>
           </div>
         </div>
