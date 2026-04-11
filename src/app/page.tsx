@@ -1,7 +1,7 @@
 
 "use client";
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { useReactToPrint } from 'react-to-print';
+
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
 import { elevatorTemplate } from '@/data/elevatorTemplate';
@@ -23,41 +23,7 @@ const Quote = () => {
   const componentRef = useRef(null);
   const nextId = useRef(2);
 
-  const pageStyle = `
-    @media print {
-      @page {
-        size: auto;
-        margin: 20mm;
-      }
-      .page-footer {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        text-align: center;
-        font-size: 10px;
-        color: #666;
-      }
-      .page-number:after {
-        counter-increment: page;
-        content: "Page " counter(page);
-      }
-      body {
-        counter-reset: page;
-      }
-      .break-inside-avoid {
-        break-inside: avoid;
-      }
-    }
-  `;
 
-  const handlePrint = useReactToPrint({
-    // @ts-ignore
-    content: () => componentRef.current,
-    documentTitle: `${companyName} - ${quotationNo}`,
-    pageStyle: pageStyle,
-    onAfterPrint: () => console.log('printed'),
-  });
 
   useEffect(() => {
     if (focusedSection) {
@@ -129,7 +95,7 @@ const Quote = () => {
       <div className="container mx-auto p-4">
         <div className="flex flex-col md:flex-row md:space-x-4">
           {/* Left Side - Inputs */}
-          <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md">
+          <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md no-print">
             <h2 className="text-xl font-semibold mb-4">Details</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
@@ -221,8 +187,8 @@ const Quote = () => {
           </div>
 
           {/* Right Side - Preview */}
-          <div className="w-full md:w-1/2 sticky top-4 h-screen overflow-y-auto">
-            <button onClick={handlePrint} className="mb-4 w-full p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700">Generate PDF</button>
+          <div className="w-full md:w-1/2 sticky top-4 h-screen overflow-y-auto print-only-full-width">
+            <button onClick={() => window.print()} className="mb-4 w-full p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 no-print">Generate PDF</button>
             <div ref={componentRef} className="w-full p-4 bg-white rounded-lg shadow-md">
               <Header />
               <div className="p-4">
@@ -307,7 +273,7 @@ const Quote = () => {
 
                     return (
                       <div className="text-sm">
-                        <div className="break-inside-avoid">
+                        <div>
                           <h4 id="preview-basic-spec" className={`text-md font-semibold mt-2 border-b px-2 py-1 ${focusedSection === 'basic-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>I. Basic specification</h4>
                           {renderSpec('Description', selectedElevator.description)}
                           {renderSpec('Type', selectedElevator.type)}
@@ -318,7 +284,7 @@ const Quote = () => {
                           {renderSpec('Drive System', selectedElevator.driveSystem)}
                         </div>
                         
-                        <div className="break-inside-avoid">
+                        <div>
                           <h4 id="preview-hoistway-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'hoistway-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>II. Hoistway specification</h4>
                           {renderSpec('Headroom (mm)', selectedElevator.headroom)}
                           {renderSpec('Pit Depth (mm)', selectedElevator.pitDepth)}
@@ -326,7 +292,7 @@ const Quote = () => {
                           {renderSpec('Machine Room Size (W x D x H mm)', selectedElevator.machineRoomSize)}
                         </div>
 
-                        <div className="break-inside-avoid">
+                        <div>
                           <h4 id="preview-door-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'door-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>III. Door specification</h4>
                           {renderSpec('Door Opening Type', selectedElevator.doorOpeningType)}
                           {renderSpec('Door Opening Size (W x H mm)', selectedElevator.doorOpeningSize)}
@@ -335,7 +301,7 @@ const Quote = () => {
                           {renderSpec('Other Floors Door Decoration', selectedElevator.otherFloorsDoor)}
                         </div>
 
-                        <div className="break-inside-avoid">
+                        <div>
                           <h4 id="preview-cabin-deco" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'cabin-deco' ? 'bg-yellow-200' : 'bg-gray-100'}`}>IV. Cabin Decoration</h4>
                           {renderSpec('Car Wall', selectedElevator.carWall)}
                           {renderSpec('Car Ceiling', selectedElevator.carCeiling)}
@@ -343,7 +309,7 @@ const Quote = () => {
                           {renderSpec('Car Handrail', selectedElevator.carHandrail)}
                         </div>
 
-                        <div className="break-inside-avoid">
+                        <div>
                           <h4 id="preview-function-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'function-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>V. Function</h4>
                           {renderSpec('COP/LOP', selectedElevator.copLop)}
                           {selectedElevator.otherFunctions.map((func: any) => 
@@ -357,13 +323,6 @@ const Quote = () => {
 
                 <div className="mt-4 pt-4 border-t text-right text-sm text-gray-500">
                   <p>Quotation Date: {quotationDate}</p>
-                </div>
-
-                <div className="page-footer hidden print:block break-inside-avoid">
-                  <p>Suzhou Xinfuji Electromechanical Co., Ltd.</p>
-                  <p>ADD:Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China</p>
-                  <p>E-mail: info@xinfuji.com</p>
-                  <p className="page-number"></p>
                 </div>
               </div>
             </div>
