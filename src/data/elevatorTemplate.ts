@@ -34,7 +34,11 @@ export const elevatorTemplate = {
 
   // Function
   copLop: 'Integrated type with LCD display',
-  ard: 'Included',
-  intercom: '5-party intercom',
-  fireEmergencyReturn: 'Included',
+  otherFunctions: [
+    { id: 1, name: 'ARD (Automatic Rescue Device)', checked: true },
+    { id: 2, name: 'Intercom', checked: true },
+    { id: 3, name: 'Fire Emergency Return', checked: true },
+    { id: 4, name: 'Air Conditioner', checked: false },
+    { id: 5, name: 'CCTV', checked: false },
+  ],
 };

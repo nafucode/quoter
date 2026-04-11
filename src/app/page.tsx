@@ -20,6 +20,16 @@ const Quote = () => {
   const [exchangeRate, setExchangeRate] = useState(1430);
   const [targetCurrency, setTargetCurrency] = useState('NGN');
   const [selectedElevatorId, setSelectedElevatorId] = useState<number | null>(null);
+  const [focusedSection, setFocusedSection] = useState<string>('');
+
+  useEffect(() => {
+    if (focusedSection) {
+      const element = document.getElementById(`preview-${focusedSection}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [focusedSection]);
 
   useEffect(() => {
     if (elevators.length > 0) {
@@ -37,7 +47,7 @@ const Quote = () => {
     setElevators(elevators.filter(elevator => elevator.id !== id));
   };
 
-  const handleElevatorChange = (id: number, name: string, value: string | number) => {
+  const handleElevatorChange = (id: number, name: string, value: any) => {
     setElevators(elevators.map(elevator => 
       elevator.id === id ? { ...elevator, [name]: value } : elevator
     ));
@@ -175,13 +185,13 @@ const Quote = () => {
             </div>
 
             {elevators.map((elevator, index) => (
-              <ElevatorForm key={elevator.id} elevator={elevator} onChange={handleElevatorChange} onRemove={removeElevator} onToggleCollapse={toggleElevatorCollapse} />
+              <ElevatorForm key={elevator.id} elevator={elevator} onChange={handleElevatorChange} onRemove={removeElevator} onToggleCollapse={toggleElevatorCollapse} onSectionFocus={setFocusedSection} />
             ))}
             <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">Add Elevator</button>
           </div>
 
           {/* Right Side - Preview */}
-          <div>
+          <div className="w-full md:w-1/2 sticky top-4 h-screen overflow-y-auto">
             <button onClick={handlePrint} className="mb-4 w-full p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700">Generate PDF</button>
             <div ref={componentRef} className="w-full p-4 bg-white rounded-lg shadow-md">
               <Header />
@@ -267,7 +277,7 @@ const Quote = () => {
 
                     return (
                       <div className="text-sm">
-                        <h4 className="text-md font-semibold mt-2 border-b bg-gray-100 px-2 py-1">I. Basic specification</h4>
+                        <h4 id="preview-basic-spec" className={`text-md font-semibold mt-2 border-b px-2 py-1 ${focusedSection === 'basic-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>I. Basic specification</h4>
                         {renderSpec('Description', selectedElevator.description)}
                         {renderSpec('Type', selectedElevator.type)}
                         {renderSpec('Capacity (KG)', selectedElevator.capacity)}
@@ -276,30 +286,30 @@ const Quote = () => {
                         {renderSpec('Control System', selectedElevator.controlSystem)}
                         {renderSpec('Drive System', selectedElevator.driveSystem)}
                         
-                        <h4 className="text-md font-semibold mt-4 border-b bg-gray-100 px-2 py-1">II. Hoistway specification</h4>
+                        <h4 id="preview-hoistway-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'hoistway-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>II. Hoistway specification</h4>
                         {renderSpec('Headroom (mm)', selectedElevator.headroom)}
                         {renderSpec('Pit Depth (mm)', selectedElevator.pitDepth)}
                         {renderSpec('Shaft Size (W x D mm)', selectedElevator.shaftSize)}
                         {renderSpec('Machine Room Size (W x D x H mm)', selectedElevator.machineRoomSize)}
 
-                        <h4 className="text-md font-semibold mt-4 border-b bg-gray-100 px-2 py-1">III. Door specification</h4>
+                        <h4 id="preview-door-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'door-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>III. Door specification</h4>
                         {renderSpec('Door Opening Type', selectedElevator.doorOpeningType)}
                         {renderSpec('Door Opening Size (W x H mm)', selectedElevator.doorOpeningSize)}
                         {renderSpec('Door Header Type', selectedElevator.doorHeaderType)}
                         {renderSpec('1st Floor Door Decoration', selectedElevator.firstFloorDoor)}
                         {renderSpec('Other Floors Door Decoration', selectedElevator.otherFloorsDoor)}
 
-                        <h4 className="text-md font-semibold mt-4 border-b bg-gray-100 px-2 py-1">IV. Cabin Decoration</h4>
+                        <h4 id="preview-cabin-deco" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'cabin-deco' ? 'bg-yellow-200' : 'bg-gray-100'}`}>IV. Cabin Decoration</h4>
                         {renderSpec('Car Wall', selectedElevator.carWall)}
                         {renderSpec('Car Ceiling', selectedElevator.carCeiling)}
                         {renderSpec('Car Floor', selectedElevator.carFloor)}
                         {renderSpec('Car Handrail', selectedElevator.carHandrail)}
 
-                        <h4 className="text-md font-semibold mt-4 border-b bg-gray-100 px-2 py-1">V. Function</h4>
+                        <h4 id="preview-function-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'function-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>V. Function</h4>
                         {renderSpec('COP/LOP', selectedElevator.copLop)}
-                        {renderSpec('ARD (Automatic Rescue Device)', selectedElevator.ard)}
-                        {renderSpec('Intercom', selectedElevator.intercom)}
-                        {renderSpec('Fire Emergency Return', selectedElevator.fireEmergencyReturn)}
+                        {selectedElevator.otherFunctions.map((func: any) => 
+                          func.checked && renderSpec(func.name, 'Included')
+                        )}
                       </div>
                     );
                   })()}
