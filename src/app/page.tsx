@@ -89,7 +89,9 @@ const Quote = () => {
 
   const componentRef = useRef(null);
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
+    documentTitle: `${companyName} - ${quotationNo}`,
+    onAfterPrint: () => console.log('printed'),
   });
 
   return (
