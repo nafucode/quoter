@@ -199,47 +199,43 @@ const Quote = () => {
 
                 <div className="mt-4 pt-4 border-t overflow-x-auto">
                   <h3 className="text-lg font-semibold mb-2">Price - Currency: USD</h3>
-                  <table className="w-full text-sm text-left printable-table">
+                  <table className="w-full text-sm text-left printable-table border-collapse">
                     <thead className="bg-gray-200">
                       <tr>
-                        <th className="p-2">Description</th>
-                        <th className="p-2">QTY</th>
-                        <th className="p-2 text-right">Unit Price</th>
-                        <th className="p-2 text-right">Total Price</th>
-                        <th className="p-2">Type</th>
-                        <th className="p-2">Loading</th>
-                        <th className="p-2">Speed</th>
-                        <th className="p-2">F/S/D</th>
+                        <th className="p-2 border border-gray-400">Description</th>
+                        <th className="p-2 border border-gray-400">Specs</th>
+                        <th className="p-2 border border-gray-400 text-center">QTY-sets</th>
+                        <th className="p-2 border border-gray-400 text-right">Unit Price</th>
+                        <th className="p-2 border border-gray-400 text-right">Total Price</th>
                       </tr>
                     </thead>
                     <tbody>
                       {elevators.map(elevator => (
                         <tr key={elevator.id}>
-                          <td className="p-2">{elevator.description}</td>
-                          <td className="p-2">{elevator.qty}</td>
-                          <td className="p-2 text-right">{elevator.unitPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                          <td className="p-2 text-right">{(elevator.unitPrice * elevator.qty).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                          <td className="p-2">{elevator.type}</td>
-                          <td className="p-2">{elevator.capacity}KG</td>
-                          <td className="p-2">{elevator.speed} M/S</td>
-                          <td className="p-2">{elevator.floorsStops}</td>
+                          <td className="p-2 border border-gray-400 align-top">{elevator.description}</td>
+                          <td className="p-2 border border-gray-400 align-top">
+                            <div>{elevator.type}</div>
+                            <div>{elevator.capacity}KG</div>
+                            <div>{elevator.speed} M/S</div>
+                            <div>{elevator.floorsStops}</div>
+                          </td>
+                          <td className="p-2 border border-gray-400 align-top text-center">{elevator.qty}</td>
+                          <td className="p-2 border border-gray-400 align-top text-right">{elevator.unitPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                          <td className="p-2 border border-gray-400 align-top text-right">{(elevator.unitPrice * elevator.qty).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                         </tr>
                       ))}
                       <tr>
-                        <td colSpan={3} className="p-2 text-right font-semibold">Local fee and Freight from factory to {freightDestination} :</td>
+                        <td colSpan={4} className="p-2 text-right font-semibold">Local fee and Freight from factory to {freightDestination} :</td>
                         <td className="p-2 text-right">{freightCost.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                        <td colSpan={4}></td>
                       </tr>
                       <tr className="font-bold bg-gray-100">
-                        <td colSpan={3} className="p-2 text-right">Total amount :</td>
+                        <td colSpan={4} className="p-2 text-right">Total amount :</td>
                         <td className="p-2 text-right">{grandTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                        <td colSpan={4}></td>
                       </tr>
                       {targetCurrency !== 'USD' && targetCurrency !== '-' && (
                         <tr className="font-bold">
-                          <td colSpan={3} className="p-2 text-right">=</td>
+                          <td colSpan={4} className="p-2 text-right">=</td>
                           <td className="p-2 text-right">{convertedTotal.toLocaleString('en-US', { style: 'currency', currency: targetCurrency })}</td>
-                          <td colSpan={4}></td>
                         </tr>
                       )}
                     </tbody>
