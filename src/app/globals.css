@@ -44,4 +44,7 @@ body {
   .print-section {
     display: block !important;
   }
+  .print-elevator-header {
+    color: darkblue !important;
+  }
 }

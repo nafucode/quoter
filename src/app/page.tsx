@@ -16,8 +16,14 @@ const Quote = () => {
   const [freightCost, setFreightCost] = useState(600);
   const [exchangeRate, setExchangeRate] = useState(1430);
   const [targetCurrency, setTargetCurrency] = useState('NGN');
-  const [selectedElevatorId, setSelectedElevatorId] = useState<number | null>(null);
   const [focusedSection, setFocusedSection] = useState<string>('');
+
+  const renderSpec = (label: string, value: any) => (
+    <div key={label} className="flex justify-between py-1 px-2 border-b last:border-b-0 hover:bg-gray-50">
+      <span className="text-sm text-gray-600">{label}</span>
+      <span className="text-sm font-medium text-right">{String(value)}</span>
+    </div>
+  );
 
   const componentRef = useRef(null);
   const nextId = useRef(2);
@@ -31,11 +37,7 @@ const Quote = () => {
     }
   }, [focusedSection]);
 
-  useEffect(() => {
-    if (elevators.length > 0) {
-      setSelectedElevatorId(elevators[0].id);
-    }
-  }, []);
+
 
   const addElevator = () => {
     const newId = nextId.current;
@@ -243,82 +245,57 @@ const Quote = () => {
                 </div>
 
                 <div className="mt-4 pt-4 border-t">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold">Specifications</h3>
-                    <div className="flex space-x-1">
-                      {elevators.map(e => (
-                        <button 
-                          key={e.id} 
-                          onClick={() => setSelectedElevatorId(e.id)} 
-                          className={`px-2 py-1 text-xs rounded-md ${selectedElevatorId === e.id ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
-                          Elevator #L{e.id}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  {(() => {
-                    const selectedElevator = elevators.find(e => e.id === selectedElevatorId);
-                    if (!selectedElevator) return null;
-
-                    const renderSpec = (label: string, value: any) => (
-                      <div key={label} className="flex justify-between py-1 px-2 border-b last:border-b-0 hover:bg-gray-50">
-                        <span className="text-sm text-gray-600">{label}</span>
-                        <span className="text-sm font-medium text-right">{String(value)}</span>
-                      </div>
-                    );
-
-                    return (
+                  <h3 className="text-lg font-semibold mb-2">Specifications</h3>
+                  {elevators.map((elevator, index) => (
+                    <div key={elevator.id} className={index > 0 ? 'break-before-page' : ''}>
+                      <h4 className="text-md font-semibold mt-4 text-gray-700 print-elevator-header">Elevator #L{elevator.id} Specifications</h4>
                       <div className="text-sm">
                         <div className="break-inside-avoid">
-                          <h4 id="preview-basic-spec" className={`text-md font-semibold mt-2 border-b px-2 py-1 ${focusedSection === 'basic-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>I. Basic specification</h4>
-                          {renderSpec('Description', selectedElevator.description)}
-                          {renderSpec('Type', selectedElevator.type)}
-                          {renderSpec('Capacity (KG)', selectedElevator.capacity)}
-                          {renderSpec('Speed (M/S)', selectedElevator.speed)}
-                          {renderSpec('Floors/Stops', selectedElevator.floorsStops)}
-                          {renderSpec('Control System', selectedElevator.controlSystem)}
-                          {renderSpec('Drive System', selectedElevator.driveSystem)}
+                          <h4 id={`preview-basic-spec-${elevator.id}`} className={`text-md font-semibold mt-2 border-b px-2 py-1 ${focusedSection === 'basic-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>I. Basic specification</h4>
+                          {renderSpec('Description', elevator.description)}
+                          {renderSpec('Type', elevator.type)}
+                          {renderSpec('Capacity (KG)', elevator.capacity)}
+                          {renderSpec('Speed (M/S)', elevator.speed)}
+                          {renderSpec('Floors/Stops', elevator.floorsStops)}
+                          {renderSpec('Control System', elevator.controlSystem)}
+                          {renderSpec('Drive System', elevator.driveSystem)}
                         </div>
-                        
                         <div className="break-inside-avoid">
-                          <h4 id="preview-hoistway-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'hoistway-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>II. Hoistway specification</h4>
-                          {renderSpec('Headroom (mm)', selectedElevator.headroom)}
-                          {renderSpec('Pit Depth (mm)', selectedElevator.pitDepth)}
-                          {renderSpec('Shaft Size (W x D mm)', selectedElevator.shaftSize)}
-                          {renderSpec('Machine Room Size (W x D x H mm)', selectedElevator.machineRoomSize)}
+                          <h4 id={`preview-hoistway-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'hoistway-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>II. Hoistway specification</h4>
+                          {renderSpec('Headroom (mm)', elevator.headroom)}
+                          {renderSpec('Pit Depth (mm)', elevator.pitDepth)}
+                          {renderSpec('Shaft Size (W x D mm)', elevator.shaftSize)}
+                          {renderSpec('Machine Room Size (W x D x H mm)', elevator.machineRoomSize)}
                         </div>
-
                         <div className="break-inside-avoid">
-                          <h4 id="preview-car-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'car-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>III. Car Specification</h4>
-                          {renderSpec('COP Plate', selectedElevator.copPlate)}
-                          {renderSpec('Car Net Dimension', selectedElevator.carNetDimension)}
-                          {renderSpec('Car Ceiling', selectedElevator.carCeiling)}
-                          {renderSpec('Car Floor', selectedElevator.carFloor)}
-                          {renderSpec('Handrail', selectedElevator.carHandrail)}
-                          {renderSpec('Left wall finish', selectedElevator.carWall.left)}
-                          {renderSpec('Right wall finish', selectedElevator.carWall.right)}
-                          {renderSpec('Rear wall finish', selectedElevator.carWall.rear)}
+                          <h4 id={`preview-car-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'car-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>III. Car Specification</h4>
+                          {renderSpec('COP Plate', elevator.copPlate)}
+                          {renderSpec('Car Net Dimension', elevator.carNetDimension)}
+                          {renderSpec('Car Ceiling', elevator.carCeiling)}
+                          {renderSpec('Car Floor', elevator.carFloor)}
+                          {renderSpec('Handrail', elevator.carHandrail)}
+                          {renderSpec('Left wall finish', elevator.carWall.left)}
+                          {renderSpec('Right wall finish', elevator.carWall.right)}
+                          {renderSpec('Rear wall finish', elevator.carWall.rear)}
                         </div>
-
                         <div className="break-inside-avoid">
-                          <h4 id="preview-door-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'door-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>IV. Door specification</h4>
-                          {renderSpec('Door Opening Type', selectedElevator.doorOpeningType)}
-                          {renderSpec('Door Opening Size (W x H mm)', selectedElevator.doorOpeningSize)}
-                          {renderSpec('Door Header Type', selectedElevator.doorHeaderType)}
-                          {renderSpec('1st Floor Door Decoration', selectedElevator.firstFloorDoor)}
-                          {renderSpec('Other Floors Door Decoration', selectedElevator.otherFloorsDoor)}
+                          <h4 id={`preview-door-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'door-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>IV. Door specification</h4>
+                          {renderSpec('Door Opening Type', elevator.doorOpeningType)}
+                          {renderSpec('Door Opening Size (W x H mm)', elevator.doorOpeningSize)}
+                          {renderSpec('Door Header Type', elevator.doorHeaderType)}
+                          {renderSpec('1st Floor Door Decoration', elevator.firstFloorDoor)}
+                          {renderSpec('Other Floors Door Decoration', elevator.otherFloorsDoor)}
                         </div>
-
                         <div className="break-inside-avoid">
-                          <h4 id="preview-function-spec" className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'function-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>V. Function</h4>
-                          {renderSpec('COP/LOP', selectedElevator.copLop)}
-                          {selectedElevator.otherFunctions.map((func: any) => 
+                          <h4 id={`preview-function-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === 'function-spec' ? 'bg-yellow-200' : 'bg-gray-100'}`}>V. Function</h4>
+                          {renderSpec('COP/LOP', elevator.copLop)}
+                          {elevator.otherFunctions.map((func: any) => 
                             func.checked && renderSpec(func.name, 'Included')
                           )}
                         </div>
                       </div>
-                    );
-                  })()}
+                    </div>
+                  ))}
                 </div>
                 
                 <div className="mt-4 pt-4 border-t text-right text-sm text-gray-500">
