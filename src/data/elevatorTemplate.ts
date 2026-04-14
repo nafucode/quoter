@@ -46,4 +46,17 @@ export const elevatorTemplate = {
     { id: 3, name: 'Emergency light', checked: true },
     { id: 4, name: 'Intercom system', checked: true },
   ],
+
+  // Cabin Effect
+  cabinEffect: {
+    cabinImage: '',
+    copImage: '/Standard-COPLOP.png',
+    lopImage: '/Standard-COPLOP.png',
+    ceiling: { type: 'text', value: 'AS cabin picture' },
+    button: { type: 'text', value: 'Round standard' },
+    floor: { type: 'text', value: 'PVC As Picture' },
+    landingDoor: { type: 'image', value: '' },
+    handrail: { type: 'text', value: 'Optional' },
+    copLogo: { type: 'text', value: 'Optional' },
+  },
 };
