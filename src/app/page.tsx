@@ -258,10 +258,17 @@ const Quote = () => {
                             {renderSpec('Speed (M/S)', elevator.speed)}
                             {renderSpec('Floors/Stops', elevator.floorsStops)}
                             {renderSpec('Control System', elevator.controlSystem)}
+                            {renderSpec('Serving floors (COP display)', elevator.servingFloors)}
+                            {renderSpec('Entrances', elevator.entrances)}
+                            {renderSpec('Power voltage', elevator.powerVoltage)}
+                            {renderSpec('Lighting voltage', elevator.lightingVoltage)}
+                            {renderSpec('Frequency', elevator.frequency)}
                             {renderSpec('Drive System', elevator.driveSystem)}
                           </div>
                           <div className="break-inside-avoid">
                             <h4 id={`preview-hoistway-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `hoistway-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>II. Hoistway specification</h4>
+                            {renderSpec('Shaft construction', elevator.shaftConstruction)}
+                            {renderSpec('Travel (mm)', elevator.travel)}
                             {renderSpec('Headroom (mm)', elevator.headroom)}
                             {renderSpec('Pit Depth (mm)', elevator.pitDepth)}
                             {renderSpec('Shaft Size (W x D mm)', elevator.shaftSize)}

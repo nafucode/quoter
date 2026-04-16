@@ -171,12 +171,36 @@ const ElevatorForm = ({ elevator, onChange, onRemove, onToggleCollapse, onSectio
               <h4 className="text-md font-semibold mt-4 border-b">I. Basic specification<span className="block text-sm font-normal text-gray-500">基本规格</span></h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Floors/Stops<span className="block text-xs text-gray-500">楼层/站</span></label>
-                  <input name="floorsStops" value={elevator.floorsStops} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                  <label className="block text-sm font-medium text-gray-700">Control system<span className="block text-xs text-gray-500">控制系统</span></label>
+                  <select name="controlSystem" value={elevator.controlSystem} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    <option>Simplex</option>
+                    <option>Duplex</option>
+                    <option>Group Control</option>
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Control System<span className="block text-xs text-gray-500">控制系统</span></label>
-                  <input name="controlSystem" value={elevator.controlSystem} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                  <label className="block text-sm font-medium text-gray-700">Serving floors (COP display)<span className="block text-xs text-gray-500">服务楼层</span></label>
+                  <input name="servingFloors" value={elevator.servingFloors} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Entrances<span className="block text-xs text-gray-500">入口</span></label>
+                  <input name="entrances" value={elevator.entrances} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Power voltage<span className="block text-xs text-gray-500">电源电压</span></label>
+                  <input name="powerVoltage" value={elevator.powerVoltage} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Lighting voltage<span className="block text-xs text-gray-500">照明电压</span></label>
+                  <input name="lightingVoltage" value={elevator.lightingVoltage} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Frequency<span className="block text-xs text-gray-500">频率</span></label>
+                  <input name="frequency" value={elevator.frequency} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Floors/Stops<span className="block text-xs text-gray-500">楼层/站</span></label>
+                  <input name="floorsStops" value={elevator.floorsStops} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">Drive System<span className="block text-xs text-gray-500">驱动系统</span></label>
@@ -188,6 +212,14 @@ const ElevatorForm = ({ elevator, onChange, onRemove, onToggleCollapse, onSectio
             <div className="sm:col-span-2" onFocus={() => onSectionFocus('hoistway-spec')}>
               <h4 className="text-md font-semibold mt-4 border-b">II. Hoistway specification<span className="block text-sm font-normal text-gray-500">井道规格</span></h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Shaft construction<span className="block text-xs text-gray-500">井道结构</span></label>
+                  <input name="shaftConstruction" value={elevator.shaftConstruction} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Travel (mm)<span className="block text-xs text-gray-500">提升高度 (mm)</span></label>
+                  <input name="travel" value={elevator.travel} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Headroom (mm)<span className="block text-xs text-gray-500">顶层高度 (mm)</span></label>
                   <input name="headroom" value={elevator.headroom} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />

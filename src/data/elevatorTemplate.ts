@@ -7,17 +7,24 @@ export const elevatorTemplate = {
   type: 'TKJ1000/1.75-VVVF',
   capacity: 1000,
   speed: 1.75,
-  floorsStops: '4/4',
-  controlSystem: 'Monarch NICE3000+',
-  driveSystem: 'Gearless PM Motor',
+  floorsStops: '4/4/4',
+  controlSystem: 'Simplex',
+  driveSystem: 'VVVF',
+  servingFloors: 'G-1F-2F-3F',
+  entrances: 'Single Entrance',
+  powerVoltage: '380V-3 phase',
+  lightingVoltage: '220V-1 phase',
+  frequency: '50HZ',
   unitPrice: 15000,
   qty: 1,
 
-  // Hoistway Spec
+  // Hoistway specification
   headroom: 4500,
-  pitDepth: 1500,
-  shaftSize: '2100x2400',
-  machineRoomSize: 'N/A',
+  pitDepth: 150,
+  shaftSize: '2100x2100',
+  machineRoomSize: '2100x3000x2500',
+  shaftConstruction: 'Concrete',
+  travel: 10650,
 
   // Car Spec
   copPlate: 'Standard',
