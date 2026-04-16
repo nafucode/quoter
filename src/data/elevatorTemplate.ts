@@ -59,7 +59,7 @@ export const elevatorTemplate = {
     cabinImage: '',
     copImage: '',
     lopImage: '',
-    ceiling: { type: 'text', value: 'AS cabin picture' },
+    ceiling: { type: 'text', value: 'As Picture' },
     button: { type: 'text', value: 'Round standard' },
     floor: { type: 'text', value: 'PVC As Picture' },
     landingDoor: { type: 'image', value: '' },

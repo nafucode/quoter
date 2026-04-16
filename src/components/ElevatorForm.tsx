@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import StylePicker from './StylePicker';
+import HybridInput from './HybridInput';
 import { cabinStyles } from '@/data/cabinStyles';
 import { copStyles } from '@/data/copStyles';
 import { lopStyles } from '@/data/lopStyles';
+import { landingDoorStyles } from '@/data/landingDoorStyles';
+import { handrailStyles } from '@/data/handrailStyles';
 
 const ElevatorForm = ({ elevator, onChange, onRemove, onToggleCollapse, onSectionFocus }: any) => {
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
@@ -68,16 +71,34 @@ const ElevatorForm = ({ elevator, onChange, onRemove, onToggleCollapse, onSectio
 
   const handleStyleSelect = (style: { id: string; name: string; previewImage: string }) => {
     let newCabinEffect;
-    if (pickerState.type === 'cabin') {
-      newCabinEffect = {
-        ...elevator.cabinEffect,
-        cabinImage: style.previewImage,
-        ceiling: { type: 'text', value: style.id },
-      };
-    } else if (pickerState.type === 'cop') {
-      newCabinEffect = { ...elevator.cabinEffect, copImage: style.previewImage };
-    } else if (pickerState.type === 'lop') {
-      newCabinEffect = { ...elevator.cabinEffect, lopImage: style.previewImage };
+    switch (pickerState.type) {
+      case 'cabin':
+        newCabinEffect = {
+          ...elevator.cabinEffect,
+          cabinImage: style.previewImage,
+          ceiling: { type: 'text', value: style.id },
+        };
+        break;
+      case 'cop':
+        newCabinEffect = { ...elevator.cabinEffect, copImage: style.previewImage };
+        break;
+      case 'lop':
+        newCabinEffect = { ...elevator.cabinEffect, lopImage: style.previewImage };
+        break;
+      case 'landingDoor':
+        newCabinEffect = {
+          ...elevator.cabinEffect,
+          landingDoor: { type: 'image', value: style.previewImage },
+        };
+        break;
+      case 'handrail':
+        newCabinEffect = {
+          ...elevator.cabinEffect,
+          handrail: { type: 'image', value: style.previewImage },
+        };
+        break;
+      default:
+        newCabinEffect = { ...elevator.cabinEffect };
     }
     onChange(elevator.id, 'cabinEffect', newCabinEffect);
   };
@@ -94,33 +115,13 @@ const ElevatorForm = ({ elevator, onChange, onRemove, onToggleCollapse, onSectio
         return { styles: copStyles, title: 'Choose a COP Style' };
       case 'lop':
         return { styles: lopStyles, title: 'Choose a LOP Style' };
+      case 'landingDoor':
+        return { styles: landingDoorStyles, title: 'Choose a Landing Door Style' };
+      case 'handrail':
+        return { styles: handrailStyles, title: 'Choose a Handrail Style' };
       default:
         return { styles: [], title: '' };
     }
-  };
-
-  const HybridInput = ({ label, labelChinese, fieldName }: { label: string, labelChinese: string, fieldName: string }) => {
-    const fieldData = elevator.cabinEffect[fieldName];
-    return (
-      <div>
-        <label className="block text-sm font-medium text-gray-700">{label}<span className="block text-xs text-gray-500">{labelChinese}</span></label>
-        <div className="flex items-center gap-2 mt-1">
-          <label className="text-sm">
-            <input type="radio" name={`${fieldName}-type`} value="text" checked={fieldData.type === 'text'} onChange={() => handleCabinEffectHybridChange(fieldName, 'type', 'text')} className="mr-1"/>
-            Text
-          </label>
-          <label className="text-sm">
-            <input type="radio" name={`${fieldName}-type`} value="image" checked={fieldData.type === 'image'} onChange={() => handleCabinEffectHybridChange(fieldName, 'type', 'image')} className="mr-1"/>
-            Image
-          </label>
-        </div>
-        {fieldData.type === 'text' ? (
-          <input type="text" value={fieldData.value} onChange={(e) => handleCabinEffectHybridChange(fieldName, 'value', e.target.value)} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"/>
-        ) : (
-          <input type="file" onChange={(e) => handleHybridFileChange(fieldName, e)} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
-        )}
-      </div>
-    );
   };
 
   return (
@@ -346,12 +347,62 @@ const ElevatorForm = ({ elevator, onChange, onRemove, onToggleCollapse, onSectio
                   <input type="file" name="lopImage" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                   <button onClick={() => openPicker('lop')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
                 </div>
-                <HybridInput label="Landing Door" labelChinese="厅门" fieldName="landingDoor" />
-                <HybridInput label="Ceiling" labelChinese="天花板" fieldName="ceiling" />
-                <HybridInput label="Button" labelChinese="按钮" fieldName="button" />
-                <HybridInput label="Floor" labelChinese="轿底" fieldName="floor" />
-                <HybridInput label="Handrail" labelChinese="扶手" fieldName="handrail" />
-                <HybridInput label="COP LOGO" labelChinese="操纵盘 LOGO" fieldName="copLogo" />
+                <HybridInput 
+                  label="Landing Door" 
+                  labelChinese="厅门" 
+                  fieldName="landingDoor" 
+                  fieldData={elevator.cabinEffect.landingDoor}
+                  onTypeChange={handleCabinEffectHybridChange}
+                  onValueChange={handleCabinEffectHybridChange}
+                  onFileChange={handleHybridFileChange}
+                  onChooseFromLibrary={() => openPicker('landingDoor')} 
+                />
+                <HybridInput 
+                  label="Ceiling" 
+                  labelChinese="天花板" 
+                  fieldName="ceiling" 
+                  fieldData={elevator.cabinEffect.ceiling}
+                  onTypeChange={handleCabinEffectHybridChange}
+                  onValueChange={handleCabinEffectHybridChange}
+                  onFileChange={handleHybridFileChange}
+                />
+                <HybridInput 
+                  label="Button" 
+                  labelChinese="按钮" 
+                  fieldName="button" 
+                  fieldData={elevator.cabinEffect.button}
+                  onTypeChange={handleCabinEffectHybridChange}
+                  onValueChange={handleCabinEffectHybridChange}
+                  onFileChange={handleHybridFileChange}
+                />
+                <HybridInput 
+                  label="Floor" 
+                  labelChinese="轿底" 
+                  fieldName="floor" 
+                  fieldData={elevator.cabinEffect.floor}
+                  onTypeChange={handleCabinEffectHybridChange}
+                  onValueChange={handleCabinEffectHybridChange}
+                  onFileChange={handleHybridFileChange}
+                />
+                <HybridInput 
+                  label="Handrail" 
+                  labelChinese="扶手" 
+                  fieldName="handrail" 
+                  fieldData={elevator.cabinEffect.handrail}
+                  onTypeChange={handleCabinEffectHybridChange}
+                  onValueChange={handleCabinEffectHybridChange}
+                  onFileChange={handleHybridFileChange}
+                  onChooseFromLibrary={() => openPicker('handrail')} 
+                />
+                <HybridInput 
+                  label="COP LOGO" 
+                  labelChinese="操纵盘 LOGO" 
+                  fieldName="copLogo" 
+                  fieldData={elevator.cabinEffect.copLogo}
+                  onTypeChange={handleCabinEffectHybridChange}
+                  onValueChange={handleCabinEffectHybridChange}
+                  onFileChange={handleHybridFileChange}
+                />
               </div>
             </div>
 

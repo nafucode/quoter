@@ -15,7 +15,7 @@ const Quote = () => {
   const [freightDestination, setFreightDestination] = useState('e.g., Port of Shanghai');
   const [freightCost, setFreightCost] = useState(600);
   const [exchangeRate, setExchangeRate] = useState(1430);
-  const [targetCurrency, setTargetCurrency] = useState('NGN');
+  const [targetCurrency, setTargetCurrency] = useState('USD');
   const [focusedSection, setFocusedSection] = useState<string>('');
 
   const renderSpec = (label: string, value: any) => (
