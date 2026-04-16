@@ -54,6 +54,14 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
     updateElevator(elevator.id, 'cabinEffect', newCabinEffect);
   };
 
+  const handleHybridTypeChange = (fieldName: string, type: 'text' | 'image') => {
+    handleCabinEffectHybridChange(fieldName, 'type', type);
+  };
+
+  const handleHybridValueChange = (fieldName: string, value: string) => {
+    handleCabinEffectHybridChange(fieldName, 'value', value);
+  };
+
   const handleHybridFileChange = (fieldName: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -336,8 +344,8 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                   labelChinese="厅门" 
                   fieldName="landingDoor" 
                   fieldData={elevator.cabinEffect.landingDoor}
-                  onTypeChange={handleCabinEffectHybridChange}
-                  onValueChange={handleCabinEffectHybridChange}
+                  onTypeChange={handleHybridTypeChange}
+                  onValueChange={handleHybridValueChange}
                   onFileChange={handleHybridFileChange}
                   onChooseFromLibrary={() => openPicker('landingDoor')} 
                 />
@@ -346,8 +354,8 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                   labelChinese="天花板" 
                   fieldName="ceiling" 
                   fieldData={elevator.cabinEffect.ceiling}
-                  onTypeChange={handleCabinEffectHybridChange}
-                  onValueChange={handleCabinEffectHybridChange}
+                  onTypeChange={handleHybridTypeChange}
+                  onValueChange={handleHybridValueChange}
                   onFileChange={handleHybridFileChange}
                 />
                 <HybridInput 
@@ -355,8 +363,8 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                   labelChinese="按钮" 
                   fieldName="button" 
                   fieldData={elevator.cabinEffect.button}
-                  onTypeChange={handleCabinEffectHybridChange}
-                  onValueChange={handleCabinEffectHybridChange}
+                  onTypeChange={handleHybridTypeChange}
+                  onValueChange={handleHybridValueChange}
                   onFileChange={handleHybridFileChange}
                 />
                 <HybridInput 
@@ -364,8 +372,8 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                   labelChinese="轿底" 
                   fieldName="floor" 
                   fieldData={elevator.cabinEffect.floor}
-                  onTypeChange={handleCabinEffectHybridChange}
-                  onValueChange={handleCabinEffectHybridChange}
+                  onTypeChange={handleHybridTypeChange}
+                  onValueChange={handleHybridValueChange}
                   onFileChange={handleHybridFileChange}
                 />
                 <HybridInput 
@@ -373,8 +381,8 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                   labelChinese="扶手" 
                   fieldName="handrail" 
                   fieldData={elevator.cabinEffect.handrail}
-                  onTypeChange={handleCabinEffectHybridChange}
-                  onValueChange={handleCabinEffectHybridChange}
+                  onTypeChange={handleHybridTypeChange}
+                  onValueChange={handleHybridValueChange}
                   onFileChange={handleHybridFileChange}
                   onChooseFromLibrary={() => openPicker('handrail')} 
                 />
@@ -383,8 +391,8 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                   labelChinese="操纵盘 LOGO" 
                   fieldName="copLogo" 
                   fieldData={elevator.cabinEffect.copLogo}
-                  onTypeChange={handleCabinEffectHybridChange}
-                  onValueChange={handleCabinEffectHybridChange}
+                  onTypeChange={handleHybridTypeChange}
+                  onValueChange={handleHybridValueChange}
                   onFileChange={handleHybridFileChange}
                 />
               </div>
