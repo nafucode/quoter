@@ -31,7 +31,7 @@ const StylePicker: React.FC<StylePickerProps> = ({ styles, onSelect, onClose, ti
                 onClose();
               }}
             >
-              <div className="h-40 bg-gray-200 flex items-center justify-center">
+              <div className="h-40 bg-gray-50 flex items-center justify-center">
                 <img src={style.previewImage} alt={style.name} className="max-h-full max-w-full object-contain"/>
               </div>
               <div className="p-2 bg-gray-50 group-hover:bg-blue-500 group-hover:text-white">

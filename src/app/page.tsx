@@ -132,21 +132,21 @@ const Quote = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-slate-50">
       <div className="p-4">
         <div className="flex flex-col md:flex-row md:space-x-4">
           {/* Left Side - Inputs */}
-          <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md no-print">
+          <div className="w-full md:w-1/2 p-4 bg-white rounded-xl border border-gray-200 shadow-sm no-print">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-semibold">Details<span className="block text-base font-normal text-gray-500">详细信息</span></h2>
               <div className="flex flex-col space-y-2 items-end">
-                  <button onClick={() => window.confirm('Are you sure you want to start a new quote? All unsaved changes will be lost.') && resetToDefaults()} className="p-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm w-32">
+                  <button onClick={() => window.confirm('Are you sure you want to start a new quote? All unsaved changes will be lost.') && resetToDefaults()} className="px-3 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 text-sm w-32 font-medium">
                     Start New Quote
                   </button>
-                  <button onClick={handleExport} className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm w-32">
+                  <button onClick={handleExport} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm w-32 font-medium">
                     Export Draft
                   </button>
-                  <button onClick={handleImportClick} className="p-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm w-32">
+                  <button onClick={handleImportClick} className="px-3 py-2 bg-slate-400 text-white rounded-lg hover:bg-slate-500 text-sm w-32 font-medium">
                     Import Draft
                   </button>
                   <input
@@ -160,33 +160,33 @@ const Quote = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Company Name<span className="block text-xs text-gray-500">公司名称</span></label>
+                <label className="block text-sm font-medium text-gray-600">Company Name<span className="block text-xs text-gray-500">公司名称</span></label>
                 <input
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={companyName}
                   onChange={(e) => setField('companyName', e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Quotation No<span className="block text-xs text-gray-500">报价单号</span></label>
+                <label className="block text-sm font-medium text-gray-600">Quotation No<span className="block text-xs text-gray-500">报价单号</span></label>
                 <input
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={quotationNo}
                   onChange={(e) => setField('quotationNo', e.target.value)}
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Project Name<span className="block text-xs text-gray-500">项目名称</span></label>
+                <label className="block text-sm font-medium text-gray-600">Project Name<span className="block text-xs text-gray-500">项目名称</span></label>
                 <input
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={projectName}
                   onChange={(e) => setField('projectName', e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Quotation Type<span className="block text-xs text-gray-500">报价类型</span></label>
+                <label className="block text-sm font-medium text-gray-600">Quotation Type<span className="block text-xs text-gray-500">报价类型</span></label>
                 <select
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={quotationType}
                   onChange={(e) => setField('quotationType', e.target.value)}
                 >
@@ -200,26 +200,26 @@ const Quote = () => {
             <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Freight & Currency<span className="block text-sm font-normal text-gray-500">运费和货币</span></h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Freight Destination<span className="block text-xs text-gray-500">目的地</span></label>
+                <label className="block text-sm font-medium text-gray-600">Freight Destination<span className="block text-xs text-gray-500">目的地</span></label>
                 <input
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={freightDestination}
                   onChange={(e) => setField('freightDestination', e.target.value)}
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Freight Cost<span className="block text-xs text-gray-500">运费</span></label>
+                <label className="block text-sm font-medium text-gray-600">Freight Cost<span className="block text-xs text-gray-500">运费</span></label>
                 <input
                   type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={freightCost}
                   onChange={(e) => setField('freightCost', e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Target Currency<span className="block text-xs text-gray-500">目标货币</span></label>
+                <label className="block text-sm font-medium text-gray-600">Target Currency<span className="block text-xs text-gray-500">目标货币</span></label>
                 <select
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={targetCurrency}
                   onChange={(e) => setField('targetCurrency', e.target.value)}
                 >
@@ -231,10 +231,10 @@ const Quote = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Exchange Rate<span className="block text-xs text-gray-500">汇率</span></label>
+                <label className="block text-sm font-medium text-gray-600">Exchange Rate<span className="block text-xs text-gray-500">汇率</span></label>
                 <input
                   type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={exchangeRate}
                   onChange={(e) => setField('exchangeRate', e.target.value)}
                 />
@@ -244,36 +244,36 @@ const Quote = () => {
             <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Terms & Validity<span className="block text-sm font-normal text-gray-500">条款与有效期</span></h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Delivery (days)<span className="block text-xs text-gray-500">交货期 (天)</span></label>
+                <label className="block text-sm font-medium text-gray-600">Delivery (days)<span className="block text-xs text-gray-500">交货期 (天)</span></label>
                 <input
                   type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={deliveryDays}
                   onChange={(e) => setField('deliveryDays', e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Warranty (months)<span className="block text-xs text-gray-500">质保期 (月)</span></label>
+                <label className="block text-sm font-medium text-gray-600">Warranty (months)<span className="block text-xs text-gray-500">质保期 (月)</span></label>
                 <input
                   type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={warrantyMonths}
                   onChange={(e) => setField('warrantyMonths', e.target.value)}
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Payment Term<span className="block text-xs text-gray-500">付款方式</span></label>
+                <label className="block text-sm font-medium text-gray-600">Payment Term<span className="block text-xs text-gray-500">付款方式</span></label>
                 <input
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={paymentTerm}
                   onChange={(e) => setField('paymentTerm', e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Price Validity (days)<span className="block text-xs text-gray-500">价格有效期 (天)</span></label>
+                <label className="block text-sm font-medium text-gray-600">Price Validity (days)<span className="block text-xs text-gray-500">价格有效期 (天)</span></label>
                 <input
                   type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white"
                   value={priceValidityDays}
                   onChange={(e) => setField('priceValidityDays', e.target.value)}
                 />
@@ -283,13 +283,13 @@ const Quote = () => {
             {elevators.map((elevator) => (
               <ElevatorForm key={elevator.id} elevator={elevator} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
             ))}
-            <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">Add Elevator</button>
+            <button onClick={addElevator} className="mt-4 w-full py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 font-medium text-sm">Add Elevator</button>
           </div>
 
           {/* Right Side - Preview */}
           <div className="w-full md:w-1/2 sticky top-4 h-screen overflow-y-auto print-only-full-width">
-            <button onClick={() => window.print()} className="mb-4 w-full p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 no-print">Generate PDF</button>
-            <div ref={componentRef} className="w-full p-4 bg-white rounded-lg shadow-md">
+            <button onClick={() => window.print()} className="mb-4 w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm no-print">Generate PDF</button>
+            <div ref={componentRef} className="w-full p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
               <Header />
               <div className="p-4">
                 <h2 className="text-2xl font-bold mb-4 border-b pb-2">Quotation</h2>
@@ -303,35 +303,35 @@ const Quote = () => {
                 <div className="mt-4 pt-4 border-t overflow-x-auto">
                   <h3 className="text-lg font-semibold mb-2">Price - Currency: USD</h3>
                   <table className="w-full text-sm text-left printable-table border-collapse">
-                    <thead className="bg-gray-200">
+                    <thead className="bg-gray-50">
                       <tr>
-                        <th className="p-2 border border-gray-400">Description</th>
-                        <th className="p-2 border border-gray-400">Specs</th>
-                        <th className="p-2 border border-gray-400 text-center">QTY-sets</th>
-                        <th className="p-2 border border-gray-400 text-right">Unit Price</th>
-                        <th className="p-2 border border-gray-400 text-right">Total Price</th>
+                        <th className="p-2 border border-gray-300">Description</th>
+                        <th className="p-2 border border-gray-300">Specs</th>
+                        <th className="p-2 border border-gray-300 text-center">QTY-sets</th>
+                        <th className="p-2 border border-gray-300 text-right">Unit Price</th>
+                        <th className="p-2 border border-gray-300 text-right">Total Price</th>
                       </tr>
                     </thead>
                     <tbody>
                       {elevators.map(elevator => (
                         <tr key={elevator.id}>
-                          <td className="p-2 border border-gray-400 align-top">{elevator.description}</td>
-                          <td className="p-2 border border-gray-400 align-top">
+                          <td className="p-2 border border-gray-300 align-top">{elevator.description}</td>
+                          <td className="p-2 border border-gray-300 align-top">
                             <div>{elevator.type}</div>
                             <div>{elevator.capacity}KG</div>
                             <div>{elevator.speed} M/S</div>
                             <div>{elevator.floorsStops}</div>
                           </td>
-                          <td className="p-2 border border-gray-400 align-top text-center">{elevator.qty}</td>
-                          <td className="p-2 border border-gray-400 align-top text-right">{elevator.unitPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                          <td className="p-2 border border-gray-400 align-top text-right">{(elevator.unitPrice * elevator.qty).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                          <td className="p-2 border border-gray-300 align-top text-center">{elevator.qty}</td>
+                          <td className="p-2 border border-gray-300 align-top text-right">{elevator.unitPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                          <td className="p-2 border border-gray-300 align-top text-right">{(elevator.unitPrice * elevator.qty).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                         </tr>
                       ))}
                       <tr>
                         <td colSpan={4} className="p-2 text-right font-semibold">Local fee and Freight from factory to {freightDestination} :</td>
                         <td className="p-2 text-right">{freightCost.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                       </tr>
-                      <tr className="font-bold bg-gray-100">
+                      <tr className="font-bold bg-slate-50">
                         <td colSpan={4} className="p-2 text-right">Total amount :</td>
                         <td className="p-2 text-right">{grandTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                       </tr>
@@ -361,7 +361,7 @@ const Quote = () => {
                         <h4 className="text-md font-semibold mt-4 text-gray-700 print-elevator-header">Elevator #L{elevator.id} Specifications</h4>
                         <div className="text-sm">
                           <div className="break-inside-avoid">
-                            <h4 id={`preview-basic-spec-${elevator.id}`} className={`text-md font-semibold mt-2 border-b px-2 py-1 ${focusedSection === `basic-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>I. Basic specification</h4>
+                            <h4 id={`preview-basic-spec-${elevator.id}`} className={`text-md font-semibold mt-2 border-b px-2 py-1 ${focusedSection === `basic-spec-${elevator.id}` ? 'bg-blue-50' : 'bg-slate-50'}`}>I. Basic specification</h4>
                             {renderSpec('Description', elevator.description)}
                             {renderSpec('Type', elevator.type)}
                             {renderSpec('Capacity (KG)', elevator.capacity)}
@@ -376,7 +376,7 @@ const Quote = () => {
                             {renderSpec('Drive System', elevator.driveSystem)}
                           </div>
                           <div className="break-inside-avoid">
-                            <h4 id={`preview-hoistway-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `hoistway-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>II. Hoistway specification</h4>
+                            <h4 id={`preview-hoistway-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `hoistway-spec-${elevator.id}` ? 'bg-blue-50' : 'bg-slate-50'}`}>II. Hoistway specification</h4>
                             {renderSpec('Shaft construction', elevator.shaftConstruction)}
                             {renderSpec('Travel (mm)', elevator.travel)}
                             {renderSpec('Headroom (mm)', elevator.headroom)}
@@ -385,7 +385,7 @@ const Quote = () => {
                             {renderSpec('Machine Room Size (W x D x H mm)', elevator.machineRoomSize)}
                           </div>
                           <div className="break-inside-avoid">
-                            <h4 id={`preview-car-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `car-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>III. Car Specification</h4>
+                            <h4 id={`preview-car-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `car-spec-${elevator.id}` ? 'bg-blue-50' : 'bg-slate-50'}`}>III. Car Specification</h4>
                             {renderSpec('COP Plate', elevator.copPlate)}
                             {renderSpec('Car Net Dimension', elevator.carNetDimension)}
                             {renderSpec('Car Ceiling', elevator.carCeiling)}
@@ -396,7 +396,7 @@ const Quote = () => {
                             {renderSpec('Rear wall finish', elevator.carWall.rear)}
                           </div>
                           <div className="break-inside-avoid">
-                            <h4 id={`preview-door-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `door-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>IV. Door specification</h4>
+                            <h4 id={`preview-door-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `door-spec-${elevator.id}` ? 'bg-blue-50' : 'bg-slate-50'}`}>IV. Door specification</h4>
                             {renderSpec('Door Opening Type', elevator.doorOpeningType)}
                             {renderSpec('Door Opening Size (W x H mm)', elevator.doorOpeningSize)}
                             {renderSpec('Door Header Type', elevator.doorHeaderType)}
@@ -404,7 +404,7 @@ const Quote = () => {
                             {renderSpec('Other Floors Door Decoration', elevator.otherFloorsDoor)}
                           </div>
                           <div className="break-inside-avoid">
-                            <h4 id={`preview-function-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `function-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>V. Function</h4>
+                            <h4 id={`preview-function-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `function-spec-${elevator.id}` ? 'bg-blue-50' : 'bg-slate-50'}`}>V. Function</h4>
                             {renderSpec('COP/LOP', elevator.copLop)}
                             {elevator.otherFunctions.map((func: any) => 
                               func.checked && renderSpec(func.name, 'Included')
@@ -415,7 +415,7 @@ const Quote = () => {
 
                       {/* Cabin Effect Page */}
                       <div className="break-before-page p-4">
-                        <h3 className="text-lg font-semibold mb-2 text-center bg-gray-200 p-2">Decoration Effect 效果图</h3>
+                        <h3 className="text-lg font-semibold mb-2 text-center bg-slate-50 border border-gray-200 p-2 rounded">Decoration Effect 效果图</h3>
                         <p className="text-center text-sm text-gray-500 mb-2">(Images are for reference only, subject to the real object)</p>
                         <div className="grid grid-cols-3 border-t border-l border-gray-400">
                           {/* Row 1: Titles */}
