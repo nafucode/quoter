@@ -51,24 +51,45 @@ const Quote = () => {
   }, [importState]);
 
   const handleSaveToLibrary = () => {
-    const state = useQuoteStore.getState();
-    window.parent.postMessage({
-      type: 'SAVE_QUOTE',
-      quote: {
-        quotationNo: state.quotationNo,
-        projectName: state.projectName,
-        companyName: state.companyName,
-        quotationType: state.quotationType,
-        quotationDate: state.quotationDate,
-        grandTotal,
-        targetCurrency: state.targetCurrency,
-        elevatorCount: state.elevators.length,
-        savedAt: new Date().toISOString(),
-        state,
-      }
-    }, '*');
-    setLibSaved(true);
-    setTimeout(() => setLibSaved(false), 2000);
+    try {
+      const s = useQuoteStore.getState();
+      // Strip functions and base64 images — both cause DataCloneError in postMessage
+      const safeElevators = s.elevators.map((e: any) => ({
+        ...e,
+        cabinEffect: {
+          cabinImage: null, copImage: null, lopImage: null,
+          ceiling:     { type: e.cabinEffect?.ceiling?.type,     value: e.cabinEffect?.ceiling?.type     === 'text' ? e.cabinEffect?.ceiling?.value     : '' },
+          button:      { type: e.cabinEffect?.button?.type,      value: e.cabinEffect?.button?.type      === 'text' ? e.cabinEffect?.button?.value      : '' },
+          floor:       { type: e.cabinEffect?.floor?.type,       value: e.cabinEffect?.floor?.type       === 'text' ? e.cabinEffect?.floor?.value       : '' },
+          landingDoor: { type: e.cabinEffect?.landingDoor?.type, value: e.cabinEffect?.landingDoor?.type === 'text' ? e.cabinEffect?.landingDoor?.value : '' },
+          handrail:    { type: e.cabinEffect?.handrail?.type,    value: e.cabinEffect?.handrail?.type    === 'text' ? e.cabinEffect?.handrail?.value    : '' },
+          copLogo:     { type: e.cabinEffect?.copLogo?.type,     value: e.cabinEffect?.copLogo?.type     === 'text' ? e.cabinEffect?.copLogo?.value     : '' },
+        },
+      }));
+      const safeState = {
+        companyName: s.companyName, quotationNo: s.quotationNo, projectName: s.projectName,
+        quotationType: s.quotationType, quotationDate: s.quotationDate,
+        elevators: safeElevators, freightDestination: s.freightDestination,
+        freightCost: s.freightCost, exchangeRate: s.exchangeRate, targetCurrency: s.targetCurrency,
+        nextId: s.nextId, deliveryDays: s.deliveryDays, paymentTerm: s.paymentTerm,
+        warrantyMonths: s.warrantyMonths, priceValidityDays: s.priceValidityDays,
+      };
+      window.parent.postMessage({
+        type: 'SAVE_QUOTE',
+        quote: {
+          quotationNo: s.quotationNo, projectName: s.projectName,
+          companyName: s.companyName, quotationType: s.quotationType,
+          quotationDate: s.quotationDate, grandTotal,
+          targetCurrency: s.targetCurrency, elevatorCount: s.elevators.length,
+          savedAt: new Date().toISOString(),
+          state: safeState,
+        }
+      }, '*');
+      setLibSaved(true);
+      setTimeout(() => setLibSaved(false), 2000);
+    } catch (err: any) {
+      alert('Save failed: ' + err.message);
+    }
   };
 
   const handleExport = () => {
