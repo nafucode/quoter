@@ -425,7 +425,7 @@ const Quote = () => {
                   <p><span className="font-semibold">IV. Price validity:</span> {priceValidityDays} days {validityUntilDate && `(until ${validityUntilDate})`}</p>
                 </div>
 
-                <div className="mt-4 pt-4 border-t">
+                <div className="mt-4 pt-4 border-t break-before-page">
                   <h3 className="text-lg font-semibold mb-2">Specifications</h3>
                   {elevators.map((elevator, index) => (
                     <div key={elevator.id}>
