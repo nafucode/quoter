@@ -102,6 +102,11 @@ const Quote = () => {
     }
   };
 
+  const handleGeneratePDF = async () => {
+    await handleSaveToLibrary();
+    window.print();
+  };
+
   const handleExport = () => {
     const state = useQuoteStore.getState();
     const jsonString = JSON.stringify(state, null, 2);
@@ -208,9 +213,6 @@ const Quote = () => {
               <div className="flex flex-col space-y-2 items-end">
                   <button onClick={() => window.confirm('Are you sure you want to start a new quote? All unsaved changes will be lost.') && resetToDefaults()} className="p-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm w-32">
                     Start New Quote
-                  </button>
-                  <button onClick={handleSaveToLibrary} className={`p-2 text-white rounded-md text-sm w-32 transition-colors ${libSaved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
-                    {libSaved ? '✓ Saved!' : 'Save to Library'}
                   </button>
                   <button onClick={handleExport} className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm w-32">
                     Export Draft
@@ -357,7 +359,9 @@ const Quote = () => {
 
           {/* Right Side - Preview */}
           <div className="w-full md:w-1/2 sticky top-4 h-screen overflow-y-auto print-only-full-width">
-            <button onClick={() => window.print()} className="mb-4 w-full p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 no-print">Generate PDF</button>
+            <button onClick={handleGeneratePDF} disabled={libSaved} className={`mb-4 w-full p-2 text-white rounded-lg shadow-md no-print transition-colors ${libSaved ? 'bg-green-600 cursor-default' : 'bg-blue-600 hover:bg-blue-700'}`}>
+              {libSaved ? '✓ 已保存，正在生成 PDF...' : '生成 PDF'}
+            </button>
             <div ref={componentRef} className="w-full p-4 bg-white rounded-lg shadow-md">
               <Header />
               <div className="p-4">
