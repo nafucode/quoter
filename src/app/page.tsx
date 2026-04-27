@@ -50,10 +50,9 @@ const Quote = () => {
     return () => window.removeEventListener('message', handler);
   }, [importState]);
 
-  const handleSaveToLibrary = () => {
+  const handleSaveToLibrary = async () => {
     try {
       const s = useQuoteStore.getState();
-      // Strip functions and base64 images — both cause DataCloneError in postMessage
       const safeElevators = s.elevators.map((e: any) => ({
         ...e,
         cabinEffect: {
@@ -74,21 +73,32 @@ const Quote = () => {
         nextId: s.nextId, deliveryDays: s.deliveryDays, paymentTerm: s.paymentTerm,
         warrantyMonths: s.warrantyMonths, priceValidityDays: s.priceValidityDays,
       };
-      window.parent.postMessage({
-        type: 'SAVE_QUOTE',
-        quote: {
-          quotationNo: s.quotationNo, projectName: s.projectName,
-          companyName: s.companyName, quotationType: s.quotationType,
-          quotationDate: s.quotationDate, grandTotal,
-          targetCurrency: s.targetCurrency, elevatorCount: s.elevators.length,
-          savedAt: new Date().toISOString(),
-          state: safeState,
-        }
-      }, '*');
+      const quote = {
+        quotationNo: s.quotationNo, projectName: s.projectName,
+        companyName: s.companyName, quotationType: s.quotationType,
+        quotationDate: s.quotationDate, grandTotal,
+        targetCurrency: s.targetCurrency, elevatorCount: s.elevators.length,
+        savedAt: new Date().toISOString(),
+        state: safeState,
+      };
+
+      // 直接 POST 到 Railway 后端（无论在哪里打开都能保存）
+      const res = await fetch('https://elevator-seo-production.up.railway.app/api/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(quote),
+      });
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+
+      // 如果在 iframe 里，额外通知父窗口刷新报价库
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'QUOTE_SAVED' }, '*');
+      }
+
       setLibSaved(true);
       setTimeout(() => setLibSaved(false), 2000);
     } catch (err: any) {
-      alert('Save failed: ' + err.message);
+      alert('保存失败: ' + err.message);
     }
   };
 
