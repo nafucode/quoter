@@ -30,11 +30,46 @@ const Quote = () => {
 
   const [focusedSection, setFocusedSection] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
+  const [libSaved, setLibSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Receive a quote from the SEO workbench library and restore it
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'LOAD_QUOTE') {
+        if (window.confirm('Load this quote from library? Current draft will be replaced.')) {
+          importState(e.data.state);
+        }
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [importState]);
+
+  const handleSaveToLibrary = () => {
+    const state = useQuoteStore.getState();
+    window.parent.postMessage({
+      type: 'SAVE_QUOTE',
+      quote: {
+        quotationNo: state.quotationNo,
+        projectName: state.projectName,
+        companyName: state.companyName,
+        quotationType: state.quotationType,
+        quotationDate: state.quotationDate,
+        grandTotal,
+        targetCurrency: state.targetCurrency,
+        elevatorCount: state.elevators.length,
+        savedAt: new Date().toISOString(),
+        state,
+      }
+    }, '*');
+    setLibSaved(true);
+    setTimeout(() => setLibSaved(false), 2000);
+  };
 
   const handleExport = () => {
     const state = useQuoteStore.getState();
@@ -142,6 +177,9 @@ const Quote = () => {
               <div className="flex flex-col space-y-2 items-end">
                   <button onClick={() => window.confirm('Are you sure you want to start a new quote? All unsaved changes will be lost.') && resetToDefaults()} className="p-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm w-32">
                     Start New Quote
+                  </button>
+                  <button onClick={handleSaveToLibrary} className={`p-2 text-white rounded-md text-sm w-32 transition-colors ${libSaved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
+                    {libSaved ? '✓ Saved!' : 'Save to Library'}
                   </button>
                   <button onClick={handleExport} className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm w-32">
                     Export Draft
