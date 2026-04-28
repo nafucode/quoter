@@ -70,7 +70,7 @@ const Quote = () => {
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (e.data?.type === 'LOAD_QUOTE') {
-        if (window.confirm('Load this quote from library? Current draft will be replaced.')) {
+        if (window.confirm(`载入报价 ${e.data.state?.quotationNo || ''}？当前草稿将被替换。`)) {
           importState(e.data.state);
         }
       }
@@ -175,7 +175,7 @@ const Quote = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (window.confirm('Are you sure you want to import this file? This will overwrite your current draft.')) {
+    if (window.confirm('确认导入此文件？当前草稿将被覆盖。')) {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
@@ -183,11 +183,11 @@ const Quote = () => {
           if (typeof text === 'string') {
             const newState = JSON.parse(text);
             importState(newState);
-            alert('Draft imported successfully!');
+            alert('草稿导入成功！');
           }
         } catch (error) {
           console.error("Failed to parse JSON file:", error);
-          alert('Failed to import draft. The file may be corrupted or in the wrong format.');
+          alert('导入失败，文件可能已损坏或格式不正确。');
         }
       };
       reader.readAsText(file);
@@ -255,16 +255,19 @@ const Quote = () => {
           {/* Left Side - Inputs */}
           <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md no-print">
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-semibold">Details<span className="block text-base font-normal text-gray-500">详细信息</span></h2>
+              <h2 className="text-xl font-semibold">报价详情</h2>
               <div className="flex flex-col space-y-2 items-end">
-                  <button onClick={() => window.confirm('Are you sure you want to start a new quote? All unsaved changes will be lost.') && resetToDefaults()} className="p-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm w-32">
-                    Start New Quote
+                  <button onClick={() => window.confirm('确认新建报价？当前草稿将会丢失。') && resetToDefaults()} className="p-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm w-36">
+                    新建报价
                   </button>
-                  <button onClick={handleExport} className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm w-32">
-                    Export Draft
+                  <button onClick={handleSaveToLibrary} className={`p-2 text-white rounded-md text-sm w-36 transition-colors ${libSaved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
+                    {libSaved ? '✓ 已保存！' : '保存到报价库'}
                   </button>
-                  <button onClick={handleImportClick} className="p-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm w-32">
-                    Import Draft
+                  <button onClick={handleExport} className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm w-36">
+                    导出草稿
+                  </button>
+                  <button onClick={handleImportClick} className="p-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm w-36">
+                    导入草稿
                   </button>
                   <input
                     type="file"
@@ -400,13 +403,13 @@ const Quote = () => {
             {elevators.map((elevator) => (
               <ElevatorForm key={elevator.id} elevator={elevator} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
             ))}
-            <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">Add Elevator</button>
+            <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">+ 添加电梯</button>
           </div>
 
           {/* Right Side - Preview */}
           <div className="w-full md:w-1/2 sticky top-4 h-screen overflow-y-auto print-only-full-width">
             <button onClick={handleGeneratePDF} className="mb-4 w-full p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 no-print">
-              {isClient && window !== window.top ? '↗ 新窗口打开 → 生成 PDF' : '生成 PDF'}
+              {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
             </button>
             <div ref={componentRef} className="w-full p-4 bg-white rounded-lg shadow-md">
               <Header />
