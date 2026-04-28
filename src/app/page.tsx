@@ -248,7 +248,7 @@ const Quote = () => {
           <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md no-print">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-semibold">报价详情</h2>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex gap-2">
                   <button onClick={handleImportClick} className="py-2 px-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
                     导入草稿
                   </button>
