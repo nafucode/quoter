@@ -249,17 +249,17 @@ const Quote = () => {
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-semibold">报价详情</h2>
               <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => window.confirm('确认新建报价？当前草稿将会丢失。') && resetToDefaults()} className="p-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm">
-                    新建报价
+                  <button onClick={handleImportClick} className="py-2 px-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
+                    导入草稿
                   </button>
-                  <button onClick={handleSaveToLibrary} className={`p-2 text-white rounded-md text-sm transition-colors ${libSaved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
-                    {libSaved ? '✓ 已保存！' : '保存到报价库'}
-                  </button>
-                  <button onClick={handleExport} className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm">
+                  <button onClick={handleExport} className="py-2 px-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
                     导出草稿
                   </button>
-                  <button onClick={handleImportClick} className="p-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm">
-                    导入草稿
+                  <button onClick={() => window.confirm('确认新建报价？当前草稿将会丢失。') && resetToDefaults()} className="py-2 px-3 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
+                    新建报价
+                  </button>
+                  <button onClick={handleSaveToLibrary} className={`py-2 px-3 text-white rounded-lg text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all ${libSaved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
+                    {libSaved ? '✓ 已保存！' : '保存到报价库'}
                   </button>
                   <input
                     type="file"
