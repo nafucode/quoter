@@ -79,7 +79,7 @@ const Quote = () => {
     return () => window.removeEventListener('message', handler);
   }, [importState]);
 
-  const handleSaveToLibrary = async () => {
+  const handleSaveToLibrary = () => {
     try {
       const s = useQuoteStore.getState();
       const safeElevators = s.elevators.map((e: any) => ({
@@ -111,20 +111,12 @@ const Quote = () => {
         state: safeState,
       };
 
-      // 直接 POST 到 Railway 后端（无论在哪里打开都能保存）
-      const res = await fetch('https://elevator-seo-production.up.railway.app/api/quotes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(quote),
-      });
-      if (!res.ok) throw new Error(`Server error ${res.status}`);
-
-      // 如果在 iframe 里，额外通知父窗口刷新报价库
+      // 如果在 iframe 里（SEO 工作台），通知父窗口保存到报价库
       if (window.parent !== window) {
-        window.parent.postMessage({ type: 'QUOTE_SAVED' }, '*');
+        window.parent.postMessage({ type: 'SAVE_QUOTE', quote }, '*');
       }
 
-      // 同步保存到本地历史
+      // 保存到本地历史
       const historyEntry = {
         id: Date.now(),
         quotationNo: s.quotationNo, projectName: s.projectName,
