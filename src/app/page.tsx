@@ -31,11 +31,40 @@ const Quote = () => {
   const [focusedSection, setFocusedSection] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
   const [libSaved, setLibSaved] = useState(false);
+  const [quoteHistory, setQuoteHistory] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const HISTORY_KEY = 'quoter_history';
 
   useEffect(() => {
     setIsClient(true);
+    try {
+      const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      setQuoteHistory(saved);
+    } catch {}
   }, []);
+
+  const saveToHistory = (entry: any) => {
+    setQuoteHistory(prev => {
+      const updated = [entry, ...prev].slice(0, 50); // 最多保留50条
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const deleteFromHistory = (id: number) => {
+    setQuoteHistory(prev => {
+      const updated = prev.filter(e => e.id !== id);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const loadFromHistory = (entry: any) => {
+    if (!window.confirm(`载入报价 ${entry.quotationNo}？当前草稿将被替换。`)) return;
+    importState(entry.state);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Receive a quote from the SEO workbench library and restore it
   useEffect(() => {
@@ -94,6 +123,18 @@ const Quote = () => {
       if (window.parent !== window) {
         window.parent.postMessage({ type: 'QUOTE_SAVED' }, '*');
       }
+
+      // 同步保存到本地历史
+      const historyEntry = {
+        id: Date.now(),
+        quotationNo: s.quotationNo, projectName: s.projectName,
+        companyName: s.companyName, quotationType: s.quotationType,
+        quotationDate: s.quotationDate, grandTotal,
+        targetCurrency: s.targetCurrency, elevatorCount: s.elevators.length,
+        savedAt: new Date().toISOString(),
+        state: safeState,
+      };
+      saveToHistory(historyEntry);
 
       setLibSaved(true);
       setTimeout(() => setLibSaved(false), 2000);
@@ -559,6 +600,68 @@ const Quote = () => {
             </div>
           </div>
         </div>
+
+        {/* 历史报价 */}
+        {isClient && (
+          <div className="mt-6 no-print">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-semibold text-gray-700">
+                历史报价
+                <span className="ml-2 text-sm font-normal text-gray-400">{quoteHistory.length} 份</span>
+              </h2>
+              {quoteHistory.length > 0 && (
+                <button
+                  onClick={() => { if (window.confirm('清空全部历史？')) { setQuoteHistory([]); localStorage.removeItem(HISTORY_KEY); } }}
+                  className="text-xs text-red-400 hover:text-red-600"
+                >
+                  清空
+                </button>
+              )}
+            </div>
+
+            {quoteHistory.length === 0 ? (
+              <div className="bg-white rounded-lg p-6 text-center text-gray-400 text-sm border border-dashed border-gray-200">
+                还没有保存的报价。填好报价后点击「Save to Library」即可保存。
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {quoteHistory.map(entry => {
+                  const date = new Date(entry.savedAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                  const total = entry.grandTotal
+                    ? entry.grandTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+                    : '—';
+                  return (
+                    <div key={entry.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all">
+                      <div className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-1">{entry.quotationType} · {entry.quotationDate}</div>
+                      <div className="font-bold text-gray-800 text-sm mb-0.5">{entry.quotationNo}</div>
+                      <div className="text-sm text-gray-600 mb-0.5 truncate">{entry.projectName}</div>
+                      <div className="text-xs text-gray-400 mb-2 truncate">{entry.companyName}</div>
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                        <span className="font-medium text-gray-700">{total}</span>
+                        <span>{entry.elevatorCount} 台 · {date}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => loadFromHistory(entry)}
+                          className="flex-1 text-xs bg-blue-500 text-white rounded px-2 py-1.5 hover:bg-blue-600 transition-colors"
+                        >
+                          载入
+                        </button>
+                        <button
+                          onClick={() => deleteFromHistory(entry.id)}
+                          className="text-xs text-red-400 hover:text-red-600 px-2 py-1.5 rounded border border-red-200 hover:border-red-400 transition-colors"
+                        >
+                          删除
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   );
