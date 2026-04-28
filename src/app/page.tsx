@@ -102,8 +102,13 @@ const Quote = () => {
     }
   };
 
-  const handleGeneratePDF = async () => {
-    await handleSaveToLibrary();
+  const handleGeneratePDF = () => {
+    // When embedded as iframe in SEO workbench, window.print() is unreliable.
+    // Open in a new tab so the user can print from a clean context.
+    if (window !== window.top) {
+      window.open(window.location.href, '_blank');
+      return;
+    }
     window.print();
   };
 
@@ -359,8 +364,8 @@ const Quote = () => {
 
           {/* Right Side - Preview */}
           <div className="w-full md:w-1/2 sticky top-4 h-screen overflow-y-auto print-only-full-width">
-            <button onClick={handleGeneratePDF} disabled={libSaved} className={`mb-4 w-full p-2 text-white rounded-lg shadow-md no-print transition-colors ${libSaved ? 'bg-green-600 cursor-default' : 'bg-blue-600 hover:bg-blue-700'}`}>
-              {libSaved ? '✓ 已保存，正在生成 PDF...' : '生成 PDF'}
+            <button onClick={handleGeneratePDF} className="mb-4 w-full p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 no-print">
+              {isClient && window !== window.top ? '↗ 新窗口打开 → 生成 PDF' : '生成 PDF'}
             </button>
             <div ref={componentRef} className="w-full p-4 bg-white rounded-lg shadow-md">
               <Header />
