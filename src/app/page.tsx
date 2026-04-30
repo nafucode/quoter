@@ -403,12 +403,7 @@ const Quote = () => {
               </div>
             </div>
 
-            {elevators.map((elevator) => (
-              <ElevatorForm key={elevator.id} elevator={elevator} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
-            ))}
-            <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">+ 添加电梯</button>
-
-            {/* Optional Additional Items */}
+            {/* Optional Additional Items — above elevator specs */}
             <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Additional Items (Optional)<span className="block text-sm font-normal text-gray-500">附加项目（可选）</span></h3>
 
             {/* Shaft Frame Row */}
@@ -484,6 +479,11 @@ const Quote = () => {
                 </div>
               )}
             </div>
+
+            {elevators.map((elevator) => (
+              <ElevatorForm key={elevator.id} elevator={elevator} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
+            ))}
+            <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">+ 添加电梯</button>
           </div>
 
           {/* Right Side - Preview */}
