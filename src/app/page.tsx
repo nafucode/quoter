@@ -523,6 +523,7 @@ const Quote = () => {
                             <div>{elevator.capacity}KG</div>
                             <div>{elevator.speed} M/S</div>
                             <div>{elevator.floorsStops}</div>
+                            {elevator.machineRoom && <div>{elevator.machineRoom}</div>}
                           </td>
                           <td className="p-2 border border-gray-400 align-top text-center">{elevator.qty}</td>
                           <td className="p-2 border border-gray-400 align-top text-right">{elevator.unitPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>

@@ -160,6 +160,33 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                 <label className="block text-sm font-medium text-gray-700">Unit Price<span className="block text-xs text-gray-500">单价</span></label>
                 <input name="unitPrice" value={elevator.unitPrice} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
               </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Machine Room<span className="block text-xs text-gray-500">机房</span></label>
+                <div className="mt-2 flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name={`machineRoom-${elevator.id}`}
+                      value="MR"
+                      checked={elevator.machineRoom === 'MR'}
+                      onChange={() => updateElevator(elevator.id, 'machineRoom', 'MR')}
+                      className="h-4 w-4 text-indigo-600"
+                    />
+                    <span className="text-sm">有机房 <span className="font-semibold text-gray-700">MR</span></span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name={`machineRoom-${elevator.id}`}
+                      value="MRL"
+                      checked={elevator.machineRoom === 'MRL'}
+                      onChange={() => updateElevator(elevator.id, 'machineRoom', 'MRL')}
+                      className="h-4 w-4 text-indigo-600"
+                    />
+                    <span className="text-sm">无机房 <span className="font-semibold text-gray-700">MRL</span></span>
+                  </label>
+                </div>
+              </div>
             </div>
 
             {/* Specifications */}

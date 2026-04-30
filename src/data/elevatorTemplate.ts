@@ -8,6 +8,7 @@ export const elevatorTemplate = {
   capacity: 1000,
   speed: 1.75,
   floorsStops: '4/4/4',
+  machineRoom: 'MR',
   controlSystem: 'Simplex',
   driveSystem: 'VVVF',
   servingFloors: 'G-1F-2F-3F',
