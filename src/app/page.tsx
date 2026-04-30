@@ -21,6 +21,8 @@ const Quote = () => {
     paymentTerm,
     warrantyMonths,
     priceValidityDays,
+    shaftFrame,
+    temperedGlass,
     setField,
     addElevator,
     resetToDefaults,
@@ -195,8 +197,6 @@ const Quote = () => {
     </div>
   );
 
-  const componentRef = useRef(null);
-
   useEffect(() => {
     if (focusedSection) {
       const element = document.getElementById(`preview-${focusedSection}`);
@@ -212,8 +212,10 @@ const Quote = () => {
 
   const grandTotal = useMemo(() => {
     const elevatorsTotal = elevators.reduce((total, elevator) => total + (elevator.unitPrice * elevator.qty), 0);
-    return elevatorsTotal + Number(freightCost);
-  }, [elevators, freightCost]);
+    const shaftFrameTotal = shaftFrame.enabled ? Number(shaftFrame.price) : 0;
+    const temperedGlassTotal = temperedGlass.enabled ? Number(temperedGlass.price) : 0;
+    return elevatorsTotal + Number(freightCost) + shaftFrameTotal + temperedGlassTotal;
+  }, [elevators, freightCost, shaftFrame, temperedGlass]);
 
   const convertedTotal = useMemo(() => {
     return grandTotal * Number(exchangeRate);
@@ -307,6 +309,15 @@ const Quote = () => {
                   <option>CIF</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Quotation Date<span className="block text-xs text-gray-500">报价日期</span></label>
+                <input
+                  type="date"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={quotationDate}
+                  onChange={(e) => setField('quotationDate', e.target.value)}
+                />
+              </div>
             </div>
             
             <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Freight & Currency<span className="block text-sm font-normal text-gray-500">运费和货币</span></h3>
@@ -325,7 +336,7 @@ const Quote = () => {
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={freightCost}
-                  onChange={(e) => setField('freightCost', e.target.value)}
+                  onChange={(e) => setField('freightCost', Number(e.target.value))}
                 />
               </div>
               <div>
@@ -348,7 +359,7 @@ const Quote = () => {
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={exchangeRate}
-                  onChange={(e) => setField('exchangeRate', e.target.value)}
+                  onChange={(e) => setField('exchangeRate', Number(e.target.value))}
                 />
               </div>
             </div>
@@ -361,7 +372,7 @@ const Quote = () => {
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={deliveryDays}
-                  onChange={(e) => setField('deliveryDays', e.target.value)}
+                  onChange={(e) => setField('deliveryDays', Number(e.target.value))}
                 />
               </div>
               <div>
@@ -370,7 +381,7 @@ const Quote = () => {
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={warrantyMonths}
-                  onChange={(e) => setField('warrantyMonths', e.target.value)}
+                  onChange={(e) => setField('warrantyMonths', Number(e.target.value))}
                 />
               </div>
               <div className="sm:col-span-2">
@@ -387,7 +398,7 @@ const Quote = () => {
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={priceValidityDays}
-                  onChange={(e) => setField('priceValidityDays', e.target.value)}
+                  onChange={(e) => setField('priceValidityDays', Number(e.target.value))}
                 />
               </div>
             </div>
@@ -396,6 +407,83 @@ const Quote = () => {
               <ElevatorForm key={elevator.id} elevator={elevator} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
             ))}
             <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">+ 添加电梯</button>
+
+            {/* Optional Additional Items */}
+            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Additional Items (Optional)<span className="block text-sm font-normal text-gray-500">附加项目（可选）</span></h3>
+
+            {/* Shaft Frame Row */}
+            <div className="border border-gray-200 rounded-md p-3 mb-3">
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="checkbox"
+                  id="shaftFrameEnabled"
+                  checked={shaftFrame.enabled}
+                  onChange={(e) => setField('shaftFrame', { ...shaftFrame, enabled: e.target.checked })}
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                />
+                <label htmlFor="shaftFrameEnabled" className="text-sm font-medium text-gray-700">
+                  Row 1: Shaft Frame<span className="ml-1 text-xs text-gray-500">井道框架</span>
+                </label>
+              </div>
+              {shaftFrame.enabled && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-medium text-gray-600">Description<span className="ml-1 text-gray-400">描述</span></label>
+                    <input
+                      value={shaftFrame.text}
+                      onChange={(e) => setField('shaftFrame', { ...shaftFrame, text: e.target.value })}
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600">Price (USD)<span className="ml-1 text-gray-400">价格</span></label>
+                    <input
+                      type="number"
+                      value={shaftFrame.price}
+                      onChange={(e) => setField('shaftFrame', { ...shaftFrame, price: Number(e.target.value) })}
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Tempered Glass Row */}
+            <div className="border border-gray-200 rounded-md p-3 mb-3">
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="checkbox"
+                  id="temperedGlassEnabled"
+                  checked={temperedGlass.enabled}
+                  onChange={(e) => setField('temperedGlass', { ...temperedGlass, enabled: e.target.checked })}
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                />
+                <label htmlFor="temperedGlassEnabled" className="text-sm font-medium text-gray-700">
+                  Row 2: Tempered Glass<span className="ml-1 text-xs text-gray-500">钢化玻璃</span>
+                </label>
+              </div>
+              {temperedGlass.enabled && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-medium text-gray-600">Description<span className="ml-1 text-gray-400">描述</span></label>
+                    <input
+                      value={temperedGlass.text}
+                      onChange={(e) => setField('temperedGlass', { ...temperedGlass, text: e.target.value })}
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600">Price (USD)<span className="ml-1 text-gray-400">价格</span></label>
+                    <input
+                      type="number"
+                      value={temperedGlass.price}
+                      onChange={(e) => setField('temperedGlass', { ...temperedGlass, price: Number(e.target.value) })}
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Side - Preview */}
@@ -403,7 +491,7 @@ const Quote = () => {
             <button onClick={handleGeneratePDF} className="mb-4 w-full p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 no-print">
               {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
             </button>
-            <div ref={componentRef} className="w-full p-4 bg-white rounded-lg shadow-md">
+            <div className="w-full p-4 bg-white rounded-lg shadow-md">
               <Header />
               <div className="p-4">
                 <h2 className="text-2xl font-bold mb-4 border-b pb-2">Quotation</h2>
@@ -441,6 +529,28 @@ const Quote = () => {
                           <td className="p-2 border border-gray-400 align-top text-right">{(elevator.unitPrice * elevator.qty).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                         </tr>
                       ))}
+                      {shaftFrame.enabled && (
+                        <tr>
+                          <td colSpan={3} className="p-2 border border-gray-400">{shaftFrame.text}</td>
+                          <td className="p-2 border border-gray-400 text-right">
+                            {shaftFrame.price > 0 ? shaftFrame.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '-'}
+                          </td>
+                          <td className="p-2 border border-gray-400 text-right">
+                            {shaftFrame.price > 0 ? shaftFrame.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '-'}
+                          </td>
+                        </tr>
+                      )}
+                      {temperedGlass.enabled && (
+                        <tr>
+                          <td colSpan={3} className="p-2 border border-gray-400">{temperedGlass.text}</td>
+                          <td className="p-2 border border-gray-400 text-right">
+                            {temperedGlass.price > 0 ? temperedGlass.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '-'}
+                          </td>
+                          <td className="p-2 border border-gray-400 text-right">
+                            {temperedGlass.price > 0 ? temperedGlass.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '-'}
+                          </td>
+                        </tr>
+                      )}
                       <tr>
                         <td colSpan={4} className="p-2 text-right font-semibold">Local fee and Freight from factory to {freightDestination} :</td>
                         <td className="p-2 text-right">{freightCost.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>

@@ -9,7 +9,7 @@ export const elevatorTemplate = {
   speed: 1.75,
   floorsStops: '4/4/4',
   controlSystem: 'Simplex',
-  driveSystem: 'Gearless motor, with VVVF control, Mona drive',
+  driveSystem: 'VVVF',
   servingFloors: 'G-1F-2F-3F',
   entrances: 'Single Entrance',
   powerVoltage: '380V-3 phase',
@@ -42,7 +42,7 @@ export const elevatorTemplate = {
   doorOpeningType: 'Center Opening',
   doorOpeningSize: '800x2100',
   doorHeaderType: 'Standard',
-  firstFloorDoor: 'Hairline Stainless Steel',
+  firstFloorDoor: 'Etching Mirror Stainless Steel',
   otherFloorsDoor: 'Hairline Stainless Steel',
 
   // Function

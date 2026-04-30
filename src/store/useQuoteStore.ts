@@ -10,6 +10,12 @@ interface Elevator {
   [key: string]: any; // Allow flexible properties
 }
 
+interface OptionalItem {
+  enabled: boolean;
+  text: string;
+  price: number;
+}
+
 interface QuoteState {
   companyName: string;
   quotationNo: string;
@@ -18,18 +24,17 @@ interface QuoteState {
   quotationDate: string;
   elevators: Elevator[];
   freightDestination: string;
-  freightCost: number | string;
-  exchangeRate: number | string;
+  freightCost: number;
+  exchangeRate: number;
   targetCurrency: string;
-  nextId: number;
-
-  // New fields for terms
-  deliveryDays: number | string;
+  deliveryDays: number;
   paymentTerm: string;
-  warrantyMonths: number | string;
-  priceValidityDays: number | string;
-
-  setField: (field: keyof Omit<QuoteState, 'elevators' | 'nextId'>, value: any) => void;
+  warrantyMonths: number;
+  priceValidityDays: number;
+  shaftFrame: OptionalItem;
+  temperedGlass: OptionalItem;
+  nextId: number;
+  setField: (field: keyof Omit<QuoteState, 'elevators' | 'nextId' | 'setField' | 'addElevator' | 'removeElevator' | 'updateElevator' | 'toggleElevatorCollapse' | 'resetToDefaults' | 'fetchExchangeRate' | 'importState'>, value: any) => void;
   addElevator: () => void;
   removeElevator: (id: number) => void;
   updateElevator: (id: number, name: string, value: any) => void;
@@ -50,13 +55,13 @@ const initialState = {
   freightCost: 600,
   exchangeRate: 1,
   targetCurrency: 'USD',
-  nextId: 2,
-
-  // Initial values for terms
-  deliveryDays: 35,
-  paymentTerm: '30% T/T in advance, 70% before shipment',
+  deliveryDays: 90,
+  paymentTerm: '30% deposit, 70% before shipment',
   warrantyMonths: 12,
   priceValidityDays: 30,
+  shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', price: 0 },
+  temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', price: 0 },
+  nextId: 2,
 };
 
 export const useQuoteStore = create<QuoteState>()(
@@ -88,7 +93,7 @@ export const useQuoteStore = create<QuoteState>()(
         ),
       })),
 
-      resetToDefaults: () => set(initialState),
+      resetToDefaults: () => set({ ...initialState, quotationDate: new Date().toLocaleDateString('en-CA') }),
 
       fetchExchangeRate: async () => {
         const { targetCurrency } = get();
