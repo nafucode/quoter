@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
 import { useQuoteStore } from '@/store/useQuoteStore';
+import { partListNote } from '@/data/partListDefaults';
 
 const Quote = () => {
   const {
@@ -23,11 +24,13 @@ const Quote = () => {
     priceValidityDays,
     shaftFrame,
     temperedGlass,
+    partList,
     setField,
     addElevator,
     resetToDefaults,
     fetchExchangeRate,
     importState,
+    updatePartListItem,
   } = useQuoteStore();
 
   const [focusedSection, setFocusedSection] = useState<string>('');
@@ -484,6 +487,47 @@ const Quote = () => {
               <ElevatorForm key={elevator.id} elevator={elevator} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
             ))}
             <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">+ 添加电梯</button>
+
+            {/* Part List Editor */}
+            <h3 className="text-lg font-semibold mt-6 mb-3 border-t pt-4">Part List<span className="block text-sm font-normal text-gray-500">零部件清单</span></h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="text-left p-2 border border-gray-300 w-1/2">Part / 零部件</th>
+                    <th className="text-left p-2 border border-gray-300">Brand / 品牌</th>
+                    <th className="text-left p-2 border border-gray-300">Origin / 产地</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {partList.map(row =>
+                    row.type === 'section' ? (
+                      <tr key={row.id} className="bg-gray-50">
+                        <td colSpan={3} className="p-2 border border-gray-300 font-semibold text-gray-700">{row.label}</td>
+                      </tr>
+                    ) : (
+                      <tr key={row.id}>
+                        <td className="p-2 border border-gray-300 text-gray-600">{row.label}</td>
+                        <td className="p-1 border border-gray-300">
+                          <input
+                            value={row.brand}
+                            onChange={(e) => updatePartListItem(row.id, 'brand', e.target.value)}
+                            className="w-full p-1 border border-gray-200 rounded text-sm focus:outline-none focus:border-blue-400"
+                          />
+                        </td>
+                        <td className="p-1 border border-gray-300">
+                          <input
+                            value={row.origin}
+                            onChange={(e) => updatePartListItem(row.id, 'origin', e.target.value)}
+                            className="w-full p-1 border border-gray-200 rounded text-sm focus:outline-none focus:border-blue-400"
+                          />
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Right Side - Preview */}
@@ -698,6 +742,36 @@ const Quote = () => {
 
                 <div className="mt-4 pt-4 border-t text-right text-sm text-gray-500">
                   <p>Quotation Date: {quotationDate}</p>
+                </div>
+
+                {/* Part List */}
+                <div className="mt-6 pt-4 border-t break-before-page">
+                  <h3 className="text-lg font-semibold mb-3">Part List</h3>
+                  <table className="w-full text-sm border-collapse printable-table">
+                    <thead className="bg-gray-200">
+                      <tr>
+                        <th className="p-2 border border-gray-400 text-left">Part</th>
+                        <th className="p-2 border border-gray-400 text-left">Brand</th>
+                        <th className="p-2 border border-gray-400 text-left">Origin</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {partList.map(row =>
+                        row.type === 'section' ? (
+                          <tr key={row.id} className="bg-gray-100">
+                            <td colSpan={3} className="p-2 border border-gray-400 font-semibold">{row.label}</td>
+                          </tr>
+                        ) : (
+                          <tr key={row.id}>
+                            <td className="p-2 border border-gray-400">{row.label}</td>
+                            <td className="p-2 border border-gray-400">{row.brand}</td>
+                            <td className="p-2 border border-gray-400">{row.origin}</td>
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                  <p className="mt-3 text-xs text-gray-500 italic leading-relaxed">{partListNote}</p>
                 </div>
               </div>
               <div className="hidden print:block print-footer">

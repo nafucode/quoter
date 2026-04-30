@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { elevatorTemplate } from '@/data/elevatorTemplate';
+import { defaultPartList, PartListRow } from '@/data/partListDefaults';
 
 // Define types for the state
 interface Elevator {
@@ -33,12 +34,14 @@ interface QuoteState {
   priceValidityDays: number;
   shaftFrame: OptionalItem;
   temperedGlass: OptionalItem;
+  partList: PartListRow[];
   nextId: number;
-  setField: (field: keyof Omit<QuoteState, 'elevators' | 'nextId' | 'setField' | 'addElevator' | 'removeElevator' | 'updateElevator' | 'toggleElevatorCollapse' | 'resetToDefaults' | 'fetchExchangeRate' | 'importState'>, value: any) => void;
+  setField: (field: keyof Omit<QuoteState, 'elevators' | 'nextId' | 'setField' | 'addElevator' | 'removeElevator' | 'updateElevator' | 'toggleElevatorCollapse' | 'resetToDefaults' | 'fetchExchangeRate' | 'importState' | 'updatePartListItem'>, value: any) => void;
   addElevator: () => void;
   removeElevator: (id: number) => void;
   updateElevator: (id: number, name: string, value: any) => void;
   toggleElevatorCollapse: (id: number) => void;
+  updatePartListItem: (id: string, field: 'brand' | 'origin', value: string) => void;
   resetToDefaults: () => void;
   fetchExchangeRate: () => void;
   importState: (newState: Partial<QuoteState>) => void;
@@ -61,6 +64,7 @@ const initialState = {
   priceValidityDays: 30,
   shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', price: 0 },
   temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', price: 0 },
+  partList: defaultPartList,
   nextId: 2,
 };
 
@@ -90,6 +94,12 @@ export const useQuoteStore = create<QuoteState>()(
       toggleElevatorCollapse: (id) => set((state) => ({
         elevators: state.elevators.map(elevator =>
           elevator.id === id ? { ...elevator, isCollapsed: !elevator.isCollapsed } : elevator
+        ),
+      })),
+
+      updatePartListItem: (id, field, value) => set((state) => ({
+        partList: state.partList.map(row =>
+          row.id === id ? { ...row, [field]: value } : row
         ),
       })),
 
