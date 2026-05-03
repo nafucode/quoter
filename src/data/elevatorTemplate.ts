@@ -43,8 +43,8 @@ export const elevatorTemplate = {
   doorOpeningType: 'Center Opening',
   doorOpeningSize: '800x2100',
   doorHeaderType: 'Standard',
-  firstFloorDoor: 'Stainless Steel 304 1.2mm',
-  otherFloorsDoor: 'Hairline Stainless Steel',
+  firstFloorDoor: 'Hairline Stainless Steel 304 1.2mm',
+  otherFloorsDoor: 'Hairline Stainless Steel 304 1.2mm',
 
   // Function
   copLop: 'Standard',
