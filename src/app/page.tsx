@@ -284,56 +284,10 @@ const Quote = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Shipping Estimation<span className="block text-sm font-normal text-gray-500">运输估算</span></h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Delivery (days)<span className="block text-xs text-gray-500">交货期 (天)</span></label>
-                <input
-                  type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-                  value={deliveryDays}
-                  onChange={(e) => setField('deliveryDays', Number(e.target.value))}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Warranty (months)<span className="block text-xs text-gray-500">质保期 (月)</span></label>
-                <input
-                  type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-                  value={warrantyMonths}
-                  onChange={(e) => setField('warrantyMonths', Number(e.target.value))}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Payment Term<span className="block text-xs text-gray-500">付款方式</span></label>
-                <input
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-                  value={paymentTerm}
-                  onChange={(e) => setField('paymentTerm', e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Price Validity (days)<span className="block text-xs text-gray-500">价格有效期 (天)</span></label>
-                <input
-                  type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-                  value={priceValidityDays}
-                  onChange={(e) => setField('priceValidityDays', e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Exchange Rate Basis (vs. RMB)<span className="block text-xs text-gray-500">汇率基准 (对人民币)</span></label>
-                <input
-                  type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-                  value={exchangeRateBasis}
-                  onChange={(e) => setField('exchangeRateBasis', e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Shipping TONS<span className="block text-xs text-gray-500">运输吨数</span></label>
+                <label className="block text-sm font-medium text-gray-700">TONS<span className="block text-xs text-gray-500">吨</span></label>
                 <input
                   type="text"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -342,7 +296,7 @@ const Quote = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Shipping CBM<span className="block text-xs text-gray-500">运输立方</span></label>
+                <label className="block text-sm font-medium text-gray-700">CBM<span className="block text-xs text-gray-500">立方米</span></label>
                 <input
                   type="text"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -351,7 +305,7 @@ const Quote = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Shipping Type<span className="block text-xs text-gray-500">运输类型</span></label>
+                <label className="block text-sm font-medium text-gray-700">Type<span className="block text-xs text-gray-500">类型</span></label>
                 <select
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={shippingType}
@@ -362,6 +316,99 @@ const Quote = () => {
                 </select>
               </div>
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Company Name<span className="block text-xs text-gray-500">公司名称</span></label>
+                <input
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={companyName}
+                  onChange={(e) => setField('companyName', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Quotation No<span className="block text-xs text-gray-500">报价单号</span></label>
+                <input
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={quotationNo}
+                  onChange={(e) => setField('quotationNo', e.target.value)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Project Name<span className="block text-xs text-gray-500">项目名称</span></label>
+                <input
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={projectName}
+                  onChange={(e) => setField('projectName', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Quotation Type<span className="block text-xs text-gray-500">报价类型</span></label>
+                <select
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={quotationType}
+                  onChange={(e) => setField('quotationType', e.target.value)}
+                >
+                  <option>EXW</option>
+                  <option>FOB</option>
+                  <option>CIF</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Quotation Date<span className="block text-xs text-gray-500">报价日期</span></label>
+                <input
+                  type="date"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={quotationDate}
+                  onChange={(e) => setField('quotationDate', e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Freight & Currency<span className="block text-sm font-normal text-gray-500">运费和货币</span></h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Freight Destination<span className="block text-xs text-gray-500">目的地</span></label>
+                <input
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={freightDestination}
+                  onChange={(e) => setField('freightDestination', e.target.value)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Freight Cost<span className="block text-xs text-gray-500">运费</span></label>
+                <input
+                  type="number"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={freightCost}
+                  onChange={(e) => setField('freightCost', Number(e.target.value))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Target Currency<span className="block text-xs text-gray-500">目标货币</span></label>
+                <select
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={targetCurrency}
+                  onChange={(e) => setField('targetCurrency', e.target.value)}
+                >
+                  <option value="-">-</option>
+                  <option>NGN</option>
+                  <option>CNY</option>
+                  <option>USD</option>
+                  <option>AUD</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Exchange Rate<span className="block text-xs text-gray-500">汇率</span></label>
+                <input
+                  type="number"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={exchangeRate}
+                  onChange={(e) => setField('exchangeRate', Number(e.target.value))}
+                />
+              </div>
+            </div>
+
+            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Terms & Validity<span className="block text-sm font-normal text-gray-500">条款与有效期</span></h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Delivery (days)<span className="block text-xs text-gray-500">交货期 (天)</span></label>
