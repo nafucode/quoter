@@ -60,7 +60,7 @@ const initialState = {
   exchangeRate: 1,
   targetCurrency: 'USD',
   deliveryDays: 90,
-  paymentTerm: '30% deposit, 70% before shipment',
+  paymentTerm: 'Pay a 30% deposit within 3 days of signing to activate the contract; the 70% balance is due 7 working days before delivery.',
   warrantyMonths: 12,
   priceValidityDays: 30,
   exchangeRateBasis: 6.8,
