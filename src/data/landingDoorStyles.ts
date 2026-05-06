@@ -24,4 +24,9 @@ export const landingDoorStyles = [
     name: '货梯-中分双折 4CO',
     previewImage: '/landing-door-styles/货梯-中分双折 4CO.png',
   },
+  {
+    id: 'LD-06',
+    name: '旁开门',
+    previewImage: '/landing-door-styles/旁开门.png',
+  },
 ];
