@@ -35,9 +35,6 @@ interface QuoteState {
   exchangeRateBasis: number | string;
   shaftFrame: OptionalItem;
   temperedGlass: OptionalItem;
-  shippingTons: string;
-  shippingCBM: string;
-  shippingType: string;
   partList: PartListRow[];
   nextId: number;
   setField: (field: keyof Omit<QuoteState, 'elevators' | 'nextId' | 'setField' | 'addElevator' | 'removeElevator' | 'updateElevator' | 'toggleElevatorCollapse' | 'resetToDefaults' | 'fetchExchangeRate' | 'importState' | 'updatePartListItem'>, value: any) => void;
@@ -69,9 +66,6 @@ const initialState = {
   exchangeRateBasis: 6.8,
   shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', price: 0 },
   temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', price: 0 },
-  shippingTons: '',
-  shippingCBM: '',
-  shippingType: 'LCL',
   partList: defaultPartList,
   nextId: 2,
 };
