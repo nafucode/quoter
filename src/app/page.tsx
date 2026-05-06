@@ -215,7 +215,11 @@ const Quote = () => {
   }, [targetCurrency, fetchExchangeRate]);
 
   const grandTotal = useMemo(() => {
-    const elevatorsTotal = elevators.reduce((total, elevator) => total + (elevator.unitPrice * elevator.qty), 0);
+    const elevatorsTotal = elevators.reduce((total, elevator) => {
+      const price = Number(elevator.unitPrice) || 0;
+      const quantity = Number(elevator.qty) || 0;
+      return total + (price * quantity);
+    }, 0);
     const shaftFrameTotal = shaftFrame.enabled ? Number(shaftFrame.price) : 0;
     const temperedGlassTotal = temperedGlass.enabled ? Number(temperedGlass.price) : 0;
     return elevatorsTotal + Number(freightCost) + shaftFrameTotal + temperedGlassTotal;

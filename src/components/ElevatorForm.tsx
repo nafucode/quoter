@@ -12,12 +12,9 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
   const { updateElevator, removeElevator, toggleElevatorCollapse } = useQuoteStore();
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
 
-  const numericFields = new Set(['capacity', 'speed', 'qty', 'unitPrice', 'headroom', 'pitDepth', 'travel']);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const parsed = numericFields.has(name) ? (value === '' ? 0 : Number(value)) : value;
-    updateElevator(elevator.id, name, parsed);
+    updateElevator(elevator.id, name, value);
   };
 
   const handleFunctionChange = (funcId: number, key: string, value: any) => {
