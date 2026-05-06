@@ -22,6 +22,7 @@ const Quote = () => {
     paymentTerm,
     warrantyMonths,
     priceValidityDays,
+    exchangeRateBasis,
     shaftFrame,
     temperedGlass,
     partList,
@@ -401,7 +402,16 @@ const Quote = () => {
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={priceValidityDays}
-                  onChange={(e) => setField('priceValidityDays', Number(e.target.value))}
+                  onChange={(e) => setField('priceValidityDays', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Exchange Rate Basis (vs. RMB)<span className="block text-xs text-gray-500">汇率基准 (对人民币)</span></label>
+                <input
+                  type="number"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={exchangeRateBasis}
+                  onChange={(e) => setField('exchangeRateBasis', e.target.value)}
                 />
               </div>
             </div>
@@ -618,7 +628,7 @@ const Quote = () => {
                   <p><span className="font-semibold">I. Delivery:</span> {deliveryDays} days after receive down payment and confirmed drawing.</p>
                   <p><span className="font-semibold">II. Payment term:</span> {paymentTerm}</p>
                   <p><span className="font-semibold">III. Warranty:</span> {warrantyMonths} months since goods arrival at destination port.</p>
-                  <p><span className="font-semibold">IV. Price validity:</span> {priceValidityDays} days {validityUntilDate && `(until ${validityUntilDate})`}</p>
+                  <p><span className="font-semibold">IV. Price validity:</span> {priceValidityDays} days {validityUntilDate && `(until ${validityUntilDate})`}, based on 1 USD = {exchangeRateBasis} RMB.</p>
                 </div>
 
                 <div className="mt-4 pt-4 border-t break-before-page">

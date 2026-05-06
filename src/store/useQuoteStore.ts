@@ -32,6 +32,7 @@ interface QuoteState {
   paymentTerm: string;
   warrantyMonths: number;
   priceValidityDays: number;
+  exchangeRateBasis: number | string;
   shaftFrame: OptionalItem;
   temperedGlass: OptionalItem;
   partList: PartListRow[];
@@ -62,6 +63,7 @@ const initialState = {
   paymentTerm: '30% deposit, 70% before shipment',
   warrantyMonths: 12,
   priceValidityDays: 30,
+  exchangeRateBasis: 6.8,
   shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', price: 0 },
   temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', price: 0 },
   partList: defaultPartList,
