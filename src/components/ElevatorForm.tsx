@@ -255,10 +255,12 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                   <label className="block text-sm font-medium text-gray-700">Shaft Size (W x D mm)<span className="block text-xs text-gray-500">井道尺寸 (宽 x 深 mm)</span></label>
                   <input name="shaftSize" value={elevator.shaftSize} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Machine Room Size (W x D x H mm)<span className="block text-xs text-gray-500">机房尺寸 (宽 x 深 x 高 mm)</span></label>
-                  <input name="machineRoomSize" value={elevator.machineRoomSize} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
-                </div>
+                {elevator.machineRoom === 'MR' && (
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Machine Room Size (W x D x H mm)<span className="block text-xs text-gray-500">机房尺寸 (宽 x 深 x 高 mm)</span></label>
+                    <input name="machineRoomSize" value={elevator.machineRoomSize} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                  </div>
+                )}
               </div>
             </div>
 
