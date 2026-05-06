@@ -661,7 +661,7 @@ const Quote = () => {
                             {renderSpec('Headroom (mm)', elevator.headroom)}
                             {renderSpec('Pit Depth (mm)', elevator.pitDepth)}
                             {renderSpec('Shaft Size (W x D mm)', elevator.shaftSize)}
-                            {renderSpec('Machine Room Size (W x D x H mm)', elevator.machineRoomSize)}
+                            {elevator.machineRoom === 'MR' && renderSpec('Machine Room Size (W x D x H mm)', elevator.machineRoomSize)}
                           </div>
                           <div className="break-inside-avoid">
                             <h4 id={`preview-car-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `car-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>III. Car Specification</h4>
