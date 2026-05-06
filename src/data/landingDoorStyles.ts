@@ -1,15 +1,5 @@
 export const landingDoorStyles = [
   {
-    id: 'LD-01',
-    name: 'Landing-door Standard',
-    previewImage: '/landing-door-styles/Landing-door Standard.png',
-  },
-  {
-    id: 'LD-02',
-    name: 'glass-door',
-    previewImage: '/landing-door-styles/glass-door.png',
-  },
-  {
     id: 'LD-03',
     name: '发纹不锈钢',
     previewImage: '/landing-door-styles/发纹不锈钢Landing-door Standard.png',
