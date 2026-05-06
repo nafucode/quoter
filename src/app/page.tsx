@@ -25,6 +25,9 @@ const Quote = () => {
     exchangeRateBasis,
     shaftFrame,
     temperedGlass,
+    shippingTons,
+    shippingCBM,
+    shippingType,
     partList,
     setField,
     addElevator,
@@ -278,6 +281,39 @@ const Quote = () => {
                     className="hidden"
                     accept=".json"
                   />
+              </div>
+            </div>
+
+            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Shipping Estimation<span className="block text-sm font-normal text-gray-500">运输估算</span></h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">TONS<span className="block text-xs text-gray-500">吨</span></label>
+                <input
+                  type="text"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={shippingTons}
+                  onChange={(e) => setField('shippingTons', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">CBM<span className="block text-xs text-gray-500">立方米</span></label>
+                <input
+                  type="text"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={shippingCBM}
+                  onChange={(e) => setField('shippingCBM', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Type<span className="block text-xs text-gray-500">类型</span></label>
+                <select
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={shippingType}
+                  onChange={(e) => setField('shippingType', e.target.value)}
+                >
+                  <option>LCL</option>
+                  <option>FCL</option>
+                </select>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -633,6 +669,7 @@ const Quote = () => {
                   <p><span className="font-semibold">II. Payment term:</span> {paymentTerm}</p>
                   <p><span className="font-semibold">III. Warranty:</span> {warrantyMonths} months since goods arrival at destination port.</p>
                   <p><span className="font-semibold">IV. Price validity:</span> {priceValidityDays} days {validityUntilDate && `(until ${validityUntilDate})`}, based on 1 USD = {exchangeRateBasis} RMB.</p>
+                  <p><span className="font-semibold">V. Shipping Estimation:</span> {shippingTons || '____'} TONS, {shippingCBM || '____'} CBM, {shippingType}</p>
                 </div>
 
                 <div className="mt-4 pt-4 border-t break-before-page">
