@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { elevatorTemplate } from '@/data/elevatorTemplate';
 import { defaultPartList, PartListRow } from '@/data/partListDefaults';
+import { Lang } from '@/data/translations';
 
 // Define types for the state
 interface Elevator {
@@ -36,6 +37,7 @@ interface QuoteState {
   shaftFrame: OptionalItem;
   temperedGlass: OptionalItem;
   partList: PartListRow[];
+  language: Lang;
   nextId: number;
   setField: (field: keyof Omit<QuoteState, 'elevators' | 'nextId' | 'setField' | 'addElevator' | 'removeElevator' | 'updateElevator' | 'toggleElevatorCollapse' | 'resetToDefaults' | 'fetchExchangeRate' | 'importState' | 'updatePartListItem'>, value: any) => void;
   addElevator: () => void;
@@ -67,6 +69,7 @@ const initialState = {
   shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', price: 0 },
   temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', price: 0 },
   partList: defaultPartList,
+  language: 'en' as Lang,
   nextId: 2,
 };
 

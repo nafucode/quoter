@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
 import { useQuoteStore } from '@/store/useQuoteStore';
-import { partListNote } from '@/data/partListDefaults';
+import { translations } from '@/data/translations';
 
 const Quote = () => {
   const {
@@ -26,6 +26,7 @@ const Quote = () => {
     shaftFrame,
     temperedGlass,
     partList,
+    language,
     setField,
     addElevator,
     resetToDefaults,
@@ -33,6 +34,8 @@ const Quote = () => {
     importState,
     updatePartListItem,
   } = useQuoteStore();
+
+  const t = translations[language];
 
   const [focusedSection, setFocusedSection] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
@@ -546,30 +549,39 @@ const Quote = () => {
 
           {/* Right Side - Preview */}
           <div className="w-full md:w-1/2 sticky top-4 h-screen overflow-y-auto print-only-full-width">
-            <button onClick={handleGeneratePDF} className="mb-4 w-full p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 no-print">
-              {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
-            </button>
+            <div className="flex gap-2 mb-4 no-print">
+              <button onClick={handleGeneratePDF} className="flex-1 p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700">
+                {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
+              </button>
+              <button
+                onClick={() => setField('language', language === 'en' ? 'es' : 'en')}
+                className="px-4 p-2 bg-gray-700 text-white rounded-lg shadow-md hover:bg-gray-800 font-semibold tracking-wide"
+                title="Switch language / Cambiar idioma"
+              >
+                {language === 'en' ? '🇪🇸 ES' : '🇬🇧 EN'}
+              </button>
+            </div>
             <div className="w-full p-4 bg-white rounded-lg shadow-md">
               <Header />
               <div className="p-4">
-                <h2 className="text-2xl font-bold mb-4 border-b pb-2">Quotation</h2>
+                <h2 className="text-2xl font-bold mb-4 border-b pb-2">{t.quotation}</h2>
                 <div className="space-y-2">
-                  <p><span className="font-semibold">Company:</span> {companyName}</p>
-                  <p><span className="font-semibold">Quotation No:</span> {quotationNo}</p>
-                  <p><span className="font-semibold">Project Name:</span> {projectName}</p>
-                  <p><span className="font-semibold">Quotation Type:</span> {quotationType}</p>
+                  <p><span className="font-semibold">{t.company}:</span> {companyName}</p>
+                  <p><span className="font-semibold">{t.quotationNo}:</span> {quotationNo}</p>
+                  <p><span className="font-semibold">{t.projectName}:</span> {projectName}</p>
+                  <p><span className="font-semibold">{t.quotationType}:</span> {quotationType}</p>
                 </div>
 
                 <div className="mt-4 pt-4 border-t overflow-x-auto">
-                  <h3 className="text-lg font-semibold mb-2">Price - Currency: USD</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t.priceTitle}</h3>
                   <table className="w-full text-sm text-left printable-table border-collapse">
                     <thead className="bg-gray-200">
                       <tr>
-                        <th className="p-2 border border-gray-400">Description</th>
-                        <th className="p-2 border border-gray-400">Specs</th>
-                        <th className="p-2 border border-gray-400 text-center">QTY-sets</th>
-                        <th className="p-2 border border-gray-400 text-right">Unit Price</th>
-                        <th className="p-2 border border-gray-400 text-right">Total Price</th>
+                        <th className="p-2 border border-gray-400">{t.colDescription}</th>
+                        <th className="p-2 border border-gray-400">{t.colSpecs}</th>
+                        <th className="p-2 border border-gray-400 text-center">{t.colQty}</th>
+                        <th className="p-2 border border-gray-400 text-right">{t.colUnitPrice}</th>
+                        <th className="p-2 border border-gray-400 text-right">{t.colTotalPrice}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -611,11 +623,11 @@ const Quote = () => {
                         </tr>
                       )}
                       <tr>
-                        <td colSpan={4} className="p-2 text-right font-semibold">Local fee and Freight from factory to {freightDestination} :</td>
+                        <td colSpan={4} className="p-2 text-right font-semibold">{t.freight(freightDestination)}</td>
                         <td className="p-2 text-right">{freightCost.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                       </tr>
                       <tr className="font-bold bg-gray-100">
-                        <td colSpan={4} className="p-2 text-right">Total amount :</td>
+                        <td colSpan={4} className="p-2 text-right">{t.totalAmount}</td>
                         <td className="p-2 text-right">{grandTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                       </tr>
                       {targetCurrency !== 'USD' && targetCurrency !== '-' && (
@@ -629,68 +641,68 @@ const Quote = () => {
                 </div>
 
                 <div className="mt-4 pt-4 border-t text-sm space-y-1">
-                  <p><span className="font-semibold">I. Delivery:</span> {deliveryDays} days after receive down payment and confirmed drawing.</p>
-                  <p><span className="font-semibold">II. Payment term:</span> {paymentTerm}</p>
-                  <p><span className="font-semibold">III. Warranty:</span> {warrantyMonths} months since goods arrival at destination port.</p>
-                  <p><span className="font-semibold">IV. Price validity:</span> {priceValidityDays} days {validityUntilDate && `(until ${validityUntilDate})`}, based on 1 USD = {exchangeRateBasis} RMB.</p>
+                  <p><span className="font-semibold">{t.delivery}</span> {deliveryDays} {t.deliverySuffix}</p>
+                  <p><span className="font-semibold">{t.paymentTerm}</span> {paymentTerm}</p>
+                  <p><span className="font-semibold">{t.warranty}</span> {warrantyMonths} {t.warrantySuffix}</p>
+                  <p><span className="font-semibold">{t.priceValidity}</span> {priceValidityDays} {t.days} {validityUntilDate && `(${t.until} ${validityUntilDate})`}, based on 1 USD = {exchangeRateBasis} RMB.</p>
                 </div>
 
                 <div className="mt-4 pt-4 border-t break-before-page">
-                  <h3 className="text-lg font-semibold mb-2">Specifications</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t.specificationsTitle}</h3>
                   {elevators.map((elevator, index) => (
                     <div key={elevator.id}>
                       {/* Specifications Section */}
                       <div className={index > 0 ? 'break-before-page' : ''}>
-                        <h4 className="text-md font-semibold mt-4 text-gray-700 print-elevator-header">Elevator #L{elevator.id} Specifications</h4>
+                        <h4 className="text-md font-semibold mt-4 text-gray-700 print-elevator-header">{t.elevatorHeader(elevator.id)}</h4>
                         <div className="text-sm">
                           <div className="break-inside-avoid">
-                            <h4 id={`preview-basic-spec-${elevator.id}`} className={`text-md font-semibold mt-2 border-b px-2 py-1 ${focusedSection === `basic-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>I. Basic specification</h4>
-                            {renderSpec('Description', elevator.description)}
-                            {renderSpec('Type', elevator.type)}
-                            {renderSpec('Capacity (KG)', elevator.capacity)}
-                            {renderSpec('Speed (M/S)', elevator.speed)}
-                            {renderSpec('Floors/Stops', elevator.floorsStops)}
-                            {renderSpec('Control System', elevator.controlSystem)}
-                            {renderSpec('Serving floors (COP display)', elevator.servingFloors)}
-                            {renderSpec('Entrances', elevator.entrances)}
-                            {renderSpec('Power voltage', elevator.powerVoltage)}
-                            {renderSpec('Lighting voltage', elevator.lightingVoltage)}
-                            {renderSpec('Frequency', elevator.frequency)}
-                            {renderSpec('Drive System', elevator.driveSystem)}
+                            <h4 id={`preview-basic-spec-${elevator.id}`} className={`text-md font-semibold mt-2 border-b px-2 py-1 ${focusedSection === `basic-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>{t.secBasic}</h4>
+                            {renderSpec(t.specDescription, elevator.description)}
+                            {renderSpec(t.specType, elevator.type)}
+                            {renderSpec(t.specCapacity, elevator.capacity)}
+                            {renderSpec(t.specSpeed, elevator.speed)}
+                            {renderSpec(t.specFloors, elevator.floorsStops)}
+                            {renderSpec(t.specControl, elevator.controlSystem)}
+                            {renderSpec(t.specServing, elevator.servingFloors)}
+                            {renderSpec(t.specEntrances, elevator.entrances)}
+                            {renderSpec(t.specPower, elevator.powerVoltage)}
+                            {renderSpec(t.specLighting, elevator.lightingVoltage)}
+                            {renderSpec(t.specFrequency, elevator.frequency)}
+                            {renderSpec(t.specDrive, elevator.driveSystem)}
                           </div>
                           <div className="break-inside-avoid">
-                            <h4 id={`preview-hoistway-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `hoistway-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>II. Hoistway specification</h4>
-                            {renderSpec('Shaft construction', elevator.shaftConstruction)}
-                            {renderSpec('Travel (mm)', elevator.travel)}
-                            {renderSpec('Headroom (mm)', elevator.headroom)}
-                            {renderSpec('Pit Depth (mm)', elevator.pitDepth)}
-                            {renderSpec('Shaft Size (W x D mm)', elevator.shaftSize)}
-                            {elevator.machineRoom === 'MR' && renderSpec('Machine Room Size (W x D x H mm)', elevator.machineRoomSize)}
+                            <h4 id={`preview-hoistway-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `hoistway-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>{t.secHoistway}</h4>
+                            {renderSpec(t.specShaftConst, elevator.shaftConstruction)}
+                            {renderSpec(t.specTravel, elevator.travel)}
+                            {renderSpec(t.specHeadroom, elevator.headroom)}
+                            {renderSpec(t.specPit, elevator.pitDepth)}
+                            {renderSpec(t.specShaftSize, elevator.shaftSize)}
+                            {elevator.machineRoom === 'MR' && renderSpec(t.specMachineRoom, elevator.machineRoomSize)}
                           </div>
                           <div className="break-inside-avoid">
-                            <h4 id={`preview-car-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `car-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>III. Car Specification</h4>
-                            {renderSpec('COP Plate', elevator.copPlate)}
-                            {renderSpec('Car Net Dimension', elevator.carNetDimension)}
-                            {renderSpec('Car Ceiling', elevator.carCeiling)}
-                            {renderSpec('Car Floor', elevator.carFloor)}
-                            {renderSpec('Handrail', elevator.carHandrail)}
-                            {renderSpec('Left wall finish', elevator.carWall.left)}
-                            {renderSpec('Right wall finish', elevator.carWall.right)}
-                            {renderSpec('Rear wall finish', elevator.carWall.rear)}
+                            <h4 id={`preview-car-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `car-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>{t.secCar}</h4>
+                            {renderSpec(t.specCopPlate, elevator.copPlate)}
+                            {renderSpec(t.specCarDim, elevator.carNetDimension)}
+                            {renderSpec(t.specCeiling, elevator.carCeiling)}
+                            {renderSpec(t.specCarFloor, elevator.carFloor)}
+                            {renderSpec(t.specHandrail, elevator.carHandrail)}
+                            {renderSpec(t.specWallLeft, elevator.carWall.left)}
+                            {renderSpec(t.specWallRight, elevator.carWall.right)}
+                            {renderSpec(t.specWallRear, elevator.carWall.rear)}
                           </div>
                           <div className="break-inside-avoid">
-                            <h4 id={`preview-door-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `door-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>IV. Door specification</h4>
-                            {renderSpec('Door Opening Type', elevator.doorOpeningType)}
-                            {renderSpec('Door Opening Size (W x H mm)', elevator.doorOpeningSize)}
-                            {renderSpec('Door Header Type', elevator.doorHeaderType)}
-                            {renderSpec('1st Floor Door Decoration', elevator.firstFloorDoor)}
-                            {renderSpec('Other Floors Door Decoration', elevator.otherFloorsDoor)}
+                            <h4 id={`preview-door-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `door-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>{t.secDoor}</h4>
+                            {renderSpec(t.specDoorType, elevator.doorOpeningType)}
+                            {renderSpec(t.specDoorSize, elevator.doorOpeningSize)}
+                            {renderSpec(t.specDoorHeader, elevator.doorHeaderType)}
+                            {renderSpec(t.specDoor1st, elevator.firstFloorDoor)}
+                            {renderSpec(t.specDoorOther, elevator.otherFloorsDoor)}
                           </div>
                           <div className="break-inside-avoid">
-                            <h4 id={`preview-function-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `function-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>V. Function</h4>
-                            {renderSpec('COP/LOP', elevator.copLop)}
-                            {elevator.otherFunctions.map((func: any) => 
-                              func.checked && renderSpec(func.name, 'Included')
+                            <h4 id={`preview-function-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `function-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>{t.secFunction}</h4>
+                            {renderSpec(t.specCopLop, elevator.copLop)}
+                            {elevator.otherFunctions.map((func: any) =>
+                              func.checked && renderSpec(func.name, t.specIncluded)
                             )}
                           </div>
                         </div>
@@ -698,13 +710,13 @@ const Quote = () => {
 
                       {/* Cabin Effect Page */}
                       <div className="break-before-page p-4">
-                        <h3 className="text-lg font-semibold mb-2 text-center bg-gray-200 p-2">Decoration Effect 效果图</h3>
-                        <p className="text-center text-sm text-gray-500 mb-2">(Images are for reference only, subject to the real object)</p>
+                        <h3 className="text-lg font-semibold mb-2 text-center bg-gray-200 p-2">{t.decorationTitle}</h3>
+                        <p className="text-center text-sm text-gray-500 mb-2">{t.decorationNote}</p>
                         <div className="grid grid-cols-3 border-t border-l border-gray-400">
                           {/* Row 1: Titles */}
-                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">CABIN</div>
-                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">COP</div>
-                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">LOP</div>
+                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cabin}</div>
+                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cop}</div>
+                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.lop}</div>
 
                           {/* Row 2: Images */}
                           <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
@@ -718,9 +730,9 @@ const Quote = () => {
                           </div>
 
                           {/* Row 2: Titles */}
-                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">CEILING</div>
-                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">BUTTON</div>
-                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">FLOOR</div>
+                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cellCeiling}</div>
+                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cellButton}</div>
+                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cellFloor}</div>
 
                           {/* Row 3: Descriptions */}
                   <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-24 text-center">
@@ -734,9 +746,9 @@ const Quote = () => {
                   </div>
 
                   {/* Row 4: Titles */}
-                  <div className="font-bold text-center border-b border-r border-gray-400 p-1">LANDING DOOR</div>
-                  <div className="font-bold text-center border-b border-r border-gray-400 p-1">HANDRAIL</div>
-                  <div className="font-bold text-center border-b border-r border-gray-400 p-1">COP LOGO</div>
+                  <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.landingDoor}</div>
+                  <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.handrail}</div>
+                  <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.copLogo}</div>
 
                   {/* Row 5: Descriptions/Images */}
                   <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48">
@@ -755,18 +767,18 @@ const Quote = () => {
                 </div>
 
                 <div className="mt-4 pt-4 border-t text-right text-sm text-gray-500">
-                  <p>Quotation Date: {quotationDate}</p>
+                  <p>{t.quotationDate}: {quotationDate}</p>
                 </div>
 
                 {/* Part List */}
                 <div className="mt-6 pt-4 border-t break-before-page">
-                  <h3 className="text-lg font-semibold mb-3">Part List</h3>
+                  <h3 className="text-lg font-semibold mb-3">{t.partListTitle}</h3>
                   <table className="w-full text-sm border-collapse printable-table">
                     <thead className="bg-gray-200">
                       <tr>
-                        <th className="p-2 border border-gray-400 text-left">Part</th>
-                        <th className="p-2 border border-gray-400 text-left">Brand</th>
-                        <th className="p-2 border border-gray-400 text-left">Origin</th>
+                        <th className="p-2 border border-gray-400 text-left">{t.partListColPart}</th>
+                        <th className="p-2 border border-gray-400 text-left">{t.partListColBrand}</th>
+                        <th className="p-2 border border-gray-400 text-left">{t.partListColOrigin}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -785,7 +797,7 @@ const Quote = () => {
                       )}
                     </tbody>
                   </table>
-                  <p className="mt-3 text-xs text-gray-500 italic leading-relaxed">{partListNote}</p>
+                  <p className="mt-3 text-xs text-gray-500 italic leading-relaxed">{t.partListNote}</p>
                 </div>
               </div>
               <div className="hidden print:block print-footer">
