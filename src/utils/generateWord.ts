@@ -1,7 +1,7 @@
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, BorderStyle, WidthType, ShadingType, VerticalAlignTable,
-  PageBreak,
+  PageBreak, ImageRun,
 } from 'docx';
 import { translations, Lang } from '@/data/translations';
 import { PartListRow } from '@/data/partListDefaults';
@@ -12,6 +12,67 @@ const BORDER = { style: BorderStyle.SINGLE, size: 1, color: '999999' } as const;
 const BORDERS = { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER };
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } as const;
 const NO_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER };
+
+// ─── image helpers ───────────────────────────────────────────────────────────
+
+/** Convert a base64 data-URL to Uint8Array + mime type string */
+function dataUrlToBytes(dataUrl: string): { data: Uint8Array; type: string } | null {
+  if (!dataUrl || !dataUrl.startsWith('data:image/')) return null;
+  try {
+    const [header, b64] = dataUrl.split(',');
+    const typeMatch = header.match(/data:image\/(\w+)/);
+    const type = typeMatch?.[1] ?? 'png';
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return { data: bytes, type };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Build a Paragraph containing an ImageRun, or a plain-text Paragraph fallback.
+ * w / h are display dimensions in pixels.
+ */
+function imagePara(dataUrl: string | undefined | null, w: number, h: number, fallback = ''): Paragraph {
+  const img = dataUrl ? dataUrlToBytes(dataUrl) : null;
+  if (img) {
+    return new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 0 },
+      children: [
+        new ImageRun({
+          type: img.type as any,
+          data: img.data,
+          transformation: { width: w, height: h },
+          altText: { title: 'cabin', description: '', name: 'cabin' },
+        }),
+      ],
+    });
+  }
+  return new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 0 },
+    children: [new TextRun({ text: fallback, size: 18, font: 'Arial', color: '999999' })],
+  });
+}
+
+/** A cabin-effect table cell that may contain an image or text */
+function effectCell(
+  content: Paragraph,
+  colW: number,
+  opts: { bg?: string; bold?: boolean } = {},
+): TableCell {
+  return new TableCell({
+    borders: BORDERS,
+    width: { size: colW, type: WidthType.DXA },
+    verticalAlign: VerticalAlignTable.CENTER,
+    shading: opts.bg ? { fill: opts.bg, type: ShadingType.CLEAR } : undefined,
+    margins: { top: 80, bottom: 80, left: 80, right: 80 },
+    children: [content],
+  });
+}
 
 // A4 content width in DXA with 1.5 cm margins: 11906 - 2 * 1701 = 8504
 const PAGE_WIDTH = 11906;
@@ -411,6 +472,119 @@ export async function generateWordBlob(state: {
       [t.specCopLop, elev.copLop ?? ''],
       [t.specIncluded, functionsList],
     ]);
+
+    // === DECORATION EFFECT (only when at least one image is set) ===
+    const ce = elev.cabinEffect;
+    const hasAnyImage =
+      ce &&
+      (ce.cabinImage ||
+        ce.copImage ||
+        ce.lopImage ||
+        (ce.landingDoor?.type === 'image' && ce.landingDoor?.value) ||
+        (ce.handrail?.type === 'image' && ce.handrail?.value) ||
+        (ce.copLogo?.type === 'image' && ce.copLogo?.value) ||
+        (ce.ceiling?.type === 'image' && ce.ceiling?.value) ||
+        (ce.button?.type === 'image' && ce.button?.value) ||
+        (ce.floor?.type === 'image' && ce.floor?.value));
+
+    if (ce && hasAnyImage) {
+      children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
+      children.push(
+        para([bold(t.decorationTitle, 22)], { align: AlignmentType.CENTER, spacingAfter: 40 }),
+      );
+      children.push(
+        para(
+          [new TextRun({ text: t.decorationNote, italics: true, size: 16, font: 'Arial', color: '888888' })],
+          { align: AlignmentType.CENTER, spacingAfter: 100 },
+        ),
+      );
+
+      // Col widths: 3 equal columns
+      const effColW = Math.floor(CONTENT_W / 3);
+      const effCols = [effColW, effColW, CONTENT_W - effColW * 2];
+
+      // Helper: header cell
+      const hdrCell = (text: string, colW: number) =>
+        effectCell(
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 0 },
+            children: [new TextRun({ text, bold: true, size: 18, font: 'Arial' })],
+          }),
+          colW,
+          { bg: 'F0F0F0' },
+        );
+
+      // Helper: value cell — image or text
+      const valCell = (
+        effectItem: { type: string; value: string } | undefined,
+        directImageUrl: string | undefined,
+        imgW: number,
+        imgH: number,
+        colW: number,
+      ) => {
+        const url = directImageUrl || (effectItem?.type === 'image' ? effectItem.value : '');
+        const textVal = effectItem?.type === 'text' ? (effectItem.value ?? '') : '';
+        return effectCell(imagePara(url || undefined, imgW, imgH, textVal), colW);
+      };
+
+      children.push(
+        new Table({
+          width: { size: CONTENT_W, type: WidthType.DXA },
+          columnWidths: effCols,
+          rows: [
+            // Row 1: CABIN / COP / LOP headers
+            new TableRow({
+              children: [
+                hdrCell(t.cabin, effCols[0]),
+                hdrCell(t.cop, effCols[1]),
+                hdrCell(t.lop, effCols[2]),
+              ],
+            }),
+            // Row 2: cabin / cop / lop images
+            new TableRow({
+              children: [
+                effectCell(imagePara(ce.cabinImage, 155, 190), effCols[0]),
+                effectCell(imagePara(ce.copImage, 90, 190), effCols[1]),
+                effectCell(imagePara(ce.lopImage, 90, 190), effCols[2]),
+              ],
+            }),
+            // Row 3: CEILING / BUTTON / FLOOR headers
+            new TableRow({
+              children: [
+                hdrCell(t.cellCeiling, effCols[0]),
+                hdrCell(t.cellButton, effCols[1]),
+                hdrCell(t.cellFloor, effCols[2]),
+              ],
+            }),
+            // Row 4: ceiling / button / floor values
+            new TableRow({
+              children: [
+                valCell(ce.ceiling, undefined, 155, 120, effCols[0]),
+                valCell(ce.button, undefined, 90, 120, effCols[1]),
+                valCell(ce.floor, undefined, 155, 120, effCols[2]),
+              ],
+            }),
+            // Row 5: LANDING DOOR / HANDRAIL / COP LOGO headers
+            new TableRow({
+              children: [
+                hdrCell(t.landingDoor, effCols[0]),
+                hdrCell(t.handrail, effCols[1]),
+                hdrCell(t.copLogo, effCols[2]),
+              ],
+            }),
+            // Row 6: landing door / handrail / cop logo values
+            new TableRow({
+              children: [
+                valCell(ce.landingDoor, undefined, 155, 140, effCols[0]),
+                valCell(ce.handrail, undefined, 155, 140, effCols[1]),
+                valCell(ce.copLogo, undefined, 155, 140, effCols[2]),
+              ],
+            }),
+          ],
+        }),
+      );
+    }
   });
 
   // === PART LIST (new page) ===
