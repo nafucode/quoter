@@ -37,10 +37,13 @@ async function fetchImgData(url: string | undefined | null): Promise<ImgData | n
       if (!res.ok) return null;
       const buf = await res.arrayBuffer();
       const ct = res.headers.get('content-type') ?? 'image/png';
-      const m = ct.match(/image\/(\w+)/);
-      // normalise 'jpeg' → 'jpg' for docx compatibility
-      let type = m?.[1] ?? 'png';
-      if (type === 'jpeg') type = 'jpg';
+      // normalise common mime variants for docx compatibility
+      let type = 'png';
+      if (ct.includes('svg'))        type = 'svg';
+      else if (ct.includes('jpeg') || ct.includes('jpg')) type = 'jpg';
+      else if (ct.includes('gif'))   type = 'gif';
+      else if (ct.includes('bmp'))   type = 'bmp';
+      else if (ct.includes('png'))   type = 'png';
       return { data: new Uint8Array(buf), type };
     }
   } catch { /* ignore */ }
@@ -171,7 +174,9 @@ export async function generateWordBlob(state: {
 }): Promise<Blob> {
   const t = translations[state.language];
 
-  // ── pre-fetch all cabin effect images (supports data-URL and public paths) ──
+  // ── pre-fetch banner + all cabin effect images ───────────────────────────
+  const bannerImg = await fetchImgData('/xinfuji-banner-quote.svg');
+
   const elevatorImgCache = await Promise.all(
     state.elevators.map(async (elev) => {
       const ce = elev.cabinEffect;
@@ -215,7 +220,26 @@ export async function generateWordBlob(state: {
   // ── sections ─────────────────────────────────────────────────────────────
   const children: (Paragraph | Table)[] = [];
 
-  // === HEADER ===
+  // === BANNER (company header image) ===
+  // Banner SVG is 1200×150 — scale to full content width
+  // CONTENT_W DXA → pixels at 96dpi: 9638/1440 * 96 ≈ 643px; height = 643 * 150/1200 ≈ 80px
+  if (bannerImg) {
+    children.push(
+      new Paragraph({
+        spacing: { before: 0, after: 160 },
+        children: [
+          new ImageRun({
+            type: bannerImg.type as any,
+            data: bannerImg.data,
+            transformation: { width: 643, height: 80 },
+            altText: { title: 'XINFUJI Header', description: '', name: 'header' },
+          }),
+        ],
+      }),
+    );
+  }
+
+  // === QUOTATION TITLE ===
   children.push(
     para([bold(`${t.quotation}`, 32)], { align: AlignmentType.CENTER, spacingAfter: 120 }),
   );
