@@ -558,34 +558,43 @@ export async function generateWordBlob(state: {
           width: { size: CONTENT_W, type: WidthType.DXA },
           columnWidths: effCols,
           rows: [
+            // Row 1 header: CABIN / COP / LOP
             new TableRow({
               children: [hdrCell(t.cabin, effCols[0]), hdrCell(t.cop, effCols[1]), hdrCell(t.lop, effCols[2])],
             }),
+            // Row 2: main images — large height to fill ~40% of page
             new TableRow({
+              height: { value: 4500, rule: 'atLeast' },
               children: [
-                effectCell(imgDataToPara(imgs.cabinImage, 155, 190), effCols[0]),
-                effectCell(imgDataToPara(imgs.copImage, 90, 190), effCols[1]),
-                effectCell(imgDataToPara(imgs.lopImage, 90, 190), effCols[2]),
+                effectCell(imgDataToPara(imgs.cabinImage, 188, 330), effCols[0]),
+                effectCell(imgDataToPara(imgs.copImage,  110, 330), effCols[1]),
+                effectCell(imgDataToPara(imgs.lopImage,  140, 330), effCols[2]),
               ],
             }),
+            // Row 3 header: CEILING / BUTTON / FLOOR
             new TableRow({
               children: [hdrCell(t.cellCeiling, effCols[0]), hdrCell(t.cellButton, effCols[1]), hdrCell(t.cellFloor, effCols[2])],
             }),
+            // Row 4: ceiling / button / floor values
             new TableRow({
+              height: { value: 2200, rule: 'atLeast' },
               children: [
-                valCell(imgs.ceiling, ce.ceiling, 155, 120, effCols[0]),
-                valCell(imgs.button, ce.button, 90, 120, effCols[1]),
-                valCell(imgs.floor, ce.floor, 155, 120, effCols[2]),
+                valCell(imgs.ceiling, ce.ceiling, 188, 200, effCols[0]),
+                valCell(imgs.button, ce.button, 120, 200, effCols[1]),
+                valCell(imgs.floor, ce.floor, 188, 200, effCols[2]),
               ],
             }),
+            // Row 5 header: LANDING DOOR / HANDRAIL / COP LOGO
             new TableRow({
               children: [hdrCell(t.landingDoor, effCols[0]), hdrCell(t.handrail, effCols[1]), hdrCell(t.copLogo, effCols[2])],
             }),
+            // Row 6: landing door / handrail / cop logo — large height
             new TableRow({
+              height: { value: 3800, rule: 'atLeast' },
               children: [
-                valCell(imgs.landingDoor, ce.landingDoor, 155, 140, effCols[0]),
-                valCell(imgs.handrail, ce.handrail, 155, 140, effCols[1]),
-                valCell(imgs.copLogo, ce.copLogo, 155, 140, effCols[2]),
+                valCell(imgs.landingDoor, ce.landingDoor, 188, 300, effCols[0]),
+                valCell(imgs.handrail,   ce.handrail,    188, 220, effCols[1]),
+                valCell(imgs.copLogo,    ce.copLogo,     188, 220, effCols[2]),
               ],
             }),
           ],
