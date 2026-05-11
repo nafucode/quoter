@@ -15,28 +15,40 @@ const NO_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: 
 
 // ─── image helpers ───────────────────────────────────────────────────────────
 
-/** Convert a base64 data-URL to Uint8Array + mime type string */
-function dataUrlToBytes(dataUrl: string): { data: Uint8Array; type: string } | null {
-  if (!dataUrl || !dataUrl.startsWith('data:image/')) return null;
+type ImgData = { data: Uint8Array; type: string };
+
+/** Fetch image data from a data-URL (base64) or a regular URL path. Returns null on failure. */
+async function fetchImgData(url: string | undefined | null): Promise<ImgData | null> {
+  if (!url) return null;
   try {
-    const [header, b64] = dataUrl.split(',');
-    const typeMatch = header.match(/data:image\/(\w+)/);
-    const type = typeMatch?.[1] ?? 'png';
-    const bin = atob(b64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    return { data: bytes, type };
-  } catch {
-    return null;
-  }
+    if (url.startsWith('data:image/')) {
+      // base64 data URL — decode synchronously
+      const [header, b64] = url.split(',');
+      const typeMatch = header.match(/data:image\/(\w+)/);
+      const type = typeMatch?.[1] ?? 'png';
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return { data: bytes, type };
+    }
+    if (url.startsWith('/') || url.startsWith('http')) {
+      // Relative public path or absolute URL — fetch from server
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const buf = await res.arrayBuffer();
+      const ct = res.headers.get('content-type') ?? 'image/png';
+      const m = ct.match(/image\/(\w+)/);
+      // normalise 'jpeg' → 'jpg' for docx compatibility
+      let type = m?.[1] ?? 'png';
+      if (type === 'jpeg') type = 'jpg';
+      return { data: new Uint8Array(buf), type };
+    }
+  } catch { /* ignore */ }
+  return null;
 }
 
-/**
- * Build a Paragraph containing an ImageRun, or a plain-text Paragraph fallback.
- * w / h are display dimensions in pixels.
- */
-function imagePara(dataUrl: string | undefined | null, w: number, h: number, fallback = ''): Paragraph {
-  const img = dataUrl ? dataUrlToBytes(dataUrl) : null;
+/** Build a Paragraph with an embedded image, or a plain-text fallback. */
+function imgDataToPara(img: ImgData | null, w: number, h: number, fallback = ''): Paragraph {
   if (img) {
     return new Paragraph({
       alignment: AlignmentType.CENTER,
@@ -158,6 +170,27 @@ export async function generateWordBlob(state: {
   language: Lang;
 }): Promise<Blob> {
   const t = translations[state.language];
+
+  // ── pre-fetch all cabin effect images (supports data-URL and public paths) ──
+  const elevatorImgCache = await Promise.all(
+    state.elevators.map(async (elev) => {
+      const ce = elev.cabinEffect;
+      if (!ce) return null;
+      const [cabinImage, copImage, lopImage, ceiling, button, floor, landingDoor, handrail, copLogo] =
+        await Promise.all([
+          fetchImgData(ce.cabinImage),
+          fetchImgData(ce.copImage),
+          fetchImgData(ce.lopImage),
+          fetchImgData(ce.ceiling?.type === 'image' ? ce.ceiling.value : null),
+          fetchImgData(ce.button?.type === 'image' ? ce.button.value : null),
+          fetchImgData(ce.floor?.type === 'image' ? ce.floor.value : null),
+          fetchImgData(ce.landingDoor?.type === 'image' ? ce.landingDoor.value : null),
+          fetchImgData(ce.handrail?.type === 'image' ? ce.handrail.value : null),
+          fetchImgData(ce.copLogo?.type === 'image' ? ce.copLogo.value : null),
+        ]);
+      return { cabinImage, copImage, lopImage, ceiling, button, floor, landingDoor, handrail, copLogo };
+    }),
+  );
 
   // ── computed totals ──────────────────────────────────────────────────────
   const elevatorsTotal = state.elevators.reduce(
@@ -473,21 +506,16 @@ export async function generateWordBlob(state: {
       [t.specIncluded, functionsList],
     ]);
 
-    // === DECORATION EFFECT (only when at least one image is set) ===
+    // === DECORATION EFFECT (only when at least one image was fetched) ===
+    const imgs = elevatorImgCache[idx];
     const ce = elev.cabinEffect;
     const hasAnyImage =
-      ce &&
-      (ce.cabinImage ||
-        ce.copImage ||
-        ce.lopImage ||
-        (ce.landingDoor?.type === 'image' && ce.landingDoor?.value) ||
-        (ce.handrail?.type === 'image' && ce.handrail?.value) ||
-        (ce.copLogo?.type === 'image' && ce.copLogo?.value) ||
-        (ce.ceiling?.type === 'image' && ce.ceiling?.value) ||
-        (ce.button?.type === 'image' && ce.button?.value) ||
-        (ce.floor?.type === 'image' && ce.floor?.value));
+      imgs &&
+      (imgs.cabinImage || imgs.copImage || imgs.lopImage ||
+        imgs.ceiling || imgs.button || imgs.floor ||
+        imgs.landingDoor || imgs.handrail || imgs.copLogo);
 
-    if (ce && hasAnyImage) {
+    if (ce && imgs && hasAnyImage) {
       children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
       children.push(
         para([bold(t.decorationTitle, 22)], { align: AlignmentType.CENTER, spacingAfter: 40 }),
@@ -499,11 +527,9 @@ export async function generateWordBlob(state: {
         ),
       );
 
-      // Col widths: 3 equal columns
       const effColW = Math.floor(CONTENT_W / 3);
       const effCols = [effColW, effColW, CONTENT_W - effColW * 2];
 
-      // Helper: header cell
       const hdrCell = (text: string, colW: number) =>
         effectCell(
           new Paragraph({
@@ -515,17 +541,16 @@ export async function generateWordBlob(state: {
           { bg: 'F0F0F0' },
         );
 
-      // Helper: value cell — image or text
+      // value cell: use pre-fetched image data, fall back to text value
       const valCell = (
+        imgData: ImgData | null,
         effectItem: { type: string; value: string } | undefined,
-        directImageUrl: string | undefined,
         imgW: number,
         imgH: number,
         colW: number,
       ) => {
-        const url = directImageUrl || (effectItem?.type === 'image' ? effectItem.value : '');
         const textVal = effectItem?.type === 'text' ? (effectItem.value ?? '') : '';
-        return effectCell(imagePara(url || undefined, imgW, imgH, textVal), colW);
+        return effectCell(imgDataToPara(imgData, imgW, imgH, textVal), colW);
       };
 
       children.push(
@@ -533,52 +558,34 @@ export async function generateWordBlob(state: {
           width: { size: CONTENT_W, type: WidthType.DXA },
           columnWidths: effCols,
           rows: [
-            // Row 1: CABIN / COP / LOP headers
+            new TableRow({
+              children: [hdrCell(t.cabin, effCols[0]), hdrCell(t.cop, effCols[1]), hdrCell(t.lop, effCols[2])],
+            }),
             new TableRow({
               children: [
-                hdrCell(t.cabin, effCols[0]),
-                hdrCell(t.cop, effCols[1]),
-                hdrCell(t.lop, effCols[2]),
+                effectCell(imgDataToPara(imgs.cabinImage, 155, 190), effCols[0]),
+                effectCell(imgDataToPara(imgs.copImage, 90, 190), effCols[1]),
+                effectCell(imgDataToPara(imgs.lopImage, 90, 190), effCols[2]),
               ],
             }),
-            // Row 2: cabin / cop / lop images
+            new TableRow({
+              children: [hdrCell(t.cellCeiling, effCols[0]), hdrCell(t.cellButton, effCols[1]), hdrCell(t.cellFloor, effCols[2])],
+            }),
             new TableRow({
               children: [
-                effectCell(imagePara(ce.cabinImage, 155, 190), effCols[0]),
-                effectCell(imagePara(ce.copImage, 90, 190), effCols[1]),
-                effectCell(imagePara(ce.lopImage, 90, 190), effCols[2]),
+                valCell(imgs.ceiling, ce.ceiling, 155, 120, effCols[0]),
+                valCell(imgs.button, ce.button, 90, 120, effCols[1]),
+                valCell(imgs.floor, ce.floor, 155, 120, effCols[2]),
               ],
             }),
-            // Row 3: CEILING / BUTTON / FLOOR headers
             new TableRow({
-              children: [
-                hdrCell(t.cellCeiling, effCols[0]),
-                hdrCell(t.cellButton, effCols[1]),
-                hdrCell(t.cellFloor, effCols[2]),
-              ],
+              children: [hdrCell(t.landingDoor, effCols[0]), hdrCell(t.handrail, effCols[1]), hdrCell(t.copLogo, effCols[2])],
             }),
-            // Row 4: ceiling / button / floor values
             new TableRow({
               children: [
-                valCell(ce.ceiling, undefined, 155, 120, effCols[0]),
-                valCell(ce.button, undefined, 90, 120, effCols[1]),
-                valCell(ce.floor, undefined, 155, 120, effCols[2]),
-              ],
-            }),
-            // Row 5: LANDING DOOR / HANDRAIL / COP LOGO headers
-            new TableRow({
-              children: [
-                hdrCell(t.landingDoor, effCols[0]),
-                hdrCell(t.handrail, effCols[1]),
-                hdrCell(t.copLogo, effCols[2]),
-              ],
-            }),
-            // Row 6: landing door / handrail / cop logo values
-            new TableRow({
-              children: [
-                valCell(ce.landingDoor, undefined, 155, 140, effCols[0]),
-                valCell(ce.handrail, undefined, 155, 140, effCols[1]),
-                valCell(ce.copLogo, undefined, 155, 140, effCols[2]),
+                valCell(imgs.landingDoor, ce.landingDoor, 155, 140, effCols[0]),
+                valCell(imgs.handrail, ce.handrail, 155, 140, effCols[1]),
+                valCell(imgs.copLogo, ce.copLogo, 155, 140, effCols[2]),
               ],
             }),
           ],
