@@ -175,7 +175,8 @@ export async function generateWordBlob(state: {
   const t = translations[state.language];
 
   // ── pre-fetch banner + all cabin effect images ───────────────────────────
-  const bannerImg = await fetchImgData('/xinfuji-banner-quote.svg');
+  // Use pre-converted PNG (SVG type is not supported by docx 9.x)
+  const bannerImg = await fetchImgData('/xinfuji-banner-quote.png');
 
   const elevatorImgCache = await Promise.all(
     state.elevators.map(async (elev) => {
