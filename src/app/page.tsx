@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
 import { useQuoteStore } from '@/store/useQuoteStore';
 import { translations } from '@/data/translations';
+import { generateWordBlob } from '@/utils/generateWord';
 
 const Quote = () => {
   const {
@@ -152,6 +153,42 @@ const Quote = () => {
       return;
     }
     window.print();
+  };
+
+  const handleExportWord = async () => {
+    try {
+      const s = useQuoteStore.getState();
+      const blob = await generateWordBlob({
+        companyName: s.companyName,
+        quotationNo: s.quotationNo,
+        projectName: s.projectName,
+        quotationType: s.quotationType,
+        quotationDate: s.quotationDate,
+        elevators: s.elevators,
+        freightDestination: s.freightDestination,
+        freightCost: s.freightCost,
+        exchangeRate: s.exchangeRate,
+        targetCurrency: s.targetCurrency,
+        deliveryDays: s.deliveryDays,
+        paymentTerm: s.paymentTerm,
+        warrantyMonths: s.warrantyMonths,
+        priceValidityDays: s.priceValidityDays,
+        shaftFrame: s.shaftFrame,
+        temperedGlass: s.temperedGlass,
+        partList: s.partList,
+        language: s.language,
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${s.quotationNo || 'quotation'}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert('Word 导出失败: ' + err.message);
+    }
   };
 
   const handleExport = () => {
@@ -552,6 +589,13 @@ const Quote = () => {
             <div className="flex gap-2 mb-4 no-print">
               <button onClick={handleGeneratePDF} className="flex-1 p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700">
                 {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
+              </button>
+              <button
+                onClick={handleExportWord}
+                className="px-4 p-2 bg-emerald-600 text-white rounded-lg shadow-md hover:bg-emerald-700 font-semibold tracking-wide"
+                title="Export as Word document"
+              >
+                📄 Word
               </button>
               <button
                 onClick={() => setField('language', language === 'en' ? 'es' : 'en')}
