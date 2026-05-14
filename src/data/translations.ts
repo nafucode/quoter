@@ -1,4 +1,4 @@
-export type Lang = 'en' | 'es';
+export type Lang = 'en' | 'es' | 'pt';
 
 export const translations = {
   en: {
@@ -191,6 +191,102 @@ export const translations = {
 
     // Footer
     quotationDate: 'Fecha de Cotización',
+  },
+
+  pt: {
+    // Header
+    quotation: 'Cotação',
+    company: 'Empresa',
+    quotationNo: 'N° Cotação',
+    projectName: 'Projeto',
+    quotationType: 'Tipo',
+
+    // Price table
+    priceTitle: 'Preço - Moeda: USD',
+    colDescription: 'Descrição',
+    colSpecs: 'Especificações',
+    colQty: 'Qtd.',
+    colUnitPrice: 'Preço Unitário',
+    colTotalPrice: 'Preço Total',
+    freight: (dest: string) => `Taxa local e Frete da fábrica até ${dest} :`,
+    totalAmount: 'Valor Total :',
+
+    // Terms
+    delivery: 'I. Prazo de entrega:',
+    deliverySuffix: 'dias após receber o sinal e a confirmação do desenho.',
+    paymentTerm: 'II. Condições de pagamento:',
+    warranty: 'III. Garantia:',
+    warrantySuffix: 'meses a partir da chegada da mercadoria ao porto de destino.',
+    priceValidity: 'IV. Validade do preço:',
+    days: 'dias',
+    until: 'até',
+
+    // Specifications
+    specificationsTitle: 'Especificações Técnicas',
+    elevatorHeader: (id: number) => `Elevador #L${id} Especificações`,
+    secBasic: 'I. Especificação básica',
+    secHoistway: 'II. Especificação da caixa',
+    secCar: 'III. Especificação da cabina',
+    secDoor: 'IV. Especificação das portas',
+    secFunction: 'V. Funções',
+
+    // Spec labels
+    specDescription: 'Descrição',
+    specType: 'Tipo',
+    specCapacity: 'Capacidade (KG)',
+    specSpeed: 'Velocidade (M/S)',
+    specFloors: 'Andares/Paradas',
+    specControl: 'Sistema de controle',
+    specServing: 'Andares atendidos (COP)',
+    specEntrances: 'Entradas',
+    specPower: 'Tensão de alimentação',
+    specLighting: 'Tensão de iluminação',
+    specFrequency: 'Frequência',
+    specDrive: 'Sistema de acionamento',
+    specShaftConst: 'Construção da caixa',
+    specTravel: 'Percurso (mm)',
+    specHeadroom: 'Altura livre superior (mm)',
+    specPit: 'Profundidade do poço (mm)',
+    specShaftSize: 'Dimensão da caixa (L x P mm)',
+    specMachineRoom: 'Casa de máquinas (L x P x A mm)',
+    specCopPlate: 'Painel COP',
+    specCarDim: 'Dimensão interna da cabina',
+    specCeiling: 'Teto da cabina',
+    specCarFloor: 'Piso da cabina',
+    specHandrail: 'Corrimão',
+    specWallLeft: 'Acabamento parede esquerda',
+    specWallRight: 'Acabamento parede direita',
+    specWallRear: 'Acabamento parede traseira',
+    specDoorType: 'Tipo de abertura',
+    specDoorSize: 'Dimensão da abertura (L x A mm)',
+    specDoorHeader: 'Tipo de verga',
+    specDoor1st: 'Decoração porta 1° andar',
+    specDoorOther: 'Decoração portas demais andares',
+    specCopLop: 'COP/LOP',
+    specIncluded: 'Incluído',
+
+    // Cabin effect
+    decorationTitle: 'Efeito Decorativo',
+    decorationNote: '(As imagens são apenas para referência, sujeito ao objeto real)',
+    cabin: 'CABINA',
+    cop: 'COP',
+    lop: 'LOP',
+    cellCeiling: 'TETO',
+    cellButton: 'BOTÃO',
+    cellFloor: 'PISO',
+    landingDoor: 'PORTA DO ANDAR',
+    handrail: 'CORRIMÃO',
+    copLogo: 'LOGO COP',
+
+    // Part list
+    partListTitle: 'Lista de Componentes',
+    partListColPart: 'Componente',
+    partListColBrand: 'Marca',
+    partListColOrigin: 'Origem',
+    partListNote: 'Nota: Com o objetivo de melhorar continuamente a qualidade do produto e a inovação tecnológica, e atender melhor às necessidades dos clientes, reservamo-nos o direito de alterar o modelo e a origem dos componentes mencionados acima, garantindo que a qualidade e o desempenho dos novos componentes não sejam inferiores aos originais.',
+
+    // Footer
+    quotationDate: 'Data da Cotação',
   },
 } as const;
 

@@ -598,11 +598,11 @@ const Quote = () => {
                 📄 Word
               </button>
               <button
-                onClick={() => setField('language', language === 'en' ? 'es' : 'en')}
+                onClick={() => setField('language', language === 'en' ? 'es' : language === 'es' ? 'pt' : 'en')}
                 className="px-4 p-2 bg-gray-700 text-white rounded-lg shadow-md hover:bg-gray-800 font-semibold tracking-wide"
-                title="Switch language / Cambiar idioma"
+                title="Switch language / Cambiar idioma / Mudar idioma"
               >
-                {language === 'en' ? '🇪🇸 ES' : '🇬🇧 EN'}
+                {language === 'en' ? '🇪🇸 ES' : language === 'es' ? '🇧🇷 PT' : '🇬🇧 EN'}
               </button>
             </div>
             <div className="w-full p-4 bg-white rounded-lg shadow-md">
