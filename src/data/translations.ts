@@ -1,4 +1,4 @@
-export type Lang = 'en' | 'es' | 'pt';
+export type Lang = 'en' | 'es' | 'pt' | 'fr' | 'ru';
 
 export const translations = {
   en: {
@@ -287,6 +287,197 @@ export const translations = {
 
     // Footer
     quotationDate: 'Data da Cotação',
+  },
+  fr: {
+    // Header
+    quotation: 'Devis',
+    company: 'Société',
+    quotationNo: 'N° Devis',
+    projectName: 'Projet',
+    quotationType: 'Type',
+
+    // Price table
+    priceTitle: 'Prix - Devise : USD',
+    colDescription: 'Description',
+    colSpecs: 'Spécifications',
+    colQty: 'Qté',
+    colUnitPrice: 'Prix Unitaire',
+    colTotalPrice: 'Prix Total',
+    freight: (dest: string) => `Frais locaux et fret de l'usine à ${dest} :`,
+    totalAmount: 'Montant Total :',
+
+    // Terms
+    delivery: 'I. Délai de livraison :',
+    deliverySuffix: 'jours après réception de l\'acompte et confirmation des plans.',
+    paymentTerm: 'II. Conditions de paiement :',
+    warranty: 'III. Garantie :',
+    warrantySuffix: 'mois à compter de l\'arrivée des marchandises au port de destination.',
+    priceValidity: 'IV. Validité du prix :',
+    days: 'jours',
+    until: 'jusqu\'au',
+
+    // Specifications
+    specificationsTitle: 'Spécifications Techniques',
+    elevatorHeader: (id: number) => `Ascenseur #L${id} Spécifications`,
+    secBasic: 'I. Spécification de base',
+    secHoistway: 'II. Spécification de la gaine',
+    secCar: 'III. Spécification de la cabine',
+    secDoor: 'IV. Spécification des portes',
+    secFunction: 'V. Fonctions',
+
+    // Spec labels
+    specDescription: 'Description',
+    specType: 'Type',
+    specCapacity: 'Capacité (KG)',
+    specSpeed: 'Vitesse (M/S)',
+    specFloors: 'Niveaux/Arrêts',
+    specControl: 'Système de contrôle',
+    specServing: 'Niveaux desservis (COP)',
+    specEntrances: 'Entrées',
+    specPower: 'Tension d\'alimentation',
+    specLighting: 'Tension d\'éclairage',
+    specFrequency: 'Fréquence',
+    specDrive: 'Système d\'entraînement',
+    specShaftConst: 'Construction de la gaine',
+    specTravel: 'Course (mm)',
+    specHeadroom: 'Hauteur libre supérieure (mm)',
+    specPit: 'Profondeur de la fosse (mm)',
+    specShaftSize: 'Dimensions de la gaine (L x P mm)',
+    specMachineRoom: 'Salle des machines (L x P x H mm)',
+    specCopPlate: 'Panneau COP',
+    specCarDim: 'Dimensions internes cabine',
+    specCeiling: 'Plafond de cabine',
+    specCarFloor: 'Sol de cabine',
+    specHandrail: 'Main courante',
+    specWallLeft: 'Finition paroi gauche',
+    specWallRight: 'Finition paroi droite',
+    specWallRear: 'Finition paroi arrière',
+    specDoorType: 'Type d\'ouverture',
+    specDoorSize: 'Dimension ouverture (L x H mm)',
+    specDoorHeader: 'Type de linteau',
+    specDoor1st: 'Décoration porte 1er étage',
+    specDoorOther: 'Décoration portes autres étages',
+    specCopLop: 'COP/LOP',
+    specIncluded: 'Inclus',
+
+    // Cabin effect
+    decorationTitle: 'Effet Décoratif',
+    decorationNote: '(Les images sont fournies à titre indicatif uniquement, sous réserve du produit réel)',
+    cabin: 'CABINE',
+    cop: 'COP',
+    lop: 'LOP',
+    cellCeiling: 'PLAFOND',
+    cellButton: 'BOUTON',
+    cellFloor: 'SOL',
+    landingDoor: 'PORTE PALIÈRE',
+    handrail: 'MAIN COURANTE',
+    copLogo: 'LOGO COP',
+
+    // Part list
+    partListTitle: 'Liste des Composants',
+    partListColPart: 'Composant',
+    partListColBrand: 'Marque',
+    partListColOrigin: 'Origine',
+    partListNote: 'Note : Afin d\'améliorer continuellement la qualité des produits et l\'innovation technologique, et de mieux répondre aux besoins des clients, nous nous réservons le droit de modifier le modèle et l\'origine des composants mentionnés ci-dessus, en garantissant que la qualité et les performances des nouveaux composants ne sont pas inférieures aux originaux.',
+
+    // Footer
+    quotationDate: 'Date du Devis',
+  },
+
+  ru: {
+    // Header
+    quotation: 'Коммерческое предложение',
+    company: 'Компания',
+    quotationNo: '№ предложения',
+    projectName: 'Проект',
+    quotationType: 'Тип',
+
+    // Price table
+    priceTitle: 'Цена — Валюта: USD',
+    colDescription: 'Описание',
+    colSpecs: 'Характеристики',
+    colQty: 'Кол-во',
+    colUnitPrice: 'Цена за ед.',
+    colTotalPrice: 'Итоговая цена',
+    freight: (dest: string) => `Местные сборы и фрахт с завода до ${dest} :`,
+    totalAmount: 'Итого :',
+
+    // Terms
+    delivery: 'I. Срок поставки:',
+    deliverySuffix: 'дней после получения аванса и подтверждения чертежей.',
+    paymentTerm: 'II. Условия оплаты:',
+    warranty: 'III. Гарантия:',
+    warrantySuffix: 'месяцев с момента прибытия товара в порт назначения.',
+    priceValidity: 'IV. Срок действия цены:',
+    days: 'дней',
+    until: 'до',
+
+    // Specifications
+    specificationsTitle: 'Технические характеристики',
+    elevatorHeader: (id: number) => `Лифт #L${id} Характеристики`,
+    secBasic: 'I. Основные характеристики',
+    secHoistway: 'II. Характеристики шахты',
+    secCar: 'III. Характеристики кабины',
+    secDoor: 'IV. Характеристики дверей',
+    secFunction: 'V. Функции',
+
+    // Spec labels
+    specDescription: 'Описание',
+    specType: 'Тип',
+    specCapacity: 'Грузоподъёмность (кг)',
+    specSpeed: 'Скорость (м/с)',
+    specFloors: 'Этажи/Остановки',
+    specControl: 'Система управления',
+    specServing: 'Обслуживаемые этажи (COP)',
+    specEntrances: 'Входы',
+    specPower: 'Напряжение питания',
+    specLighting: 'Напряжение освещения',
+    specFrequency: 'Частота',
+    specDrive: 'Система привода',
+    specShaftConst: 'Конструкция шахты',
+    specTravel: 'Ход (мм)',
+    specHeadroom: 'Верхний зазор (мм)',
+    specPit: 'Глубина приямка (мм)',
+    specShaftSize: 'Размер шахты (Ш × Г мм)',
+    specMachineRoom: 'Машинное помещение (Ш × Г × В мм)',
+    specCopPlate: 'Панель COP',
+    specCarDim: 'Внутренние размеры кабины',
+    specCeiling: 'Потолок кабины',
+    specCarFloor: 'Пол кабины',
+    specHandrail: 'Поручень',
+    specWallLeft: 'Отделка левой стены',
+    specWallRight: 'Отделка правой стены',
+    specWallRear: 'Отделка задней стены',
+    specDoorType: 'Тип открывания',
+    specDoorSize: 'Размер проёма (Ш × В мм)',
+    specDoorHeader: 'Тип перемычки',
+    specDoor1st: 'Отделка двери 1-го этажа',
+    specDoorOther: 'Отделка дверей других этажей',
+    specCopLop: 'COP/LOP',
+    specIncluded: 'Включено',
+
+    // Cabin effect
+    decorationTitle: 'Декоративное оформление',
+    decorationNote: '(Изображения приведены только для справки, реальный вид может отличаться)',
+    cabin: 'КАБИНА',
+    cop: 'COP',
+    lop: 'LOP',
+    cellCeiling: 'ПОТОЛОК',
+    cellButton: 'КНОПКА',
+    cellFloor: 'ПОЛ',
+    landingDoor: 'ДВЕРЬ ЭТАЖА',
+    handrail: 'ПОРУЧЕНЬ',
+    copLogo: 'ЛОГОТИП COP',
+
+    // Part list
+    partListTitle: 'Список комплектующих',
+    partListColPart: 'Компонент',
+    partListColBrand: 'Марка',
+    partListColOrigin: 'Происхождение',
+    partListNote: 'Примечание: В целях постоянного улучшения качества продукции и технологических инноваций, а также для лучшего удовлетворения потребностей клиентов, мы оставляем за собой право изменять модель и происхождение отдельных комплектующих, указанных выше, гарантируя при этом, что качество и характеристики новых комплектующих будут не ниже оригинальных.',
+
+    // Footer
+    quotationDate: 'Дата предложения',
   },
 } as const;
 
