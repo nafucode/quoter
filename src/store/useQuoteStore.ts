@@ -81,10 +81,23 @@ export const useQuoteStore = create<QuoteState>()(
       // Actions
       setField: (field, value) => set({ [field]: value }),
 
-      addElevator: () => set((state) => ({
-        elevators: [...state.elevators, { ...elevatorTemplate, id: state.nextId }],
-        nextId: state.nextId + 1,
-      })),
+      addElevator: () => set((state) => {
+        const last = state.elevators[state.elevators.length - 1];
+        const base = last ? { ...last } : { ...elevatorTemplate };
+        // Deep-clone nested objects so mutations don't bleed between elevators
+        const newElevator = {
+          ...base,
+          id: state.nextId,
+          isCollapsed: false,
+          cabinEffect: last ? JSON.parse(JSON.stringify(last.cabinEffect ?? elevatorTemplate.cabinEffect)) : { ...elevatorTemplate.cabinEffect },
+          carWall: { ...(last?.carWall ?? elevatorTemplate.carWall) },
+          otherFunctions: (last?.otherFunctions ?? elevatorTemplate.otherFunctions).map((f: any) => ({ ...f })),
+        };
+        return {
+          elevators: [...state.elevators, newElevator],
+          nextId: state.nextId + 1,
+        };
+      }),
 
       removeElevator: (id) => set((state) => ({
         elevators: state.elevators.filter(elevator => elevator.id !== id),
