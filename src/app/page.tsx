@@ -133,6 +133,7 @@ const Quote = () => {
         companyName: s.companyName, quotationType: s.quotationType,
         quotationDate: s.quotationDate, grandTotal,
         targetCurrency: s.targetCurrency, elevatorCount: s.elevators.length,
+        elevatorTypes: s.elevators.map((e: any) => e.type).filter(Boolean),
         savedAt: new Date().toISOString(),
         state: safeState,
       };
@@ -879,35 +880,53 @@ const Quote = () => {
                 还没有保存的报价。填好报价后点击「Save to Library」即可保存。
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100 overflow-hidden">
                 {quoteHistory.map(entry => {
-                  const date = new Date(entry.savedAt).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                  const date = new Date(entry.savedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                   const total = entry.grandTotal
-                    ? entry.grandTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+                    ? '$' + Math.round(entry.grandTotal).toLocaleString()
+                    : '—';
+                  // Elevator types: from saved field or fall back to state
+                  const types: string[] = entry.elevatorTypes?.length
+                    ? entry.elevatorTypes
+                    : (entry.state?.elevators ?? []).map((e: any) => e.type).filter(Boolean);
+                  const typeLabel = types.length
+                    ? types.join(' / ')
                     : '—';
                   return (
-                    <div key={entry.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all">
-                      <div className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-1">{entry.quotationType} · {entry.quotationDate}</div>
-                      <div className="font-bold text-gray-800 text-sm mb-0.5">{entry.quotationNo}</div>
-                      <div className="text-sm text-gray-600 mb-0.5 truncate">{entry.projectName}</div>
-                      <div className="text-xs text-gray-400 mb-2 truncate">{entry.companyName}</div>
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-                        <span className="font-medium text-gray-700">{total}</span>
-                        <span>{entry.elevatorCount} 台 · {date}</span>
+                    <div key={entry.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 transition-colors group">
+                      {/* Badge */}
+                      <span className="shrink-0 text-xs font-bold text-blue-600 w-10 text-center leading-tight">
+                        {entry.quotationType}
+                      </span>
+                      {/* Date */}
+                      <span className="shrink-0 text-xs text-gray-400 w-20">{entry.quotationDate}</span>
+                      {/* No + Project */}
+                      <div className="w-36 shrink-0">
+                        <div className="text-sm font-bold text-gray-800 truncate">{entry.quotationNo}</div>
+                        <div className="text-xs text-gray-400 truncate">{entry.projectName}</div>
                       </div>
-                      <div className="flex gap-2">
+                      {/* Company */}
+                      <div className="flex-1 min-w-0 text-xs text-gray-500 truncate">{entry.companyName}</div>
+                      {/* Elevator type */}
+                      <div className="w-52 shrink-0 text-xs text-gray-600 truncate font-mono" title={typeLabel}>
+                        {typeLabel}
+                        {entry.elevatorCount > 1 && <span className="ml-1 text-gray-400">×{entry.elevatorCount}</span>}
+                      </div>
+                      {/* Total */}
+                      <span className="shrink-0 text-sm font-semibold text-gray-700 w-20 text-right">{total}</span>
+                      {/* Saved time */}
+                      <span className="shrink-0 text-xs text-gray-400 w-20 text-right">{date}</span>
+                      {/* Actions */}
+                      <div className="shrink-0 flex gap-1.5">
                         <button
                           onClick={() => loadFromHistory(entry)}
-                          className="flex-1 text-xs bg-blue-500 text-white rounded px-2 py-1.5 hover:bg-blue-600 transition-colors"
-                        >
-                          载入
-                        </button>
+                          className="text-xs bg-blue-500 text-white rounded px-3 py-1 hover:bg-blue-600 transition-colors"
+                        >载入</button>
                         <button
                           onClick={() => deleteFromHistory(entry.id)}
-                          className="text-xs text-red-400 hover:text-red-600 px-2 py-1.5 rounded border border-red-200 hover:border-red-400 transition-colors"
-                        >
-                          删除
-                        </button>
+                          className="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded border border-red-200 hover:border-red-400 transition-colors"
+                        >删除</button>
                       </div>
                     </div>
                   );
