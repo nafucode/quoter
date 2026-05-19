@@ -10,7 +10,7 @@ export const elevatorTemplate = {
   floorsStops: '4/4/4',
   machineRoom: 'MR',
   controlSystem: 'Simplex',
-  driveSystem: 'VVVF',
+  driveSystem: 'Gearless Motor - VVVF',
   servingFloors: 'G-1F-2F-3F',
   entrances: 'Single Entrance',
   powerVoltage: '380V-3 phase',
@@ -21,7 +21,7 @@ export const elevatorTemplate = {
 
   // Hoistway specification
   headroom: 4500,
-  pitDepth: 150,
+  pitDepth: 1500,
   shaftSize: '2100x2100',
   machineRoomSize: '2100x3000x2500',
   shaftConstruction: 'Concrete',
