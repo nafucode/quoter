@@ -1,6 +1,7 @@
 
 "use client";
 import { useState, useMemo, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
 import { useQuoteStore } from '@/store/useQuoteStore';
@@ -314,6 +315,9 @@ const Quote = () => {
                   <button onClick={handleImportClick} className="py-2 px-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
                     导入草稿
                   </button>
+                  <Link href="/pi" className="py-2 px-3 bg-slate-900 text-white rounded-lg hover:bg-slate-700 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
+                    PI 制作
+                  </Link>
                   <button onClick={handleExport} className="py-2 px-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
                     导出草稿
                   </button>
