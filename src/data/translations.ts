@@ -1,4 +1,4 @@
-export type Lang = 'en' | 'es' | 'pt' | 'fr' | 'ru';
+export type Lang = 'en' | 'zh' | 'es' | 'pt' | 'fr' | 'ru';
 
 export const translations = {
   en: {
@@ -95,6 +95,102 @@ export const translations = {
 
     // Footer
     quotationDate: 'Quotation Date',
+  },
+
+  zh: {
+    // Header
+    quotation: '报价单',
+    company: '公司',
+    quotationNo: '报价编号',
+    projectName: '项目名称',
+    quotationType: '报价类型',
+
+    // Price table
+    priceTitle: '价格 - 币种：USD',
+    colDescription: '描述',
+    colSpecs: '规格',
+    colQty: '数量（套）',
+    colUnitPrice: '单价',
+    colTotalPrice: '总价',
+    freight: (dest: string) => `当地费用及从工厂至 ${dest} 的运费：`,
+    totalAmount: '合计金额：',
+
+    // Terms
+    delivery: '一、交货期：',
+    deliverySuffix: '个工作日（收到定金及确认图纸后起算）。',
+    paymentTerm: '二、付款方式：',
+    warranty: '三、质保：',
+    warrantySuffix: '个月（货物抵达目的港之日起算）。',
+    priceValidity: '四、报价有效期：',
+    days: '天',
+    until: '至',
+
+    // Specifications
+    specificationsTitle: '技术规格',
+    elevatorHeader: (id: number) => `电梯 #L${id} 规格`,
+    secBasic: '一、基本规格',
+    secHoistway: '二、井道规格',
+    secCar: '三、轿厢规格',
+    secDoor: '四、门系统规格',
+    secFunction: '五、功能配置',
+
+    // Spec labels
+    specDescription: '描述',
+    specType: '型号',
+    specCapacity: '额定载重（KG）',
+    specSpeed: '额定速度（M/S）',
+    specFloors: '层/站/门',
+    specControl: '控制系统',
+    specServing: '服务楼层（COP显示）',
+    specEntrances: '开门方向',
+    specPower: '电源电压',
+    specLighting: '照明电压',
+    specFrequency: '频率',
+    specDrive: '驱动系统',
+    specShaftConst: '井道结构',
+    specTravel: '提升高度（mm）',
+    specHeadroom: '顶层高度（mm）',
+    specPit: '底坑深度（mm）',
+    specShaftSize: '井道尺寸（宽×深 mm）',
+    specMachineRoom: '机房尺寸（宽×深×高 mm）',
+    specCopPlate: 'COP面板',
+    specCarDim: '轿厢净尺寸',
+    specCeiling: '轿顶',
+    specCarFloor: '轿厢地板',
+    specHandrail: '扶手',
+    specWallLeft: '左壁板',
+    specWallRight: '右壁板',
+    specWallRear: '后壁板',
+    specDoorType: '开门方式',
+    specDoorSize: '开门尺寸（宽×高 mm）',
+    specDoorHeader: '门头类型',
+    specDoor1st: '首层门装饰',
+    specDoorOther: '其他层门装饰',
+    specCopLop: 'COP/LOP',
+    specIncluded: '含',
+
+    // Cabin effect
+    decorationTitle: '装饰效果',
+    decorationNote: '（图片仅供参考，以实物为准）',
+    cabin: '轿厢',
+    cop: 'COP',
+    lop: 'LOP',
+    cellCeiling: '轿顶',
+    cellButton: '按钮',
+    cellFloor: '地板',
+    landingDoor: '层门',
+    handrail: '扶手',
+    copLogo: 'COP LOGO',
+
+    // Part list
+    partListTitle: '配件清单',
+    partListColPart: '配件',
+    partListColBrand: '品牌',
+    partListColOrigin: '产地',
+    partListNote: '注：为持续提升产品质量和技术创新，更好地满足客户需求，我司保留对上述部分配件型号及产地进行调整的权利，但保证新配件的质量和性能不低于原配件。',
+
+    // Footer
+    quotationDate: '报价日期',
   },
 
   es: {

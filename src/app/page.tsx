@@ -605,6 +605,7 @@ const Quote = () => {
                 title="Switch output language"
               >
                 <option value="en">🇬🇧 EN</option>
+                <option value="zh">🇨🇳 中文</option>
                 <option value="es">🇪🇸 ES</option>
                 <option value="pt">🇧🇷 PT</option>
                 <option value="fr">🇫🇷 FR</option>
