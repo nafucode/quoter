@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import { useQuoteStore } from "@/store/useQuoteStore";
@@ -23,6 +23,9 @@ type PiForm = {
   contractNo: string;
   issueDate: string;
   currency: string;
+  showTargetCurrency: boolean;
+  targetCurrency: string;
+  targetExchangeRate: number;
   goodsDescription: string;
   deliveryTerms: string;
   leadTime: string;
@@ -32,11 +35,27 @@ type PiForm = {
   countryOfOrigin: string;
   bankName: string;
   accountNo: string;
+  swiftCode: string;
   bankAddress: string;
+  intermediaryBank: string;
+  intermediarySwift: string;
   beneficiary: string;
   beneficiaryAddress: string;
   additionalRequirements: string;
   items: PiItem[];
+};
+
+type BankPreset = {
+  id: string;
+  label: string;
+  bankName: string;
+  accountNo: string;
+  swiftCode: string;
+  bankAddress: string;
+  intermediaryBank: string;
+  intermediarySwift: string;
+  beneficiary: string;
+  beneficiaryAddress: string;
 };
 
 type QuoteElevator = {
@@ -75,6 +94,19 @@ type QuoteHistoryEntry = {
   state?: QuoteSnapshot;
 };
 
+type PiHistoryEntry = {
+  id: number;
+  contractNo: string;
+  buyerName: string;
+  issueDate: string;
+  total: number;
+  currency: string;
+  savedAt: string;
+  form: PiForm;
+};
+
+const PI_HISTORY_KEY = "pi_history";
+
 const initialForm: PiForm = {
   buyerName: "FRANK EGBORO",
   buyerTel: "+234 803 345 4299",
@@ -82,6 +114,9 @@ const initialForm: PiForm = {
   contractNo: "XFJH26030201P",
   issueDate: "2026.3.2",
   currency: "USD",
+  showTargetCurrency: false,
+  targetCurrency: "NGN",
+  targetExchangeRate: 1460,
   goodsDescription: "1 Unit of Elevator (HS CODE: 8428101090)",
   deliveryTerms: "EXW SUZHOU",
   leadTime: "30 days after deposit.",
@@ -92,7 +127,10 @@ const initialForm: PiForm = {
   countryOfOrigin: "China",
   bankName: "Wema bank",
   accountNo: "7949338275",
+  swiftCode: "",
   bankAddress: "54 Marina, Lagos Island, Lagos, Lagos, 101241, Nigeria",
+  intermediaryBank: "",
+  intermediarySwift: "",
   beneficiary: "Suzhou Xinfuji Electromechanical Co., Ltd.",
   beneficiaryAddress:
     "Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China.",
@@ -110,6 +148,62 @@ const initialForm: PiForm = {
     },
   ],
 };
+
+const bankPresets: BankPreset[] = [
+  {
+    id: "wema",
+    label: "Wema bank",
+    bankName: "Wema bank",
+    accountNo: "7949338275",
+    swiftCode: "",
+    bankAddress: "54 Marina, Lagos Island, Lagos, Lagos, 101241, Nigeria",
+    intermediaryBank: "",
+    intermediarySwift: "",
+    beneficiary: "Suzhou Xinfuji Electromechanical Co., Ltd.",
+    beneficiaryAddress:
+      "Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China.",
+  },
+  {
+    id: "chouzhou",
+    label: "Zhejiang Chouzhou Commercial Bank",
+    bankName: "ZHEJIANG CHOUZHOU COMMERCIAL BANK CO.,LTD",
+    accountNo: "13601002010090003861",
+    swiftCode: "CZCBCN2X",
+    bankAddress:
+      "No.586 Fenghuang Road, Wuxing District, Huzhou City, Zhejiang Province, China",
+    intermediaryBank: "JPMORGAN Chase Bank, New York",
+    intermediarySwift: "CHASUS33",
+    beneficiary: "Suzhou Xinfuji Electromechanical Co., Ltd.",
+    beneficiaryAddress:
+      "No.586 Fenghuang Road, Wuxing District, Huzhou City, Zhejiang Province, China",
+  },
+  {
+    id: "icbc",
+    label: "ICBC Zhejiang Provincial Branch",
+    bankName:
+      "INDUSTRIAL & COMMERCIAL BANK OF CHINA (ICBC) Zhejiang Provincial Branch",
+    accountNo: "1205240019200409295",
+    swiftCode: "ICBKCNBJZJP",
+    bankAddress: "No. 150 Zhonghe Middle Road, Hangzhou City, Zhejiang Province, China",
+    intermediaryBank: "",
+    intermediarySwift: "",
+    beneficiary: "SUZHOU XINFUJI ELECTROMECHANICAL CO., LTD",
+    beneficiaryAddress: "DADE INDUSTRIAL ZONE, TAOYUAN TOWN, WUJIANG DISTRICT",
+  },
+  {
+    id: "jiangsu-rural",
+    label: "Jiangsu Suzhou Rural Commercial Bank",
+    bankName: "JIANGSU SUZHOU RURAL COMMERCIAL BANK CO., LTD",
+    accountNo: "0706678981420100395359",
+    swiftCode: "WJRBCNBWXXX",
+    bankAddress: "NO.1777 SOUTH ZHONGSHAN ROAD, SUZHOU, CHINA",
+    intermediaryBank: "CITIBANK N.A. NEW YORK",
+    intermediarySwift: "CITIUS33XXX",
+    beneficiary: "Suzhou Xinfuji Electromechanical Co., Ltd.",
+    beneficiaryAddress:
+      "Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu 215236, China",
+  },
+];
 
 const smallNumbers = [
   "ZERO",
@@ -167,7 +261,16 @@ function integerToWords(value: number): string {
 }
 
 function moneyWords(amount: number, currency: string) {
-  const currencyName = currency === "USD" ? "US DOLLARS" : currency;
+  const currencyName =
+    currency === "USD"
+      ? "US DOLLARS"
+      : currency === "NGN"
+        ? "NIGERIAN NAIRA"
+        : currency === "GHS"
+          ? "GHANAIAN CEDI"
+          : currency === "RMB" || currency === "CNY"
+            ? "CHINESE YUAN"
+            : currency;
   return `${currencyName} ${integerToWords(amount)} ONLY`;
 }
 
@@ -209,6 +312,9 @@ function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
       source.targetCurrency && source.targetCurrency !== "-"
         ? source.targetCurrency
         : current.currency,
+    showTargetCurrency: current.showTargetCurrency,
+    targetCurrency: current.targetCurrency,
+    targetExchangeRate: current.targetExchangeRate,
     destination: source.freightDestination || current.destination,
     deliveryTerms:
       source.quotationType === "EXW"
@@ -231,7 +337,10 @@ function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
 export default function ProformaInvoicePage() {
   const [form, setForm] = useState<PiForm>(initialForm);
   const [quoteHistory, setQuoteHistory] = useState<QuoteHistoryEntry[]>([]);
+  const [piHistory, setPiHistory] = useState<PiHistoryEntry[]>([]);
   const [activeHistoryId, setActiveHistoryId] = useState<number | null>(null);
+  const [activePiHistoryId, setActivePiHistoryId] = useState<number | null>(null);
+  const [piSaved, setPiSaved] = useState(false);
   const quote = useQuoteStore();
 
   useEffect(() => {
@@ -240,6 +349,13 @@ export default function ProformaInvoicePage() {
       setQuoteHistory(Array.isArray(saved) ? saved : []);
     } catch {
       setQuoteHistory([]);
+    }
+
+    try {
+      const savedPi = JSON.parse(localStorage.getItem(PI_HISTORY_KEY) || "[]");
+      setPiHistory(Array.isArray(savedPi) ? savedPi : []);
+    } catch {
+      setPiHistory([]);
     }
   }, []);
 
@@ -250,6 +366,11 @@ export default function ProformaInvoicePage() {
         0,
       ),
     [form.items],
+  );
+
+  const targetTotal = useMemo(
+    () => total * Number(form.targetExchangeRate || 0),
+    [form.targetExchangeRate, total],
   );
 
   const updateField = (field: keyof PiForm, value: string) => {
@@ -293,13 +414,71 @@ export default function ProformaInvoicePage() {
 
   const migrateFromQuote = () => {
     setActiveHistoryId(null);
+    setActivePiHistoryId(null);
     setForm((current) => piFromQuote(quote, current));
   };
 
   const makePiFromHistory = (entry: QuoteHistoryEntry) => {
     if (!entry.state) return;
     setActiveHistoryId(entry.id);
+    setActivePiHistoryId(null);
     setForm((current) => piFromQuote(entry.state || {}, current));
+  };
+
+  const savePiToHistory = () => {
+    const entry: PiHistoryEntry = {
+      id: Date.now(),
+      contractNo: form.contractNo || "Untitled PI",
+      buyerName: form.buyerName || "-",
+      issueDate: form.issueDate || "-",
+      total,
+      currency: form.currency,
+      savedAt: new Date().toISOString(),
+      form: JSON.parse(JSON.stringify(form)),
+    };
+
+    setPiHistory((current) => {
+      const updated = [entry, ...current].slice(0, 50);
+      localStorage.setItem(PI_HISTORY_KEY, JSON.stringify(updated));
+      return updated;
+    });
+    setActivePiHistoryId(entry.id);
+    setActiveHistoryId(null);
+    setPiSaved(true);
+    setTimeout(() => setPiSaved(false), 1800);
+  };
+
+  const loadPiFromHistory = (entry: PiHistoryEntry) => {
+    setForm(entry.form);
+    setActivePiHistoryId(entry.id);
+    setActiveHistoryId(null);
+  };
+
+  const deletePiFromHistory = (id: number) => {
+    setPiHistory((current) => {
+      const updated = current.filter((entry) => entry.id !== id);
+      localStorage.setItem(PI_HISTORY_KEY, JSON.stringify(updated));
+      return updated;
+    });
+    if (activePiHistoryId === id) {
+      setActivePiHistoryId(null);
+    }
+  };
+
+  const applyBankPreset = (presetId: string) => {
+    const preset = bankPresets.find((bank) => bank.id === presetId);
+    if (!preset) return;
+    setForm((current) => ({
+      ...current,
+      bankName: preset.bankName,
+      accountNo: preset.accountNo,
+      swiftCode: preset.swiftCode,
+      bankAddress: preset.bankAddress,
+      intermediaryBank: preset.intermediaryBank,
+      intermediarySwift: preset.intermediarySwift,
+      beneficiary: preset.beneficiary,
+      beneficiaryAddress: preset.beneficiaryAddress,
+    }));
   };
 
   const textFields: Array<[keyof PiForm, string, "input" | "textarea"]> = [
@@ -317,7 +496,10 @@ export default function ProformaInvoicePage() {
     ["countryOfOrigin", "Country of Origin", "input"],
     ["bankName", "Beneficiary Bank", "input"],
     ["accountNo", "A/C No.", "input"],
+    ["swiftCode", "Swift Code", "input"],
     ["bankAddress", "Bank Address", "textarea"],
+    ["intermediaryBank", "Intermediary Bank", "input"],
+    ["intermediarySwift", "Intermediary Swift BIC", "input"],
     ["beneficiary", "Beneficiary", "input"],
     ["beneficiaryAddress", "Add of Beneficiary", "textarea"],
     ["additionalRequirements", "Additional Requirements", "textarea"],
@@ -333,6 +515,12 @@ export default function ProformaInvoicePage() {
             <p className="text-sm text-slate-500">左侧填写，右侧实时生成 Proforma Invoice。</p>
           </div>
           <div className="flex gap-2">
+            <Link
+              href="/packing-list"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"
+            >
+              Packing List
+            </Link>
             <Link
               href="/"
               className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"
@@ -355,13 +543,25 @@ export default function ProformaInvoicePage() {
             <h2 className="text-lg font-semibold">填写内容</h2>
             <div className="flex gap-2">
               <button
+                onClick={savePiToHistory}
+                className={`rounded-md px-3 py-1.5 text-sm font-semibold text-white ${
+                  piSaved ? "bg-green-600" : "bg-green-500 hover:bg-green-600"
+                }`}
+              >
+                {piSaved ? "已保存" : "保存 PI"}
+              </button>
+              <button
                 onClick={migrateFromQuote}
                 className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-700"
               >
                 从报价迁移
               </button>
               <button
-                onClick={() => setForm(initialForm)}
+                onClick={() => {
+                  setForm(initialForm);
+                  setActiveHistoryId(null);
+                  setActivePiHistoryId(null);
+                }}
                 className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
               >
                 恢复表一示例
@@ -379,24 +579,100 @@ export default function ProformaInvoicePage() {
               />
             </label>
 
-            {textFields.map(([field, label, type]) => (
-              <label key={field} className="block">
-                <span className="text-sm font-medium text-slate-700">{label}</span>
-                {type === "textarea" ? (
-                  <textarea
-                    value={String(form[field])}
-                    onChange={(event) => updateField(field, event.target.value)}
-                    rows={field === "paymentTerms" ? 3 : 2}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  />
-                ) : (
-                  <input
-                    value={String(form[field])}
-                    onChange={(event) => updateField(field, event.target.value)}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  />
-                )}
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.showTargetCurrency}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      showTargetCurrency: event.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 rounded border-slate-300"
+                />
+                增加目标货币总价
               </label>
+              {form.showTargetCurrency && (
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <label className="block">
+                    <span className="text-xs font-medium text-slate-600">Target Currency</span>
+                    <select
+                      value={form.targetCurrency}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          targetCurrency: event.target.value,
+                        }))
+                      }
+                      className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                    >
+                      <option value="NGN">NGN</option>
+                      <option value="GHS">GHS</option>
+                      <option value="RMB">RMB</option>
+                      <option value="CNY">CNY</option>
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium text-slate-600">Exchange Rate</span>
+                    <input
+                      type="number"
+                      value={form.targetExchangeRate}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          targetExchangeRate: Number(event.target.value),
+                        }))
+                      }
+                      className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {textFields.map(([field, label, type]) => (
+              <Fragment key={field}>
+                {field === "bankName" && (
+                  <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                    <label className="block">
+                      <span className="text-sm font-medium text-slate-700">Bank Preset</span>
+                      <select
+                        onChange={(event) => applyBankPreset(event.target.value)}
+                        defaultValue=""
+                        className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                      >
+                        <option value="" disabled>
+                          选择银行账户
+                        </option>
+                        {bankPresets.map((bank) => (
+                          <option key={bank.id} value={bank.id}>
+                            {bank.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                )}
+                <label className="block">
+                  <span className="text-sm font-medium text-slate-700">{label}</span>
+                  {type === "textarea" ? (
+                    <textarea
+                      value={String(form[field])}
+                      onChange={(event) => updateField(field, event.target.value)}
+                      rows={field === "paymentTerms" ? 3 : 2}
+                      className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                    />
+                  ) : (
+                    <input
+                      value={String(form[field])}
+                      onChange={(event) => updateField(field, event.target.value)}
+                      className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                    />
+                  )}
+                </label>
+              </Fragment>
             ))}
           </div>
 
@@ -468,6 +744,91 @@ export default function ProformaInvoicePage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="mt-6 border-t border-slate-200 pt-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-semibold">
+                PI 历史
+                <span className="ml-2 text-sm font-normal text-slate-400">
+                  {piHistory.length} 份
+                </span>
+              </h3>
+              {piHistory.length > 0 && (
+                <button
+                  onClick={() => {
+                    if (!window.confirm("清空全部 PI 历史？")) return;
+                    setPiHistory([]);
+                    setActivePiHistoryId(null);
+                    localStorage.removeItem(PI_HISTORY_KEY);
+                  }}
+                  className="text-sm font-medium text-red-500 hover:text-red-600"
+                >
+                  清空
+                </button>
+              )}
+            </div>
+
+            {piHistory.length === 0 ? (
+              <div className="rounded-md border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500">
+                还没有保存的 PI。填好后点击「保存 PI」，之后可在这里载入。
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {piHistory.map((entry) => {
+                  const isActive = activePiHistoryId === entry.id;
+                  const savedAt = new Date(entry.savedAt).toLocaleDateString("zh-CN", {
+                    month: "numeric",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+
+                  return (
+                    <div
+                      key={entry.id}
+                      className={`rounded-md border p-3 transition-colors ${
+                        isActive
+                          ? "border-green-500 bg-green-50"
+                          : "border-slate-200 bg-white hover:border-green-200"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-semibold text-slate-900">
+                            {entry.contractNo}
+                          </div>
+                          <div className="mt-1 truncate text-xs text-slate-500">
+                            {entry.buyerName} · {entry.issueDate}
+                          </div>
+                          <div className="mt-1 text-xs text-slate-400">
+                            {entry.currency} {formatMoney(entry.total)} · {savedAt}
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 gap-2">
+                          <button
+                            onClick={() => loadPiFromHistory(entry)}
+                            className={`rounded-md px-3 py-1.5 text-sm font-semibold ${
+                              isActive
+                                ? "bg-green-700 text-white"
+                                : "bg-green-600 text-white hover:bg-green-700"
+                            }`}
+                          >
+                            {isActive ? "已载入" : "载入"}
+                          </button>
+                          <button
+                            onClick={() => deletePiFromHistory(entry.id)}
+                            className="rounded-md border border-red-200 px-2 py-1.5 text-sm font-medium text-red-500 hover:border-red-400 hover:text-red-600"
+                          >
+                            删除
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="mt-6 border-t border-slate-200 pt-4">
@@ -630,6 +991,20 @@ export default function ProformaInvoicePage() {
                     {formatMoney(total)}
                   </td>
                 </tr>
+                {form.showTargetCurrency && (
+                  <tr>
+                    <td className="border border-black px-2 py-3" colSpan={2} />
+                    <td className="border border-black px-2 py-3 text-left font-bold" colSpan={5}>
+                      {moneyWords(targetTotal, form.targetCurrency)}
+                    </td>
+                    <td className="border border-black px-2 py-3 font-bold">
+                      {form.targetCurrency}
+                    </td>
+                    <td className="border border-black px-2 py-3 text-right font-bold">
+                      {formatMoney(targetTotal)}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
 
@@ -648,7 +1023,14 @@ export default function ProformaInvoicePage() {
               <div className="mt-2 space-y-2">
                 <PreviewLine label="Beneficiary Bank:" value={form.bankName} />
                 <PreviewLine label="A/C No:" value={form.accountNo} />
+                {form.swiftCode && <PreviewLine label="Swift Code:" value={form.swiftCode} />}
                 <PreviewLine label="Bank Address:" value={form.bankAddress} />
+                {form.intermediaryBank && (
+                  <PreviewLine label="Intermediary Bank:" value={form.intermediaryBank} />
+                )}
+                {form.intermediarySwift && (
+                  <PreviewLine label="Intermediary Swift BIC:" value={form.intermediarySwift} />
+                )}
                 <PreviewLine label="Beneficiary:" value={form.beneficiary} />
                 <PreviewLine label="Add of Beneficiary:" value={form.beneficiaryAddress} />
               </div>

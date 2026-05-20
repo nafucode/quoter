@@ -318,6 +318,9 @@ const Quote = () => {
                   <Link href="/pi" className="py-2 px-3 bg-slate-900 text-white rounded-lg hover:bg-slate-700 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
                     PI 制作
                   </Link>
+                  <Link href="/packing-list" className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
+                    Packing List
+                  </Link>
                   <button onClick={handleExport} className="py-2 px-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
                     导出草稿
                   </button>
