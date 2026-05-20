@@ -618,6 +618,8 @@ export default function ProformaInvoicePage() {
                     <span className="text-xs font-medium text-slate-600">Exchange Rate</span>
                     <input
                       type="number"
+                      step="any"
+                      inputMode="decimal"
                       value={form.targetExchangeRate}
                       onChange={(event) =>
                         setForm((current) => ({
