@@ -915,6 +915,9 @@ export default function ProformaInvoicePage() {
 
         <section className="print-only-full-width overflow-auto rounded-lg bg-white p-4 shadow-sm">
           <div className="mx-auto min-h-[1120px] w-full max-w-[794px] bg-white p-8 text-[11px] leading-snug text-black shadow-sm print:min-h-0 print:w-full print:max-w-none print:p-0 print:text-[12px] print:shadow-none">
+            <div className="mb-5">
+              <Header />
+            </div>
             <div className="text-center">
               <h2 className="text-[18px] font-bold">
                 Suzhou Xinfuji Electromechanical Co., Ltd.
