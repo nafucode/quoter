@@ -914,17 +914,17 @@ const Quote = () => {
                       {/* Date */}
                       <span className="shrink-0 text-xs text-gray-400 w-20">{entry.quotationDate}</span>
                       {/* No + Project */}
-                      <div className="w-36 shrink-0">
+                      <div className="w-32 shrink-0">
                         <div className="text-sm font-bold text-gray-800 truncate">{entry.quotationNo}</div>
                         <div className="text-xs text-gray-400 truncate">{entry.projectName}</div>
                       </div>
-                      {/* Company */}
-                      <div className="flex-1 min-w-0 text-xs text-gray-500 truncate">{entry.companyName}</div>
-                      {/* Elevator type */}
-                      <div className="w-52 shrink-0 text-xs text-gray-600 truncate font-mono" title={typeLabel}>
+                      {/* Elevator type — placed right after No so there's no big gap */}
+                      <div className="w-48 shrink-0 text-xs text-gray-600 truncate font-mono" title={typeLabel}>
                         {typeLabel}
                         {entry.elevatorCount > 1 && <span className="ml-1 text-gray-400">×{entry.elevatorCount}</span>}
                       </div>
+                      {/* Company — flex-1 fills the remaining space */}
+                      <div className="flex-1 min-w-0 text-xs text-gray-400 truncate">{entry.companyName}</div>
                       {/* Total */}
                       <span className="shrink-0 text-sm font-semibold text-gray-700 w-20 text-right">{total}</span>
                       {/* Saved time */}
