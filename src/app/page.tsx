@@ -153,7 +153,14 @@ const Quote = () => {
       window.open(window.location.href, '_blank');
       return;
     }
+    // Set document.title so the browser uses it as the default PDF filename.
+    const sanitize = (s: string) => s.replace(/[/\\?%*:|"<>]/g, '-').trim();
+    const pdfTitle = `Quotation-${sanitize(companyName)}-${sanitize(projectName)}`;
+    const prevTitle = document.title;
+    document.title = pdfTitle;
     window.print();
+    // Restore after a tick (print dialog is synchronous on most browsers)
+    setTimeout(() => { document.title = prevTitle; }, 500);
   };
 
   const handleExportWord = async () => {
