@@ -53,5 +53,12 @@ export const cabinStyleGroups = [
       { id: 'FJ-K24', name: 'FJ-K24', previewImage: '/cabin-styles/FJ-K24.png' },
       { id: 'FJ-K25', name: 'FJ-K25', previewImage: '/cabin-styles/FJ-K25.png' },
     ]
+  },
+  {
+    groupName: 'B系列样册 (FJ-B)',
+    styles: [
+      { id: 'FJ-B01', name: 'FJ-B01', previewImage: '/cabin-styles/FJ-B01.png' },
+      { id: 'FJ-B02', name: 'FJ-B02', previewImage: '/cabin-styles/FJ-B02.png' },
+    ]
   }
 ];
