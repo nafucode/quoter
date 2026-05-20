@@ -19,4 +19,9 @@ export const copStyles = [
     name: '带 IC 卡一体式-黑底白字-标配',
     previewImage: '/cop-styles/带 IC 卡一体式-黑底白字-标配.png',
   },
+  {
+    id: 'COP-05',
+    name: '医院挂壁式含残操',
+    previewImage: '/cop-styles/医院挂壁式含残操.png',
+  },
 ];
