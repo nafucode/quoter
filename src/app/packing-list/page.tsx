@@ -51,6 +51,24 @@ type QuoteHistoryEntry = {
   state?: QuoteSnapshot;
 };
 
+type PiTransferItem = {
+  id: number;
+  name?: string;
+  quantity?: string | number;
+  unit?: string;
+};
+
+type PiTransferForm = {
+  buyerName?: string;
+  buyerTel?: string;
+  buyerAddress?: string;
+  contractNo?: string;
+  issueDate?: string;
+  items?: PiTransferItem[];
+};
+
+const PI_TO_PACKING_KEY = "pi_to_packing_draft";
+
 const initialForm: PackingForm = {
   buyerName: "FRANK EGBORO",
   buyerTel: "+234 803 345 4299",
@@ -109,6 +127,32 @@ function packingFromQuote(source: QuoteSnapshot, current: PackingForm): PackingF
   };
 }
 
+function packingFromPi(source: PiTransferForm, current: PackingForm): PackingForm {
+  const rows = (source.items || []).map((item, index) => {
+    const qty = numberValue(item.quantity, 1) || 1;
+    return {
+      id: Number(item.id) || index + 1,
+      marks: "N/M",
+      description: (item.name || "ELEVATOR").toUpperCase(),
+      unit: `${qty} ${qty > 1 ? "UNITS" : "UNIT"}`,
+      packages: qty * 10,
+      grossWeight: qty * 2810,
+      netWeight: qty * 2700,
+      measurement: qty * 6,
+    };
+  });
+
+  return {
+    ...current,
+    buyerName: source.buyerName || current.buyerName,
+    buyerTel: source.buyerTel || current.buyerTel,
+    buyerAddress: source.buyerAddress || current.buyerAddress,
+    packingNo: packingNoFromQuote(source.contractNo) || current.packingNo,
+    issueDate: source.issueDate || current.issueDate,
+    rows: rows.length ? rows : current.rows,
+  };
+}
+
 function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 2,
@@ -128,6 +172,17 @@ export default function PackingListPage() {
       setQuoteHistory(Array.isArray(saved) ? saved : []);
     } catch {
       setQuoteHistory([]);
+    }
+
+    try {
+      const piDraft = localStorage.getItem(PI_TO_PACKING_KEY);
+      if (piDraft) {
+        const parsed = JSON.parse(piDraft);
+        setForm((current) => packingFromPi(parsed, current));
+        localStorage.removeItem(PI_TO_PACKING_KEY);
+      }
+    } catch {
+      localStorage.removeItem(PI_TO_PACKING_KEY);
     }
   }, []);
 
@@ -196,8 +251,7 @@ export default function PackingListPage() {
   return (
     <main className="min-h-screen bg-slate-100 text-slate-950">
       <div className="no-print border-b border-slate-200 bg-white">
-        <Header />
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+        <div className="mx-auto flex w-[90vw] items-center justify-between gap-4 py-4">
           <div>
             <h1 className="text-xl font-semibold">Packing List 制作</h1>
             <p className="text-sm text-slate-500">左侧填写，右侧实时生成 Packing List。</p>
@@ -225,7 +279,7 @@ export default function PackingListPage() {
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-4 p-4 lg:grid-cols-[minmax(360px,500px)_1fr]">
+      <div className="mx-auto grid w-[90vw] grid-cols-1 gap-4 py-5 lg:grid-cols-2">
         <section className="no-print max-h-[calc(100vh-120px)] overflow-auto rounded-lg bg-white p-4 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold">填写内容</h2>
@@ -313,6 +367,9 @@ export default function PackingListPage() {
 
         <section className="print-only-full-width overflow-auto rounded-lg bg-white p-4 shadow-sm">
           <div className="mx-auto min-h-[1120px] w-full max-w-[794px] bg-white p-8 text-[11px] leading-snug text-black shadow-sm print:min-h-0 print:w-full print:max-w-none print:p-0 print:text-[12px] print:shadow-none">
+            <div className="mb-5">
+              <Header />
+            </div>
             <div className="text-center">
               <h2 className="text-[18px] font-bold">
                 Suzhou Xinfuji Electromechanical Co., Ltd.

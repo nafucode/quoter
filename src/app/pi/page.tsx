@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import { useQuoteStore } from "@/store/useQuoteStore";
 
@@ -106,6 +107,7 @@ type PiHistoryEntry = {
 };
 
 const PI_HISTORY_KEY = "pi_history";
+const PI_TO_PACKING_KEY = "pi_to_packing_draft";
 
 const initialForm: PiForm = {
   buyerName: "FRANK EGBORO",
@@ -335,6 +337,7 @@ function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
 }
 
 export default function ProformaInvoicePage() {
+  const router = useRouter();
   const [form, setForm] = useState<PiForm>(initialForm);
   const [quoteHistory, setQuoteHistory] = useState<QuoteHistoryEntry[]>([]);
   const [piHistory, setPiHistory] = useState<PiHistoryEntry[]>([]);
@@ -465,6 +468,11 @@ export default function ProformaInvoicePage() {
     }
   };
 
+  const makePackingListFromPi = () => {
+    localStorage.setItem(PI_TO_PACKING_KEY, JSON.stringify(form));
+    router.push("/packing-list");
+  };
+
   const applyBankPreset = (presetId: string) => {
     const preset = bankPresets.find((bank) => bank.id === presetId);
     if (!preset) return;
@@ -508,19 +516,18 @@ export default function ProformaInvoicePage() {
   return (
     <main className="min-h-screen bg-slate-100 text-slate-950">
       <div className="no-print border-b border-slate-200 bg-white">
-        <Header />
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+        <div className="mx-auto flex w-[90vw] items-center justify-between gap-4 py-4">
           <div>
             <h1 className="text-xl font-semibold">PI 制作</h1>
             <p className="text-sm text-slate-500">左侧填写，右侧实时生成 Proforma Invoice。</p>
           </div>
           <div className="flex gap-2">
-            <Link
-              href="/packing-list"
+            <button
+              onClick={makePackingListFromPi}
               className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"
             >
-              Packing List
-            </Link>
+              制作箱单
+            </button>
             <Link
               href="/"
               className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"
@@ -537,7 +544,7 @@ export default function ProformaInvoicePage() {
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-4 p-4 lg:grid-cols-[minmax(360px,480px)_1fr]">
+      <div className="mx-auto grid w-[90vw] grid-cols-1 gap-4 py-5 lg:grid-cols-2">
         <section className="no-print max-h-[calc(100vh-120px)] overflow-auto rounded-lg bg-white p-4 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold">填写内容</h2>
@@ -748,6 +755,7 @@ export default function ProformaInvoicePage() {
             </div>
           </div>
 
+          <div className="hidden">
           <div className="mt-6 border-t border-slate-200 pt-4">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-semibold">
@@ -911,6 +919,7 @@ export default function ProformaInvoicePage() {
               </div>
             )}
           </div>
+          </div>
         </section>
 
         <section className="print-only-full-width overflow-auto rounded-lg bg-white p-4 shadow-sm">
@@ -1051,6 +1060,174 @@ export default function ProformaInvoicePage() {
               <span className="whitespace-pre-wrap">{form.additionalRequirements}</span>
             </div>
           </div>
+        </section>
+      </div>
+
+      <div className="no-print mx-auto grid w-[90vw] grid-cols-1 gap-4 pb-6 lg:grid-cols-2">
+        <section className="rounded-lg bg-white p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="font-semibold">
+              PI 历史
+              <span className="ml-2 text-sm font-normal text-slate-400">
+                {piHistory.length} 份
+              </span>
+            </h3>
+            {piHistory.length > 0 && (
+              <button
+                onClick={() => {
+                  if (!window.confirm("清空全部 PI 历史？")) return;
+                  setPiHistory([]);
+                  setActivePiHistoryId(null);
+                  localStorage.removeItem(PI_HISTORY_KEY);
+                }}
+                className="text-sm font-medium text-red-500 hover:text-red-600"
+              >
+                清空
+              </button>
+            )}
+          </div>
+
+          {piHistory.length === 0 ? (
+            <div className="rounded-md border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500">
+              还没有保存的 PI。填好后点击「保存 PI」，之后可在这里载入。
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {piHistory.map((entry) => {
+                const isActive = activePiHistoryId === entry.id;
+                const savedAt = new Date(entry.savedAt).toLocaleDateString("zh-CN", {
+                  month: "numeric",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+
+                return (
+                  <div
+                    key={entry.id}
+                    className={`rounded-md border p-3 transition-colors ${
+                      isActive
+                        ? "border-green-500 bg-green-50"
+                        : "border-slate-200 bg-white hover:border-green-200"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold text-slate-900">
+                          {entry.contractNo}
+                        </div>
+                        <div className="mt-1 truncate text-xs text-slate-500">
+                          {entry.buyerName} · {entry.issueDate}
+                        </div>
+                        <div className="mt-1 text-xs text-slate-400">
+                          {entry.currency} {formatMoney(entry.total)} · {savedAt}
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 gap-2">
+                        <button
+                          onClick={() => loadPiFromHistory(entry)}
+                          className={`rounded-md px-3 py-1.5 text-sm font-semibold ${
+                            isActive
+                              ? "bg-green-700 text-white"
+                              : "bg-green-600 text-white hover:bg-green-700"
+                          }`}
+                        >
+                          {isActive ? "已载入" : "载入"}
+                        </button>
+                        <button
+                          onClick={() => deletePiFromHistory(entry.id)}
+                          className="rounded-md border border-red-200 px-2 py-1.5 text-sm font-medium text-red-500 hover:border-red-400 hover:text-red-600"
+                        >
+                          删除
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-lg bg-white p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="font-semibold">
+              历史报价
+              <span className="ml-2 text-sm font-normal text-slate-400">
+                {quoteHistory.length} 份
+              </span>
+            </h3>
+            <Link href="/" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+              管理报价
+            </Link>
+          </div>
+
+          {quoteHistory.length === 0 ? (
+            <div className="rounded-md border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500">
+              还没有历史报价。先在报价页保存到报价库后，这里就能直接选择制作 PI。
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {quoteHistory.map((entry) => {
+                const isActive = activeHistoryId === entry.id;
+                const total = entry.grandTotal
+                  ? `$${Math.round(entry.grandTotal).toLocaleString("en-US")}`
+                  : "-";
+                const savedAt = entry.savedAt
+                  ? new Date(entry.savedAt).toLocaleDateString("zh-CN", {
+                      month: "numeric",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "";
+
+                return (
+                  <div
+                    key={entry.id}
+                    className={`rounded-md border p-3 transition-colors ${
+                      isActive
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-slate-200 bg-white hover:border-blue-200"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm font-semibold text-slate-900">
+                            {entry.quotationNo || "未命名报价"}
+                          </span>
+                          {entry.quotationType && (
+                            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600">
+                              {entry.quotationType}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 truncate text-xs text-slate-500">
+                          {entry.companyName || "-"} · {entry.projectName || "-"}
+                        </div>
+                        <div className="mt-1 text-xs text-slate-400">
+                          {entry.quotationDate || "-"} ·{" "}
+                          {entry.elevatorCount || entry.state?.elevators?.length || 0} 台 ·{" "}
+                          {total} · {savedAt}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => makePiFromHistory(entry)}
+                        className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-semibold ${
+                          isActive
+                            ? "bg-blue-700 text-white"
+                            : "bg-blue-600 text-white hover:bg-blue-700"
+                        }`}
+                      >
+                        {isActive ? "已选择" : "制作 PI"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
       </div>
     </main>
