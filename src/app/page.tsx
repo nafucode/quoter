@@ -374,6 +374,7 @@ const Quote = () => {
                   <option>EXW</option>
                   <option>FOB</option>
                   <option>CIF</option>
+                  <option>DDP</option>
                 </select>
               </div>
               <div>
