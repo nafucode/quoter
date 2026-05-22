@@ -8,6 +8,7 @@ import { useQuoteStore } from '@/store/useQuoteStore';
 import { translations } from '@/data/translations';
 import { generateWordBlob } from '@/utils/generateWord';
 import { translateValueToZh } from '@/data/zhValueMap';
+import { translateValueToEs } from '@/data/esValueMap';
 
 const Quote = () => {
   const {
@@ -244,8 +245,14 @@ const Quote = () => {
     event.target.value = '';
   };
 
+  const translateValue = (v: string) => {
+    if (language === 'zh') return translateValueToZh(v);
+    if (language === 'es') return translateValueToEs(v);
+    return v;
+  };
+
   const renderSpec = (label: string, value: any) => {
-    const displayValue = language === 'zh' ? translateValueToZh(String(value)) : String(value);
+    const displayValue = translateValue(String(value));
     return (
       <div key={label} className="flex justify-between py-1 px-2 border-b last:border-b-0 hover:bg-gray-50">
         <span className="text-sm text-gray-600">{label}</span>
@@ -796,7 +803,7 @@ const Quote = () => {
                             <h4 id={`preview-function-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `function-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>{t.secFunction}</h4>
                             {renderSpec(t.specCopLop, elevator.copLop)}
                             {elevator.otherFunctions.map((func: any) =>
-                              func.checked && renderSpec(language === 'zh' ? translateValueToZh(func.name) : func.name, t.specIncluded)
+                              func.checked && renderSpec(translateValue(func.name), t.specIncluded)
                             )}
                           </div>
                         </div>
