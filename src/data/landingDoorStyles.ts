@@ -26,6 +26,11 @@ export const landingDoorStyles = [
   },
   {
     id: 'LD-06',
+    name: '旁开玻璃门',
+    previewImage: '/landing-door-styles/glass-side-opening.png',
+  },
+  {
+    id: 'LD-07',
     name: '货梯-中分双折 4CO',
     previewImage: '/landing-door-styles/货梯-中分双折 4CO.png',
   },
