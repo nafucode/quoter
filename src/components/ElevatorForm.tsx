@@ -3,7 +3,7 @@ import { useQuoteStore } from '@/store/useQuoteStore';
 import StylePicker from './StylePicker';
 import HybridInput from './HybridInput';
 import { cabinStyleGroups } from '@/data/cabinStyles';
-import { copStyles } from '@/data/copStyles';
+import { copStyleGroups } from '@/data/copStyles';
 import { lopStyles } from '@/data/lopStyles';
 import { landingDoorStyles } from '@/data/landingDoorStyles';
 import { handrailStyles } from '@/data/handrailStyles';
@@ -108,7 +108,7 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
   const getPickerProps = () => {
     switch (pickerState.type) {
       case 'cabin': return { styleGroups: cabinStyleGroups, title: 'Choose a Cabin Style' };
-      case 'cop': return { styleGroups: [{ groupName: 'COP Styles', styles: copStyles }], title: 'Choose a COP Style' };
+      case 'cop': return { styleGroups: copStyleGroups, title: 'Choose a COP Style' };
       case 'lop': return { styleGroups: [{ groupName: 'LOP Styles', styles: lopStyles }], title: 'Choose a LOP Style' };
       case 'landingDoor': return { styleGroups: [{ groupName: 'Landing Door Styles', styles: landingDoorStyles }], title: 'Choose a Landing Door Style' };
       case 'handrail': return { styleGroups: [{ groupName: 'Handrail Styles', styles: handrailStyles }], title: 'Choose a Handrail Style' };
