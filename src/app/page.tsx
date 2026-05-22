@@ -666,8 +666,8 @@ const Quote = () => {
                             {elevator.machineRoom && <div>{elevator.machineRoom}</div>}
                           </td>
                           <td className="p-2 border border-gray-400 align-top text-center">{elevator.qty}</td>
-                          <td className="p-2 border border-gray-400 align-top text-right">{elevator.unitPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                          <td className="p-2 border border-gray-400 align-top text-right">{(elevator.unitPrice * elevator.qty).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                          <td className="p-2 border border-gray-400 align-top text-right">{Number(elevator.unitPrice).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                          <td className="p-2 border border-gray-400 align-top text-right">{(Number(elevator.unitPrice) * Number(elevator.qty)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                         </tr>
                       ))}
                       {shaftFrame.enabled && (
