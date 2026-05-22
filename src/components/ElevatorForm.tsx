@@ -135,7 +135,7 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
             <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4" onFocus={() => onSectionFocus('basic-spec')}>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Description<span className="block text-xs text-gray-500">描述</span></label>
-                <input name="description" value={elevator.description} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                <textarea name="description" value={elevator.description} onChange={handleChange} rows={2} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm resize-y" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Type<span className="block text-xs text-gray-500">类型</span></label>
