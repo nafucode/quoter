@@ -17,12 +17,12 @@ export const landingDoorStyles = [
   {
     id: 'LD-04',
     name: '单扇自动门',
-    previewImage: '/landing-door-styles/单扇自动.png',
+    previewImage: '/landing-door-styles/single-panel-auto.png',
   },
   {
     id: 'LD-05',
     name: '平开门',
-    previewImage: '/landing-door-styles/平开门.png',
+    previewImage: '/landing-door-styles/swing-door.png',
   },
   {
     id: 'LD-06',
