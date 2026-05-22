@@ -350,11 +350,35 @@ const Quote = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Quotation No<span className="block text-xs text-gray-500">报价单号</span></label>
-                <input
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-                  value={quotationNo}
-                  onChange={(e) => setField('quotationNo', e.target.value)}
-                />
+                <div className="mt-1 flex gap-1">
+                  <input
+                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                    value={quotationNo}
+                    onChange={(e) => setField('quotationNo', e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    title="生成单号"
+                    onClick={() => {
+                      const d = new Date();
+                      const yy = String(d.getFullYear()).slice(2);
+                      const mm = String(d.getMonth() + 1).padStart(2, '0');
+                      const dd = String(d.getDate()).padStart(2, '0');
+                      const prefix = `XFJ${yy}${mm}${dd}`;
+                      // Find the highest seq used today in history
+                      const saved: any[] = (() => { try { return JSON.parse(localStorage.getItem('quoter_history') || '[]'); } catch { return []; } })();
+                      const used = saved
+                        .map((e: any) => e.quotationNo || '')
+                        .filter((n: string) => n.startsWith(prefix))
+                        .map((n: string) => parseInt(n.slice(prefix.length), 10) || 0);
+                      const next = used.length ? Math.max(...used) + 1 : 1;
+                      setField('quotationNo', `${prefix}${String(next).padStart(2, '0')}`);
+                    }}
+                    className="shrink-0 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md text-gray-600 whitespace-nowrap"
+                  >
+                    ↻ 生成
+                  </button>
+                </div>
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Project Name<span className="block text-xs text-gray-500">项目名称</span></label>

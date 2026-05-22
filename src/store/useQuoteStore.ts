@@ -52,7 +52,7 @@ interface QuoteState {
 
 const initialState = {
   companyName: 'Your Company Name',
-  quotationNo: 'Q-2024001',
+  quotationNo: (() => { const d = new Date(); const yy = String(d.getFullYear()).slice(2); const mm = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0'); return `XFJ${yy}${mm}${dd}01`; })(),
   projectName: 'Sample Project',
   quotationType: 'FOB',
   quotationDate: new Date().toLocaleDateString('en-CA'),
