@@ -688,7 +688,7 @@ const Quote = () => {
                     <tbody>
                       {elevators.map(elevator => (
                         <tr key={elevator.id}>
-                          <td className="p-2 border border-gray-400 align-top">{elevator.description}</td>
+                          <td className="p-2 border border-gray-400 align-top whitespace-pre-wrap">{elevator.description}</td>
                           <td className="p-2 border border-gray-400 align-top">
                             <div>{elevator.type}</div>
                             <div>{elevator.capacity}KG</div>
