@@ -5,6 +5,7 @@ import {
 } from 'docx';
 import { translations, Lang } from '@/data/translations';
 import { PartListRow } from '@/data/partListDefaults';
+import { standardFeatures } from '@/data/standardFeatures';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -117,6 +118,7 @@ const cell = (
     align?: (typeof AlignmentType)[keyof typeof AlignmentType];
     width?: number;
     colSpan?: number;
+    rowSpan?: number;
     verticalAlign?: (typeof VerticalAlignTable)[keyof typeof VerticalAlignTable];
   } = {},
 ) => {
@@ -129,6 +131,7 @@ const cell = (
     borders: BORDERS,
     width: opts.width ? { size: opts.width, type: WidthType.DXA } : undefined,
     columnSpan: opts.colSpan,
+    rowSpan: opts.rowSpan,
     verticalAlign: opts.verticalAlign ?? VerticalAlignTable.CENTER,
     shading: opts.bg ? { fill: opts.bg, type: ShadingType.CLEAR } : undefined,
     margins: { top: 60, bottom: 60, left: 100, right: 100 },
@@ -676,6 +679,46 @@ export async function generateWordBlob(state: {
   children.push(para([], { spacingAfter: 100 }));
   children.push(
     para([new TextRun({ text: t.partListNote, italics: true, size: 16, font: 'Arial', color: '666666' })], {}),
+  );
+
+  children.push(para([], { spacingAfter: 140 }));
+  children.push(
+    para([bold(t.standardFeaturesTitle, 24)], { spacingAfter: 120 }),
+  );
+
+  const featureCols = [Math.floor(CONTENT_W * 0.23), Math.floor(CONTENT_W * 0.385), CONTENT_W - Math.floor(CONTENT_W * 0.23) - Math.floor(CONTENT_W * 0.385)];
+  const featureRows: TableRow[] = [];
+
+  standardFeatures.forEach((group) => {
+    group.rows.forEach((featureRow, rowIndex) => {
+      const rowCells = [
+        ...(rowIndex === 0
+          ? [
+              cell(group.category, {
+                width: featureCols[0],
+                rowSpan: group.rows.length,
+                verticalAlign: VerticalAlignTable.CENTER,
+              }),
+            ]
+          : []),
+        cell(featureRow[0], { width: featureCols[1] }),
+        cell(featureRow[1], { width: featureCols[2] }),
+      ];
+
+      featureRows.push(
+        new TableRow({
+          children: rowCells,
+        }),
+      );
+    });
+  });
+
+  children.push(
+    new Table({
+      width: { size: CONTENT_W, type: WidthType.DXA },
+      columnWidths: featureCols,
+      rows: featureRows,
+    }),
   );
 
   // Footer: quotation date

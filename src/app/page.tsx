@@ -9,6 +9,7 @@ import { translations } from '@/data/translations';
 import { generateWordBlob } from '@/utils/generateWord';
 import { translateValueToZh } from '@/data/zhValueMap';
 import { translateValueToEs } from '@/data/esValueMap';
+import { standardFeatures } from '@/data/standardFeatures';
 
 const Quote = () => {
   const {
@@ -899,6 +900,31 @@ const Quote = () => {
                     </tbody>
                   </table>
                   <p className="mt-3 text-xs text-gray-500 italic leading-relaxed">{t.partListNote}</p>
+                </div>
+
+                {/* Standard Features */}
+                <div className="mt-6 pt-4 border-t">
+                  <h3 className="text-lg font-semibold mb-3">{t.standardFeaturesTitle}</h3>
+                  <table className="w-full text-sm border-collapse printable-table">
+                    <tbody>
+                      {standardFeatures.flatMap((group) =>
+                        group.rows.map((featureRow, rowIndex) => (
+                          <tr key={`${group.category}-${rowIndex}`}>
+                            {rowIndex === 0 && (
+                              <td
+                                rowSpan={group.rows.length}
+                                className="w-[23%] p-2 border border-gray-400 align-middle"
+                              >
+                                {group.category}
+                              </td>
+                            )}
+                            <td className="w-[38.5%] p-2 border border-gray-400">{featureRow[0]}</td>
+                            <td className="w-[38.5%] p-2 border border-gray-400">{featureRow[1]}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
               <div className="hidden print:block print-footer">
