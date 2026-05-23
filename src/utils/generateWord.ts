@@ -690,7 +690,9 @@ export async function generateWordBlob(state: {
   }
 
   if (showFunctionList) {
-    children.push(para([], { spacingAfter: showPartList ? 140 : 0 }));
+    if (showPartList) {
+      children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
+    }
     children.push(
       para([bold(t.standardFeaturesTitle, 24)], { spacingAfter: 120 }),
     );

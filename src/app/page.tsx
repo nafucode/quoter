@@ -934,7 +934,7 @@ const Quote = () => {
                     )}
 
                     {showFunctionList && (
-                      <div className="mt-6 pt-4 border-t">
+                      <div className="mt-6 pt-4 border-t break-before-page">
                         <h3 className="text-lg font-semibold mb-3">{t.standardFeaturesTitle}</h3>
                         <table className="w-full text-sm border-collapse printable-table">
                           <tbody>

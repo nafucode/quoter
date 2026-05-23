@@ -92,7 +92,7 @@ export const translations = {
     partListColBrand: 'Brand',
     partListColOrigin: 'Origin',
     partListNote: 'Note: In order to further improve product quality and technological innovation, and better meet customer needs, we reserve the right to change the model and origin of the individual parts mentioned above, but we guarantee that the quality and performance of the new parts are not lower than the original parts.',
-    standardFeaturesTitle: 'Standard Features',
+    standardFeaturesTitle: 'Functions',
 
     // Footer
     quotationDate: 'Quotation Date',
@@ -189,7 +189,7 @@ export const translations = {
     partListColBrand: '品牌',
     partListColOrigin: '产地',
     partListNote: '注：为持续提升产品质量和技术创新，更好地满足客户需求，我司保留对上述部分配件型号及产地进行调整的权利，但保证新配件的质量和性能不低于原配件。',
-    standardFeaturesTitle: '标准功能',
+    standardFeaturesTitle: '功能',
 
     // Footer
     quotationDate: '报价日期',
@@ -286,7 +286,7 @@ export const translations = {
     partListColBrand: 'Marca',
     partListColOrigin: 'Origen',
     partListNote: 'Nota: Con el fin de mejorar continuamente la calidad del producto e innovación tecnológica, y satisfacer mejor las necesidades del cliente, nos reservamos el derecho de cambiar el modelo y origen de los componentes mencionados anteriormente, garantizando que la calidad y el rendimiento de los nuevos componentes no sea inferior a los originales.',
-    standardFeaturesTitle: 'Funciones Estándar',
+    standardFeaturesTitle: 'Funciones',
 
     // Footer
     quotationDate: 'Fecha de Cotización',
@@ -383,7 +383,7 @@ export const translations = {
     partListColBrand: 'Marca',
     partListColOrigin: 'Origem',
     partListNote: 'Nota: Com o objetivo de melhorar continuamente a qualidade do produto e a inovação tecnológica, e atender melhor às necessidades dos clientes, reservamo-nos o direito de alterar o modelo e a origem dos componentes mencionados acima, garantindo que a qualidade e o desempenho dos novos componentes não sejam inferiores aos originais.',
-    standardFeaturesTitle: 'Funções Padrão',
+    standardFeaturesTitle: 'Funções',
 
     // Footer
     quotationDate: 'Data da Cotação',
@@ -479,7 +479,7 @@ export const translations = {
     partListColBrand: 'Marque',
     partListColOrigin: 'Origine',
     partListNote: 'Note : Afin d\'améliorer continuellement la qualité des produits et l\'innovation technologique, et de mieux répondre aux besoins des clients, nous nous réservons le droit de modifier le modèle et l\'origine des composants mentionnés ci-dessus, en garantissant que la qualité et les performances des nouveaux composants ne sont pas inférieures aux originaux.',
-    standardFeaturesTitle: 'Fonctions Standard',
+    standardFeaturesTitle: 'Fonctions',
 
     // Footer
     quotationDate: 'Date du Devis',
@@ -576,7 +576,7 @@ export const translations = {
     partListColBrand: 'Марка',
     partListColOrigin: 'Происхождение',
     partListNote: 'Примечание: В целях постоянного улучшения качества продукции и технологических инноваций, а также для лучшего удовлетворения потребностей клиентов, мы оставляем за собой право изменять модель и происхождение отдельных комплектующих, указанных выше, гарантируя при этом, что качество и характеристики новых комплектующих будут не ниже оригинальных.',
-    standardFeaturesTitle: 'Стандартные функции',
+    standardFeaturesTitle: 'Функции',
 
     // Footer
     quotationDate: 'Дата предложения',
