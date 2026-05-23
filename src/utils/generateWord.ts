@@ -172,10 +172,14 @@ export async function generateWordBlob(state: {
   priceValidityDays: number;
   shaftFrame: { enabled: boolean; text: string; price: number };
   temperedGlass: { enabled: boolean; text: string; price: number };
+  showPartList?: boolean;
+  showFunctionList?: boolean;
   partList: PartListRow[];
   language: Lang;
 }): Promise<Blob> {
   const t = translations[state.language];
+  const showPartList = state.showPartList ?? true;
+  const showFunctionList = state.showFunctionList ?? true;
 
   // ── pre-fetch banner + all cabin effect images ───────────────────────────
   // Use pre-converted PNG (SVG type is not supported by docx 9.x)
@@ -631,95 +635,101 @@ export async function generateWordBlob(state: {
     }
   });
 
-  // === PART LIST (new page) ===
-  children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
-  children.push(
-    para([bold(t.partListTitle, 24)], { align: AlignmentType.CENTER, spacingAfter: 120 }),
-  );
+  if (showPartList || showFunctionList) {
+    children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
+  }
 
-  const partCols = [Math.floor(CONTENT_W * 0.5), Math.floor(CONTENT_W * 0.25), CONTENT_W - Math.floor(CONTENT_W * 0.5) - Math.floor(CONTENT_W * 0.25)];
-  const partRows: TableRow[] = [
-    headerRow([
-      { text: t.partListColPart, width: partCols[0] },
-      { text: t.partListColBrand, width: partCols[1] },
-      { text: t.partListColOrigin, width: partCols[2] },
-    ]),
-  ];
+  if (showPartList) {
+    children.push(
+      para([bold(t.partListTitle, 24)], { align: AlignmentType.CENTER, spacingAfter: 120 }),
+    );
 
-  state.partList.forEach((row) => {
-    if (row.type === 'section') {
-      partRows.push(
-        new TableRow({
-          children: [
-            cell(row.label, { bold: true, bg: 'D9D9D9', colSpan: 3, width: CONTENT_W }),
-          ],
-        }),
-      );
-    } else {
-      partRows.push(
-        new TableRow({
-          children: [
-            cell(row.label, { width: partCols[0] }),
-            cell(row.brand, { width: partCols[1] }),
-            cell(row.origin, { width: partCols[2] }),
-          ],
-        }),
-      );
-    }
-  });
+    const partCols = [Math.floor(CONTENT_W * 0.5), Math.floor(CONTENT_W * 0.25), CONTENT_W - Math.floor(CONTENT_W * 0.5) - Math.floor(CONTENT_W * 0.25)];
+    const partRows: TableRow[] = [
+      headerRow([
+        { text: t.partListColPart, width: partCols[0] },
+        { text: t.partListColBrand, width: partCols[1] },
+        { text: t.partListColOrigin, width: partCols[2] },
+      ]),
+    ];
 
-  children.push(
-    new Table({
-      width: { size: CONTENT_W, type: WidthType.DXA },
-      columnWidths: partCols,
-      rows: partRows,
-    }),
-  );
-
-  children.push(para([], { spacingAfter: 100 }));
-  children.push(
-    para([new TextRun({ text: t.partListNote, italics: true, size: 16, font: 'Arial', color: '666666' })], {}),
-  );
-
-  children.push(para([], { spacingAfter: 140 }));
-  children.push(
-    para([bold(t.standardFeaturesTitle, 24)], { spacingAfter: 120 }),
-  );
-
-  const featureCols = [Math.floor(CONTENT_W * 0.23), Math.floor(CONTENT_W * 0.385), CONTENT_W - Math.floor(CONTENT_W * 0.23) - Math.floor(CONTENT_W * 0.385)];
-  const featureRows: TableRow[] = [];
-
-  standardFeatures.forEach((group) => {
-    group.rows.forEach((featureRow, rowIndex) => {
-      const rowCells = [
-        ...(rowIndex === 0
-          ? [
-              cell(group.category, {
-                width: featureCols[0],
-                rowSpan: group.rows.length,
-                verticalAlign: VerticalAlignTable.CENTER,
-              }),
-            ]
-          : []),
-        cell(featureRow[0], { width: featureCols[1] }),
-        cell(featureRow[1], { width: featureCols[2] }),
-      ];
-
-      featureRows.push(
-        new TableRow({
-          children: rowCells,
-        }),
-      );
+    state.partList.forEach((row) => {
+      if (row.type === 'section') {
+        partRows.push(
+          new TableRow({
+            children: [
+              cell(row.label, { bold: true, bg: 'D9D9D9', colSpan: 3, width: CONTENT_W }),
+            ],
+          }),
+        );
+      } else {
+        partRows.push(
+          new TableRow({
+            children: [
+              cell(row.label, { width: partCols[0] }),
+              cell(row.brand, { width: partCols[1] }),
+              cell(row.origin, { width: partCols[2] }),
+            ],
+          }),
+        );
+      }
     });
-  });
 
-  children.push(
-    new Table({
-      width: { size: CONTENT_W, type: WidthType.DXA },
-      columnWidths: featureCols,
-      rows: featureRows,
-    }),
-  );
+    children.push(
+      new Table({
+        width: { size: CONTENT_W, type: WidthType.DXA },
+        columnWidths: partCols,
+        rows: partRows,
+      }),
+    );
+
+    children.push(para([], { spacingAfter: 100 }));
+    children.push(
+      para([new TextRun({ text: t.partListNote, italics: true, size: 16, font: 'Arial', color: '666666' })], {}),
+    );
+  }
+
+  if (showFunctionList) {
+    children.push(para([], { spacingAfter: showPartList ? 140 : 0 }));
+    children.push(
+      para([bold(t.standardFeaturesTitle, 24)], { spacingAfter: 120 }),
+    );
+
+    const featureCols = [Math.floor(CONTENT_W * 0.23), Math.floor(CONTENT_W * 0.385), CONTENT_W - Math.floor(CONTENT_W * 0.23) - Math.floor(CONTENT_W * 0.385)];
+    const featureRows: TableRow[] = [];
+
+    standardFeatures.forEach((group) => {
+      group.rows.forEach((featureRow, rowIndex) => {
+        const rowCells = [
+          ...(rowIndex === 0
+            ? [
+                cell(group.category, {
+                  width: featureCols[0],
+                  rowSpan: group.rows.length,
+                  verticalAlign: VerticalAlignTable.CENTER,
+                }),
+              ]
+            : []),
+          cell(featureRow[0], { width: featureCols[1] }),
+          cell(featureRow[1], { width: featureCols[2] }),
+        ];
+
+        featureRows.push(
+          new TableRow({
+            children: rowCells,
+          }),
+        );
+      });
+    });
+
+    children.push(
+      new Table({
+        width: { size: CONTENT_W, type: WidthType.DXA },
+        columnWidths: featureCols,
+        rows: featureRows,
+      }),
+    );
+  }
 
   // Footer: quotation date
   children.push(para([], { spacingAfter: 200 }));

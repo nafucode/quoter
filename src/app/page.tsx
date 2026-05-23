@@ -30,6 +30,8 @@ const Quote = () => {
     exchangeRateBasis,
     shaftFrame,
     temperedGlass,
+    showPartList,
+    showFunctionList,
     partList,
     language,
     setField,
@@ -115,6 +117,7 @@ const Quote = () => {
         freightCost: s.freightCost, exchangeRate: s.exchangeRate, targetCurrency: s.targetCurrency,
         nextId: s.nextId, deliveryDays: s.deliveryDays, paymentTerm: s.paymentTerm,
         warrantyMonths: s.warrantyMonths, priceValidityDays: s.priceValidityDays,
+        showPartList: s.showPartList, showFunctionList: s.showFunctionList,
       };
       const quote = {
         quotationNo: s.quotationNo, projectName: s.projectName,
@@ -187,6 +190,8 @@ const Quote = () => {
         priceValidityDays: s.priceValidityDays,
         shaftFrame: s.shaftFrame,
         temperedGlass: s.temperedGlass,
+        showPartList: s.showPartList,
+        showFunctionList: s.showFunctionList,
         partList: s.partList,
         language: s.language,
       });
@@ -589,6 +594,29 @@ const Quote = () => {
               )}
             </div>
 
+            {/* Output Options */}
+            <h3 className="text-lg font-semibold mt-6 mb-3 border-t pt-4">Print Options<span className="block text-sm font-normal text-gray-500">打印选项</span></h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label className="flex items-center gap-2 border border-gray-200 rounded-md p-3 text-sm font-medium text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={showPartList}
+                  onChange={(e) => setField('showPartList', e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                />
+                Part List<span className="text-xs font-normal text-gray-500">配件清单</span>
+              </label>
+              <label className="flex items-center gap-2 border border-gray-200 rounded-md p-3 text-sm font-medium text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={showFunctionList}
+                  onChange={(e) => setField('showFunctionList', e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                />
+                Function List<span className="text-xs font-normal text-gray-500">功能清单</span>
+              </label>
+            </div>
+
             {elevators.map((elevator) => (
               <ElevatorForm key={elevator.id} elevator={elevator} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
             ))}
@@ -872,60 +900,66 @@ const Quote = () => {
                   <p>{t.quotationDate}: {quotationDate}</p>
                 </div>
 
-                {/* Part List */}
-                <div className="mt-6 pt-4 border-t break-before-page">
-                  <h3 className="text-lg font-semibold mb-3">{t.partListTitle}</h3>
-                  <table className="w-full text-sm border-collapse printable-table">
-                    <thead className="bg-gray-200">
-                      <tr>
-                        <th className="p-2 border border-gray-400 text-left">{t.partListColPart}</th>
-                        <th className="p-2 border border-gray-400 text-left">{t.partListColBrand}</th>
-                        <th className="p-2 border border-gray-400 text-left">{t.partListColOrigin}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {partList.map(row =>
-                        row.type === 'section' ? (
-                          <tr key={row.id} className="bg-gray-100">
-                            <td colSpan={3} className="p-2 border border-gray-400 font-semibold">{row.label}</td>
-                          </tr>
-                        ) : (
-                          <tr key={row.id}>
-                            <td className="p-2 border border-gray-400">{row.label}</td>
-                            <td className="p-2 border border-gray-400">{row.brand}</td>
-                            <td className="p-2 border border-gray-400">{row.origin}</td>
-                          </tr>
-                        )
-                      )}
-                    </tbody>
-                  </table>
-                  <p className="mt-3 text-xs text-gray-500 italic leading-relaxed">{t.partListNote}</p>
-                </div>
-
-                {/* Standard Features */}
-                <div className="mt-6 pt-4 border-t">
-                  <h3 className="text-lg font-semibold mb-3">{t.standardFeaturesTitle}</h3>
-                  <table className="w-full text-sm border-collapse printable-table">
-                    <tbody>
-                      {standardFeatures.flatMap((group) =>
-                        group.rows.map((featureRow, rowIndex) => (
-                          <tr key={`${group.category}-${rowIndex}`}>
-                            {rowIndex === 0 && (
-                              <td
-                                rowSpan={group.rows.length}
-                                className="w-[23%] p-2 border border-gray-400 align-middle"
-                              >
-                                {group.category}
-                              </td>
+                {(showPartList || showFunctionList) && (
+                  <div className="break-before-page">
+                    {showPartList && (
+                      <div className="mt-6 pt-4 border-t">
+                        <h3 className="text-lg font-semibold mb-3">{t.partListTitle}</h3>
+                        <table className="w-full text-sm border-collapse printable-table">
+                          <thead className="bg-gray-200">
+                            <tr>
+                              <th className="p-2 border border-gray-400 text-left">{t.partListColPart}</th>
+                              <th className="p-2 border border-gray-400 text-left">{t.partListColBrand}</th>
+                              <th className="p-2 border border-gray-400 text-left">{t.partListColOrigin}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {partList.map(row =>
+                              row.type === 'section' ? (
+                                <tr key={row.id} className="bg-gray-100">
+                                  <td colSpan={3} className="p-2 border border-gray-400 font-semibold">{row.label}</td>
+                                </tr>
+                              ) : (
+                                <tr key={row.id}>
+                                  <td className="p-2 border border-gray-400">{row.label}</td>
+                                  <td className="p-2 border border-gray-400">{row.brand}</td>
+                                  <td className="p-2 border border-gray-400">{row.origin}</td>
+                                </tr>
+                              )
                             )}
-                            <td className="w-[38.5%] p-2 border border-gray-400">{featureRow[0]}</td>
-                            <td className="w-[38.5%] p-2 border border-gray-400">{featureRow[1]}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                          </tbody>
+                        </table>
+                        <p className="mt-3 text-xs text-gray-500 italic leading-relaxed">{t.partListNote}</p>
+                      </div>
+                    )}
+
+                    {showFunctionList && (
+                      <div className="mt-6 pt-4 border-t">
+                        <h3 className="text-lg font-semibold mb-3">{t.standardFeaturesTitle}</h3>
+                        <table className="w-full text-sm border-collapse printable-table">
+                          <tbody>
+                            {standardFeatures.flatMap((group) =>
+                              group.rows.map((featureRow, rowIndex) => (
+                                <tr key={`${group.category}-${rowIndex}`}>
+                                  {rowIndex === 0 && (
+                                    <td
+                                      rowSpan={group.rows.length}
+                                      className="w-[23%] p-2 border border-gray-400 align-middle"
+                                    >
+                                      {group.category}
+                                    </td>
+                                  )}
+                                  <td className="w-[38.5%] p-2 border border-gray-400">{featureRow[0]}</td>
+                                  <td className="w-[38.5%] p-2 border border-gray-400">{featureRow[1]}</td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="hidden print:block print-footer">
                 www.xinfuji.com

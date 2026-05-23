@@ -36,6 +36,8 @@ interface QuoteState {
   exchangeRateBasis: number | string;
   shaftFrame: OptionalItem;
   temperedGlass: OptionalItem;
+  showPartList: boolean;
+  showFunctionList: boolean;
   partList: PartListRow[];
   language: Lang;
   nextId: number;
@@ -68,6 +70,8 @@ const initialState = {
   exchangeRateBasis: 6.8,
   shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', price: 0 },
   temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', price: 0 },
+  showPartList: true,
+  showFunctionList: true,
   partList: defaultPartList,
   language: 'en' as Lang,
   nextId: 2,
