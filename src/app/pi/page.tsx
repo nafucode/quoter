@@ -20,7 +20,11 @@ type PiItem = {
 type PiForm = {
   buyerName: string;
   buyerTel: string;
+  buyerEmail: string;
+  showBuyerEmail: boolean;
   buyerAddress: string;
+  buyerTaxNo: string;
+  showBuyerTaxNo: boolean;
   contractNo: string;
   issueDate: string;
   currency: string;
@@ -112,7 +116,11 @@ const PI_TO_PACKING_KEY = "pi_to_packing_draft";
 const initialForm: PiForm = {
   buyerName: "FRANK EGBORO",
   buyerTel: "+234 803 345 4299",
+  buyerEmail: "",
+  showBuyerEmail: false,
   buyerAddress: "Asaba, Delta state, Nigeria",
+  buyerTaxNo: "",
+  showBuyerTaxNo: false,
   contractNo: "XFJH26030201P",
   issueDate: "2026.3.2",
   currency: "USD",
@@ -336,6 +344,10 @@ function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
   };
 }
 
+function normalizePiForm(value: PiForm): PiForm {
+  return { ...initialForm, ...value };
+}
+
 export default function ProformaInvoicePage() {
   const router = useRouter();
   const [form, setForm] = useState<PiForm>(initialForm);
@@ -452,7 +464,7 @@ export default function ProformaInvoicePage() {
   };
 
   const loadPiFromHistory = (entry: PiHistoryEntry) => {
-    setForm(entry.form);
+    setForm(normalizePiForm(entry.form));
     setActivePiHistoryId(entry.id);
     setActiveHistoryId(null);
   };
@@ -492,7 +504,9 @@ export default function ProformaInvoicePage() {
   const textFields: Array<[keyof PiForm, string, "input" | "textarea"]> = [
     ["buyerName", "Messrs.", "input"],
     ["buyerTel", "Tel", "input"],
+    ["buyerEmail", "Email", "input"],
     ["buyerAddress", "Address", "textarea"],
+    ["buyerTaxNo", "Tax No.", "input"],
     ["contractNo", "Contract No.", "input"],
     ["issueDate", "Issue Date", "input"],
     ["goodsDescription", "Description Of Goods", "textarea"],
@@ -665,7 +679,41 @@ export default function ProformaInvoicePage() {
                   </div>
                 )}
                 <label className="block">
-                  <span className="text-sm font-medium text-slate-700">{label}</span>
+                  <span className="flex items-center justify-between gap-3 text-sm font-medium text-slate-700">
+                    <span>{label}</span>
+                    {field === "buyerEmail" && (
+                      <span className="flex items-center gap-1 text-xs font-normal text-slate-500">
+                        <input
+                          type="checkbox"
+                          checked={form.showBuyerEmail}
+                          onChange={(event) =>
+                            setForm((current) => ({
+                              ...current,
+                              showBuyerEmail: event.target.checked,
+                            }))
+                          }
+                          className="h-3.5 w-3.5 rounded border-slate-300"
+                        />
+                        显示
+                      </span>
+                    )}
+                    {field === "buyerTaxNo" && (
+                      <span className="flex items-center gap-1 text-xs font-normal text-slate-500">
+                        <input
+                          type="checkbox"
+                          checked={form.showBuyerTaxNo}
+                          onChange={(event) =>
+                            setForm((current) => ({
+                              ...current,
+                              showBuyerTaxNo: event.target.checked,
+                            }))
+                          }
+                          className="h-3.5 w-3.5 rounded border-slate-300"
+                        />
+                        显示
+                      </span>
+                    )}
+                  </span>
                   {type === "textarea" ? (
                     <textarea
                       value={String(form[field])}
@@ -947,7 +995,13 @@ export default function ProformaInvoicePage() {
               <PreviewRow label="Contract No.:" value={form.contractNo} />
               <PreviewRow label="Tel:" value={form.buyerTel} />
               <PreviewRow label="Issue Date:" value={form.issueDate} />
+              {form.showBuyerEmail && form.buyerEmail && (
+                <PreviewRow label="Email:" value={form.buyerEmail} className="col-span-2" />
+              )}
               <PreviewRow label="Address:" value={form.buyerAddress} className="col-span-2" />
+              {form.showBuyerTaxNo && form.buyerTaxNo && (
+                <PreviewRow label="Tax No.:" value={form.buyerTaxNo} className="col-span-2" />
+              )}
             </div>
 
             <table className="mt-8 w-full border-collapse text-center">
