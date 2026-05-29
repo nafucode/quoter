@@ -46,7 +46,7 @@ const Quote = () => {
 
   const t = translations[language];
   const selectedCertificationStandard = certificationStandard || 'CE Certification';
-  const shouldShowCertificationStandard = showCertificationStandard ?? true;
+  const shouldShowCertificationStandard = showCertificationStandard ?? false;
 
   const [focusedSection, setFocusedSection] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
@@ -122,7 +122,7 @@ const Quote = () => {
         nextId: s.nextId, deliveryDays: s.deliveryDays, paymentTerm: s.paymentTerm,
         warrantyMonths: s.warrantyMonths, priceValidityDays: s.priceValidityDays,
         certificationStandard: s.certificationStandard || 'CE Certification',
-        showCertificationStandard: s.showCertificationStandard ?? true,
+        showCertificationStandard: s.showCertificationStandard ?? false,
         showPartList: s.showPartList, showFunctionList: s.showFunctionList,
       };
       const quote = {
@@ -195,7 +195,7 @@ const Quote = () => {
         warrantyMonths: s.warrantyMonths,
         priceValidityDays: s.priceValidityDays,
         certificationStandard: s.certificationStandard || 'CE Certification',
-        showCertificationStandard: s.showCertificationStandard ?? true,
+        showCertificationStandard: s.showCertificationStandard ?? false,
         shaftFrame: s.shaftFrame,
         temperedGlass: s.temperedGlass,
         showPartList: s.showPartList,

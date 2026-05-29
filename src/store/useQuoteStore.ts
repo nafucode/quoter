@@ -70,7 +70,7 @@ const initialState = {
   warrantyMonths: 12,
   priceValidityDays: 30,
   certificationStandard: 'CE Certification',
-  showCertificationStandard: true,
+  showCertificationStandard: false,
   exchangeRateBasis: 6.8,
   shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', price: 0 },
   temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', price: 0 },
@@ -153,6 +153,16 @@ export const useQuoteStore = create<QuoteState>()(
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
+      version: 1,
+      migrate: (persistedState: any, version) => {
+        if (version < 1 && persistedState && typeof persistedState === 'object') {
+          return {
+            ...persistedState,
+            showCertificationStandard: false,
+          };
+        }
+        return persistedState;
+      },
     }
   )
 );

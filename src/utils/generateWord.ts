@@ -432,7 +432,7 @@ export async function generateWordBlob(state: {
       {},
     ),
   );
-  if (state.showCertificationStandard ?? true) {
+  if (state.showCertificationStandard ?? false) {
     children.push(
       para([bold(t.complianceStandard), plain(` ${state.certificationStandard || 'CE Certification'}`)], {}),
     );
