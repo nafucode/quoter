@@ -33,6 +33,8 @@ interface QuoteState {
   paymentTerm: string;
   warrantyMonths: number;
   priceValidityDays: number;
+  certificationStandard: string;
+  showCertificationStandard: boolean;
   exchangeRateBasis: number | string;
   shaftFrame: OptionalItem;
   temperedGlass: OptionalItem;
@@ -67,6 +69,8 @@ const initialState = {
   paymentTerm: 'Pay a 30% deposit within 3 days of signing to activate the contract; the 70% balance is due 7 working days before delivery.',
   warrantyMonths: 12,
   priceValidityDays: 30,
+  certificationStandard: 'CE Certification',
+  showCertificationStandard: true,
   exchangeRateBasis: 6.8,
   shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', price: 0 },
   temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', price: 0 },

@@ -170,6 +170,8 @@ export async function generateWordBlob(state: {
   paymentTerm: string;
   warrantyMonths: number;
   priceValidityDays: number;
+  certificationStandard?: string;
+  showCertificationStandard?: boolean;
   shaftFrame: { enabled: boolean; text: string; price: number };
   temperedGlass: { enabled: boolean; text: string; price: number };
   showPartList?: boolean;
@@ -430,6 +432,11 @@ export async function generateWordBlob(state: {
       {},
     ),
   );
+  if (state.showCertificationStandard ?? true) {
+    children.push(
+      para([bold(t.complianceStandard), plain(` ${state.certificationStandard || 'CE Certification'}`)], {}),
+    );
+  }
   children.push(para([], { spacingAfter: 200 }));
 
   // === SPECIFICATIONS (one per elevator) ===

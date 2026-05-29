@@ -301,6 +301,12 @@ function dateForPi(value: string) {
   return value ? value.replaceAll("-", ".") : "";
 }
 
+function piNoFromContract(contractNo: string) {
+  const value = contractNo.trim();
+  if (!value) return "";
+  return value.toUpperCase().endsWith("P") ? value : `${value}P`;
+}
+
 function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
   const quoteItems = (source.elevators || []).map((elevator, index) => ({
     id: Number(elevator.id) || index + 1,
@@ -387,6 +393,8 @@ export default function ProformaInvoicePage() {
     () => total * Number(form.targetExchangeRate || 0),
     [form.targetExchangeRate, total],
   );
+
+  const piNo = useMemo(() => piNoFromContract(form.contractNo), [form.contractNo]);
 
   const updateField = (field: keyof PiForm, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -971,7 +979,7 @@ export default function ProformaInvoicePage() {
         </section>
 
         <section className="print-only-full-width overflow-auto rounded-lg bg-white p-4 shadow-sm">
-          <div className="mx-auto min-h-[1120px] w-full max-w-[794px] bg-white p-8 text-[11px] leading-snug text-black shadow-sm print:min-h-0 print:w-full print:max-w-none print:p-0 print:text-[12px] print:shadow-none">
+          <div className="mx-auto min-h-[1120px] w-full max-w-[794px] bg-white p-8 text-[11px] leading-tight text-black shadow-sm print:min-h-0 print:w-full print:max-w-none print:p-0 print:text-[12px] print:shadow-none">
             <div className="mb-5">
               <Header />
             </div>
@@ -994,7 +1002,8 @@ export default function ProformaInvoicePage() {
               <PreviewRow label="Messrs.:" value={form.buyerName} />
               <PreviewRow label="Contract No.:" value={form.contractNo} />
               <PreviewRow label="Tel:" value={form.buyerTel} />
-              <PreviewRow label="Issue Date:" value={form.issueDate} />
+              <PreviewRow label="PI No.:" value={piNo} />
+              <PreviewRow label="Issue Date:" value={form.issueDate} className="col-start-2" />
               {form.showBuyerEmail && form.buyerEmail && (
                 <PreviewRow label="Email:" value={form.buyerEmail} className="col-span-2" />
               )}
@@ -1004,7 +1013,7 @@ export default function ProformaInvoicePage() {
               )}
             </div>
 
-            <table className="mt-8 w-full border-collapse text-center">
+            <table className="mt-6 w-full border-collapse text-center">
               <thead>
                 <tr>
                   <th className="border border-black px-2 py-2" rowSpan={2}>
@@ -1032,43 +1041,43 @@ export default function ProformaInvoicePage() {
               <tbody>
                 {form.items.map((item, index) => (
                   <tr key={item.id}>
-                    <td className="border border-black px-2 py-3">{index + 1}</td>
-                    <td className="border border-black px-2 py-3">{item.name}</td>
-                    <td className="border border-black px-2 py-3">{item.capacity}</td>
-                    <td className="border border-black px-2 py-3">{item.speed}</td>
-                    <td className="border border-black px-2 py-3">{item.floorsStops}</td>
-                    <td className="border border-black px-2 py-3">{item.quantity}</td>
-                    <td className="border border-black px-2 py-3">{item.unit}</td>
-                    <td className="border border-black px-2 py-3 text-right">
+                    <td className="border border-black px-2 py-2">{index + 1}</td>
+                    <td className="border border-black px-2 py-2">{item.name}</td>
+                    <td className="border border-black px-2 py-2">{item.capacity}</td>
+                    <td className="border border-black px-2 py-2">{item.speed}</td>
+                    <td className="border border-black px-2 py-2">{item.floorsStops}</td>
+                    <td className="border border-black px-2 py-2">{item.quantity}</td>
+                    <td className="border border-black px-2 py-2">{item.unit}</td>
+                    <td className="border border-black px-2 py-2 text-right">
                       {formatMoney(Number(item.unitPrice || 0))}
                     </td>
-                    <td className="border border-black px-2 py-3 text-right">
+                    <td className="border border-black px-2 py-2 text-right">
                       {formatMoney(Number(item.quantity || 0) * Number(item.unitPrice || 0))}
                     </td>
                   </tr>
                 ))}
                 <tr>
-                  <td className="border border-black px-2 py-3 text-left font-bold" colSpan={2}>
+                  <td className="border border-black px-2 py-2 text-left font-bold" colSpan={2}>
                     Total:
                   </td>
-                  <td className="border border-black px-2 py-3 text-left font-bold" colSpan={5}>
+                  <td className="border border-black px-2 py-2 text-left font-bold" colSpan={5}>
                     {moneyWords(total, form.currency)}
                   </td>
-                  <td className="border border-black px-2 py-3 font-bold">{form.currency}</td>
-                  <td className="border border-black px-2 py-3 text-right font-bold">
+                  <td className="border border-black px-2 py-2 font-bold">{form.currency}</td>
+                  <td className="border border-black px-2 py-2 text-right font-bold">
                     {formatMoney(total)}
                   </td>
                 </tr>
                 {form.showTargetCurrency && (
                   <tr>
-                    <td className="border border-black px-2 py-3" colSpan={2} />
-                    <td className="border border-black px-2 py-3 text-left font-bold" colSpan={5}>
+                    <td className="border border-black px-2 py-2" colSpan={2} />
+                    <td className="border border-black px-2 py-2 text-left font-bold" colSpan={5}>
                       {moneyWords(targetTotal, form.targetCurrency)}
                     </td>
-                    <td className="border border-black px-2 py-3 font-bold">
+                    <td className="border border-black px-2 py-2 font-bold">
                       {form.targetCurrency}
                     </td>
-                    <td className="border border-black px-2 py-3 text-right font-bold">
+                    <td className="border border-black px-2 py-2 text-right font-bold">
                       {formatMoney(targetTotal)}
                     </td>
                   </tr>
@@ -1076,7 +1085,7 @@ export default function ProformaInvoicePage() {
               </tbody>
             </table>
 
-            <div className="mt-5 space-y-2">
+            <div className="mt-4 space-y-1">
               <PreviewLine label="Description Of Goods:" value={form.goodsDescription} />
               <PreviewLine label="Delivery Terms:" value={form.deliveryTerms} />
               <PreviewLine label="Lead Time:" value={form.leadTime} />
@@ -1086,9 +1095,9 @@ export default function ProformaInvoicePage() {
               <PreviewLine label="Country of Origin:" value={form.countryOfOrigin} />
             </div>
 
-            <div className="mt-6">
+            <div className="mt-5">
               <h3 className="font-bold">Bank Information:</h3>
-              <div className="mt-2 space-y-2">
+              <div className="mt-1 space-y-1">
                 <PreviewLine label="Beneficiary Bank:" value={form.bankName} />
                 <PreviewLine label="A/C No:" value={form.accountNo} />
                 {form.swiftCode && <PreviewLine label="Swift Code:" value={form.swiftCode} />}
@@ -1104,12 +1113,12 @@ export default function ProformaInvoicePage() {
               </div>
             </div>
 
-            <div className="mt-16 grid grid-cols-2 gap-12 text-center">
+            <div className="mt-10 grid grid-cols-2 gap-12 text-center">
               <div>Buyer (stamp&amp;sign)</div>
               <div>Seller (stamp&amp;sign)</div>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-6">
               <span className="font-bold">Additional Requirements:</span>{" "}
               <span className="whitespace-pre-wrap">{form.additionalRequirements}</span>
             </div>

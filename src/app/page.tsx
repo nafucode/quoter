@@ -27,6 +27,8 @@ const Quote = () => {
     paymentTerm,
     warrantyMonths,
     priceValidityDays,
+    certificationStandard,
+    showCertificationStandard,
     exchangeRateBasis,
     shaftFrame,
     temperedGlass,
@@ -43,6 +45,8 @@ const Quote = () => {
   } = useQuoteStore();
 
   const t = translations[language];
+  const selectedCertificationStandard = certificationStandard || 'CE Certification';
+  const shouldShowCertificationStandard = showCertificationStandard ?? true;
 
   const [focusedSection, setFocusedSection] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
@@ -117,6 +121,8 @@ const Quote = () => {
         freightCost: s.freightCost, exchangeRate: s.exchangeRate, targetCurrency: s.targetCurrency,
         nextId: s.nextId, deliveryDays: s.deliveryDays, paymentTerm: s.paymentTerm,
         warrantyMonths: s.warrantyMonths, priceValidityDays: s.priceValidityDays,
+        certificationStandard: s.certificationStandard || 'CE Certification',
+        showCertificationStandard: s.showCertificationStandard ?? true,
         showPartList: s.showPartList, showFunctionList: s.showFunctionList,
       };
       const quote = {
@@ -188,6 +194,8 @@ const Quote = () => {
         paymentTerm: s.paymentTerm,
         warrantyMonths: s.warrantyMonths,
         priceValidityDays: s.priceValidityDays,
+        certificationStandard: s.certificationStandard || 'CE Certification',
+        showCertificationStandard: s.showCertificationStandard ?? true,
         shaftFrame: s.shaftFrame,
         temperedGlass: s.temperedGlass,
         showPartList: s.showPartList,
@@ -515,6 +523,29 @@ const Quote = () => {
                   onChange={(e) => setField('exchangeRateBasis', e.target.value)}
                 />
               </div>
+              <div className="sm:col-span-2">
+                <div className="flex items-center justify-between gap-3">
+                  <label className="block text-sm font-medium text-gray-700">Compliance Standard<span className="block text-xs text-gray-500">符合标准</span></label>
+                  <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 text-indigo-600"
+                      checked={shouldShowCertificationStandard}
+                      onChange={(e) => setField('showCertificationStandard', e.target.checked)}
+                    />
+                    Show in quotation / 显示
+                  </label>
+                </div>
+                <select
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm disabled:bg-gray-100 disabled:text-gray-500"
+                  value={selectedCertificationStandard}
+                  onChange={(e) => setField('certificationStandard', e.target.value)}
+                  disabled={!shouldShowCertificationStandard}
+                >
+                  <option value="CE Certification">CE Certification</option>
+                  <option value="EAC Certification">EAC Certification</option>
+                </select>
+              </div>
             </div>
 
             {/* Optional Additional Items — above elevator specs */}
@@ -775,6 +806,9 @@ const Quote = () => {
                   <p><span className="font-semibold">{t.paymentTerm}</span> {paymentTerm}</p>
                   <p><span className="font-semibold">{t.warranty}</span> {warrantyMonths} {t.warrantySuffix}</p>
                   <p><span className="font-semibold">{t.priceValidity}</span> {priceValidityDays} {t.days} {validityUntilDate && `(${t.until} ${validityUntilDate})`}, based on 1 USD = {exchangeRateBasis} RMB.</p>
+                  {shouldShowCertificationStandard && (
+                    <p><span className="font-semibold">{t.complianceStandard}</span> {selectedCertificationStandard}</p>
+                  )}
                 </div>
 
                 <div className="mt-4 pt-4 border-t break-before-page">

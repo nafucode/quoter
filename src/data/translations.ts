@@ -26,6 +26,7 @@ export const translations = {
     warranty: 'III. Warranty:',
     warrantySuffix: 'months since goods arrival at destination port.',
     priceValidity: 'IV. Price validity:',
+    complianceStandard: 'V. Compliance standard:',
     days: 'days',
     until: 'until',
 
@@ -123,6 +124,7 @@ export const translations = {
     warranty: '三、质保：',
     warrantySuffix: '个月（货物抵达目的港之日起算）。',
     priceValidity: '四、报价有效期：',
+    complianceStandard: '五、符合标准：',
     days: '天',
     until: '至',
 
@@ -220,6 +222,7 @@ export const translations = {
     warranty: 'III. Garantía:',
     warrantySuffix: 'meses desde la llegada al puerto de destino.',
     priceValidity: 'IV. Validez del precio:',
+    complianceStandard: 'V. Norma de cumplimiento:',
     days: 'días',
     until: 'hasta',
 
@@ -317,6 +320,7 @@ export const translations = {
     warranty: 'III. Garantia:',
     warrantySuffix: 'meses a partir da chegada da mercadoria ao porto de destino.',
     priceValidity: 'IV. Validade do preço:',
+    complianceStandard: 'V. Norma de conformidade:',
     days: 'dias',
     until: 'até',
 
@@ -413,6 +417,7 @@ export const translations = {
     warranty: 'III. Garantie :',
     warrantySuffix: 'mois à compter de l\'arrivée des marchandises au port de destination.',
     priceValidity: 'IV. Validité du prix :',
+    complianceStandard: 'V. Norme de conformité :',
     days: 'jours',
     until: 'jusqu\'au',
 
@@ -510,6 +515,7 @@ export const translations = {
     warranty: 'III. Гарантия:',
     warrantySuffix: 'месяцев с момента прибытия товара в порт назначения.',
     priceValidity: 'IV. Срок действия цены:',
+    complianceStandard: 'V. Стандарт соответствия:',
     days: 'дней',
     until: 'до',
 

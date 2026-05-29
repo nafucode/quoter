@@ -19,6 +19,8 @@ type PackingRow = {
 type PackingForm = {
   buyerName: string;
   buyerTel: string;
+  buyerEmail: string;
+  showBuyerEmail: boolean;
   buyerAddress: string;
   packingNo: string;
   issueDate: string;
@@ -61,6 +63,8 @@ type PiTransferItem = {
 type PiTransferForm = {
   buyerName?: string;
   buyerTel?: string;
+  buyerEmail?: string;
+  showBuyerEmail?: boolean;
   buyerAddress?: string;
   contractNo?: string;
   issueDate?: string;
@@ -72,6 +76,8 @@ const PI_TO_PACKING_KEY = "pi_to_packing_draft";
 const initialForm: PackingForm = {
   buyerName: "FRANK EGBORO",
   buyerTel: "+234 803 345 4299",
+  buyerEmail: "",
+  showBuyerEmail: false,
   buyerAddress: "Asaba, Delta state, Nigeria",
   packingNo: "XFJH26030201PKL",
   issueDate: "2025.5.18",
@@ -146,6 +152,8 @@ function packingFromPi(source: PiTransferForm, current: PackingForm): PackingFor
     ...current,
     buyerName: source.buyerName || current.buyerName,
     buyerTel: source.buyerTel || current.buyerTel,
+    buyerEmail: source.buyerEmail || current.buyerEmail,
+    showBuyerEmail: source.showBuyerEmail ?? current.showBuyerEmail,
     buyerAddress: source.buyerAddress || current.buyerAddress,
     packingNo: packingNoFromQuote(source.contractNo) || current.packingNo,
     issueDate: source.issueDate || current.issueDate,
@@ -302,6 +310,30 @@ export default function PackingListPage() {
           <div className="grid grid-cols-1 gap-3">
             <Field label="Messrs." value={form.buyerName} onChange={(value) => updateField("buyerName", value)} />
             <Field label="Tel" value={form.buyerTel} onChange={(value) => updateField("buyerTel", value)} />
+            <div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium text-slate-700">Email</span>
+                <label className="flex items-center gap-1 text-xs text-slate-500">
+                  <input
+                    type="checkbox"
+                    checked={form.showBuyerEmail}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        showBuyerEmail: event.target.checked,
+                      }))
+                    }
+                    className="h-3.5 w-3.5 rounded border-slate-300"
+                  />
+                  显示
+                </label>
+              </div>
+              <input
+                value={form.buyerEmail}
+                onChange={(event) => updateField("buyerEmail", event.target.value)}
+                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
             <Field
               label="Address"
               value={form.buyerAddress}
@@ -393,6 +425,9 @@ export default function PackingListPage() {
               <PreviewRow label="PKL No.:" value={form.packingNo} />
               <PreviewRow label="Tel:" value={form.buyerTel} />
               <PreviewRow label="Issue Date:" value={form.issueDate} />
+              {form.showBuyerEmail && form.buyerEmail && (
+                <PreviewRow label="Email:" value={form.buyerEmail} className="col-span-2" />
+              )}
               <PreviewRow label="Address:" value={form.buyerAddress} className="col-span-2" />
             </div>
 
