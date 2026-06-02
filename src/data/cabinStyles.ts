@@ -62,6 +62,12 @@ export const cabinStyleGroups = [
     ]
   },
   {
+    groupName: 'H系列样册 (FJ-H)',
+    styles: [
+      { id: 'FJ-H001', name: 'FJ-H001', previewImage: '/cabin-styles/FJ-H001.png' },
+    ]
+  },
+  {
     groupName: '观光梯样册 (FJ-OLV)',
     styles: [
       { id: 'FJ-OLV01', name: 'FJ-OLV01', previewImage: '/cabin-styles/FJ-OLV01.png' },
