@@ -18,6 +18,7 @@ type PiItem = {
 };
 
 type PiForm = {
+  sellerTel: string;
   buyerName: string;
   buyerTel: string;
   buyerEmail: string;
@@ -61,6 +62,7 @@ type BankPreset = {
   intermediarySwift: string;
   beneficiary: string;
   beneficiaryAddress: string;
+  additionalRequirements?: string;
 };
 
 type QuoteElevator = {
@@ -114,6 +116,7 @@ const PI_HISTORY_KEY = "pi_history";
 const PI_TO_PACKING_KEY = "pi_to_packing_draft";
 
 const initialForm: PiForm = {
+  sellerTel: "+86 18018599919",
   buyerName: "FRANK EGBORO",
   buyerTel: "+234 803 345 4299",
   buyerEmail: "",
@@ -212,6 +215,21 @@ const bankPresets: BankPreset[] = [
     beneficiary: "Suzhou Xinfuji Electromechanical Co., Ltd.",
     beneficiaryAddress:
       "Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu 215236, China",
+  },
+  {
+    id: "first-bank-ghana-gip",
+    label: "GHS GIP - First Bank Ghana",
+    bankName: "FIRST BANK OF NIGERIA, GHANA",
+    accountNo: "9990000019924",
+    swiftCode: "INCEGHACXXX",
+    bankAddress:
+      "FIRST BANK GHANA LTD, NO. 16, 678 NEAR GOLDEN TULIP, HOTEL, LIBERA PMB ACCRA NORTH, ACCRA, Ghana",
+    intermediaryBank: "",
+    intermediarySwift: "",
+    beneficiary: "Suzhou Xinfuji Electromechanical Co., Ltd.",
+    beneficiaryAddress: "Country/Region: Ghana\nType of Account: Business Account\nBankCode: 300319\nBranchName: RING ROAD CENTRAL",
+    additionalRequirements:
+      "Hello esteemed customer,\nFor the payment of goods, please make a GIP Payment of:\nAmount: _______\nTo the following account:\nAccount Number: 9990000019924\nAccount Name: Suzhou Xinfuji Electromechanical Co., Ltd.\nBank Name: FIRST BANK OF NIGERIA, GHANA\nBank Address: FIRST BANK GHANA LTD, NO. 16, 678 NEAR GOLDEN TULIP, HOTEL, LIBERA PMB ACCRA NORTH, ACCRA, Ghana\nCountry/Region: Ghana\nType of Account: Business Account\nPayment message: Please include the following memo/message to receiver when making a payment: [Buyer Name] [Invoice/Contract Number] [Product]\nSWIFT/BIC Code: INCEGHACXXX\nBankCode: 300319\nBranchName: RING ROAD CENTRAL\nTips:\n- This collection account only supports the collection of GHS; [SWIFT/international TT is not supported by this account]\n- The following memo/message should be included to the receiver when making a payment:\n- [Buyer Name][Invoice/Contract Number][Product]",
   },
 ];
 
@@ -506,10 +524,13 @@ export default function ProformaInvoicePage() {
       intermediarySwift: preset.intermediarySwift,
       beneficiary: preset.beneficiary,
       beneficiaryAddress: preset.beneficiaryAddress,
+      additionalRequirements:
+        preset.additionalRequirements ?? current.additionalRequirements,
     }));
   };
 
   const textFields: Array<[keyof PiForm, string, "input" | "textarea"]> = [
+    ["sellerTel", "Seller Tel", "input"],
     ["buyerName", "Messrs.", "input"],
     ["buyerTel", "Tel", "input"],
     ["buyerEmail", "Email", "input"],
@@ -991,7 +1012,9 @@ export default function ProformaInvoicePage() {
                 Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou City, Jiangsu
                 Province, China.
               </p>
-              <p>Tel: +86 18018599919&nbsp;&nbsp;&nbsp; Website: www.xinfuji.com&nbsp;&nbsp;&nbsp; E-mail: info@xinfuji.com</p>
+              <p>
+                Tel: {form.sellerTel}&nbsp;&nbsp;&nbsp; Website: www.xinfuji.com&nbsp;&nbsp;&nbsp; E-mail: info@xinfuji.com
+              </p>
             </div>
 
             <h1 className="mt-6 text-center text-[20px] font-bold tracking-wide">
