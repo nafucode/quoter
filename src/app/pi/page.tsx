@@ -115,6 +115,15 @@ type PiHistoryEntry = {
 const PI_HISTORY_KEY = "pi_history";
 const PI_TO_PACKING_KEY = "pi_to_packing_draft";
 
+const sellerTelOptions = [
+  "+86 18018599919",
+  "+86 17816538257",
+  "+86 18361551938",
+  "+86 19014509482",
+  "+86 15706137940",
+  "+86 13912703131",
+];
+
 const initialForm: PiForm = {
   sellerTel: "+86 18018599919",
   buyerName: "FRANK EGBORO",
@@ -188,7 +197,7 @@ const bankPresets: BankPreset[] = [
     intermediarySwift: "CHASUS33",
     beneficiary: "Suzhou Xinfuji Electromechanical Co., Ltd.",
     beneficiaryAddress:
-      "No.586 Fenghuang Road, Wuxing District, Huzhou City, Zhejiang Province, China",
+      "Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China",
   },
   {
     id: "icbc",
@@ -743,7 +752,19 @@ export default function ProformaInvoicePage() {
                       </span>
                     )}
                   </span>
-                  {type === "textarea" ? (
+                  {field === "sellerTel" ? (
+                    <select
+                      value={form.sellerTel}
+                      onChange={(event) => updateField("sellerTel", event.target.value)}
+                      className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                    >
+                      {sellerTelOptions.map((tel) => (
+                        <option key={tel} value={tel}>
+                          {tel}
+                        </option>
+                      ))}
+                    </select>
+                  ) : type === "textarea" ? (
                     <textarea
                       value={String(form[field])}
                       onChange={(event) => updateField(field, event.target.value)}
