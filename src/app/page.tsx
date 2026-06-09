@@ -9,6 +9,7 @@ import { translations } from '@/data/translations';
 import { generateWordBlob } from '@/utils/generateWord';
 import { translateValueToZh } from '@/data/zhValueMap';
 import { translateValueToEs } from '@/data/esValueMap';
+import { translateValueToFr } from '@/data/frValueMap';
 import { standardFeatures } from '@/data/standardFeatures';
 
 const Quote = () => {
@@ -102,16 +103,25 @@ const Quote = () => {
   const handleSaveToLibrary = () => {
     try {
       const s = useQuoteStore.getState();
+      const libraryImage = (value: unknown) =>
+        typeof value === 'string' && value.startsWith('/') ? value : '';
+      const safeHybrid = (field: any) => {
+        if (field?.type === 'text') return { type: 'text', value: field.value || '' };
+        if (field?.type === 'image') return { type: 'image', value: libraryImage(field.value) };
+        return { type: field?.type || 'text', value: '' };
+      };
       const safeElevators = s.elevators.map((e: any) => ({
         ...e,
         cabinEffect: {
-          cabinImage: null, copImage: null, lopImage: null,
-          ceiling:     { type: e.cabinEffect?.ceiling?.type,     value: e.cabinEffect?.ceiling?.type     === 'text' ? e.cabinEffect?.ceiling?.value     : '' },
-          button:      { type: e.cabinEffect?.button?.type,      value: e.cabinEffect?.button?.type      === 'text' ? e.cabinEffect?.button?.value      : '' },
-          floor:       { type: e.cabinEffect?.floor?.type,       value: e.cabinEffect?.floor?.type       === 'text' ? e.cabinEffect?.floor?.value       : '' },
-          landingDoor: { type: e.cabinEffect?.landingDoor?.type, value: e.cabinEffect?.landingDoor?.type === 'text' ? e.cabinEffect?.landingDoor?.value : '' },
-          handrail:    { type: e.cabinEffect?.handrail?.type,    value: e.cabinEffect?.handrail?.type    === 'text' ? e.cabinEffect?.handrail?.value    : '' },
-          copLogo:     { type: e.cabinEffect?.copLogo?.type,     value: e.cabinEffect?.copLogo?.type     === 'text' ? e.cabinEffect?.copLogo?.value     : '' },
+          cabinImage: libraryImage(e.cabinEffect?.cabinImage),
+          copImage: libraryImage(e.cabinEffect?.copImage),
+          lopImage: libraryImage(e.cabinEffect?.lopImage),
+          ceiling: safeHybrid(e.cabinEffect?.ceiling),
+          button: safeHybrid(e.cabinEffect?.button),
+          floor: safeHybrid(e.cabinEffect?.floor),
+          landingDoor: safeHybrid(e.cabinEffect?.landingDoor),
+          handrail: safeHybrid(e.cabinEffect?.handrail),
+          copLogo: safeHybrid(e.cabinEffect?.copLogo),
         },
       }));
       const safeState = {
@@ -159,6 +169,11 @@ const Quote = () => {
     }
   };
 
+  const buildQuotationFileTitle = (company: string, project: string) => {
+    const sanitize = (s: string) => s.replace(/[/\\?%*:|"<>]/g, '-').trim();
+    return `Quotation-${sanitize(company)}-${sanitize(project)}`;
+  };
+
   const handleGeneratePDF = () => {
     // When embedded as iframe in SEO workbench, window.print() is unreliable.
     // Open in a new tab so the user can print from a clean context.
@@ -167,8 +182,7 @@ const Quote = () => {
       return;
     }
     // Set document.title so the browser uses it as the default PDF filename.
-    const sanitize = (s: string) => s.replace(/[/\\?%*:|"<>]/g, '-').trim();
-    const pdfTitle = `Quotation-${sanitize(companyName)}-${sanitize(projectName)}`;
+    const pdfTitle = buildQuotationFileTitle(companyName, projectName);
     const prevTitle = document.title;
     document.title = pdfTitle;
     window.print();
@@ -206,7 +220,7 @@ const Quote = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${s.quotationNo || 'quotation'}.docx`;
+      a.download = `${buildQuotationFileTitle(s.companyName, s.projectName)}.docx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -262,6 +276,7 @@ const Quote = () => {
   const translateValue = (v: string) => {
     if (language === 'zh') return translateValueToZh(v);
     if (language === 'es') return translateValueToEs(v);
+    if (language === 'fr') return translateValueToFr(v);
     return v;
   };
 
@@ -698,6 +713,12 @@ const Quote = () => {
           {/* Right Side - Preview */}
           <div className="w-full md:w-1/2 sticky top-4 h-screen overflow-y-auto print-only-full-width">
             <div className="flex gap-2 mb-4 no-print">
+              <Link
+                href="/escalator"
+                className="px-4 p-2 bg-orange-600 text-white rounded-lg shadow-md hover:bg-orange-700 font-semibold tracking-wide"
+              >
+                扶梯报价
+              </Link>
               <button onClick={handleGeneratePDF} className="flex-1 p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700">
                 {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
               </button>

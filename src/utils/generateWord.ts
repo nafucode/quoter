@@ -6,6 +6,9 @@ import {
 import { translations, Lang } from '@/data/translations';
 import { PartListRow } from '@/data/partListDefaults';
 import { standardFeatures } from '@/data/standardFeatures';
+import { translateValueToZh } from '@/data/zhValueMap';
+import { translateValueToEs } from '@/data/esValueMap';
+import { translateValueToFr } from '@/data/frValueMap';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -13,6 +16,13 @@ const BORDER = { style: BorderStyle.SINGLE, size: 1, color: '999999' } as const;
 const BORDERS = { top: BORDER, bottom: BORDER, left: BORDER, right: BORDER };
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } as const;
 const NO_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER };
+
+const translateValueForLang = (value: string, lang: Lang) => {
+  if (lang === 'zh') return translateValueToZh(value);
+  if (lang === 'es') return translateValueToEs(value);
+  if (lang === 'fr') return translateValueToFr(value);
+  return value;
+};
 
 // ─── image helpers ───────────────────────────────────────────────────────────
 
@@ -473,7 +483,7 @@ export async function generateWordBlob(state: {
             new TableRow({
               children: [
                 cell(label, { width: specCols[0], bg: 'F5F5F5' }),
-                cell(value, { width: specCols[1] }),
+                cell(translateValueForLang(String(value), state.language), { width: specCols[1] }),
               ],
             }),
         ),
