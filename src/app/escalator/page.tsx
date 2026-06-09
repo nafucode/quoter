@@ -65,6 +65,7 @@ const initialState: EscalatorQuoteState = {
 };
 
 const STORAGE_KEY = 'xinfuji-escalator-quote';
+const HISTORY_KEY = 'xinfuji-escalator-history';
 
 const money = (value: number) =>
   Number(value || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
@@ -78,6 +79,7 @@ export default function EscalatorQuotePage() {
   const [state, setState] = useState<EscalatorQuoteState>(initialState);
   const [saved, setSaved] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [quoteHistory, setQuoteHistory] = useState<any[]>([]);
 
   useEffect(() => {
     setIsClient(true);
@@ -88,6 +90,11 @@ export default function EscalatorQuotePage() {
       } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
+    }
+    try {
+      setQuoteHistory(JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'));
+    } catch {
+      setQuoteHistory([]);
     }
   }, []);
 
@@ -165,8 +172,36 @@ export default function EscalatorQuotePage() {
 
   const saveDraft = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const historyEntry = {
+      id: `${Date.now()}`,
+      quotationNo: state.quotationNo,
+      projectName: state.projectName,
+      customer: state.customer,
+      quotationType: state.quotationType,
+      quotationDate: state.quotationDate,
+      escalatorCount: state.priceRows.reduce((sum, row) => sum + Number(row.quantity || 0), 0),
+      grandTotal,
+      savedAt: new Date().toISOString(),
+      state,
+    };
+    const updated = [historyEntry, ...quoteHistory.filter((entry) => entry.quotationNo !== state.quotationNo)].slice(0, 50);
+    setQuoteHistory(updated);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
+  };
+
+  const loadFromHistory = (entry: any) => {
+    if (!window.confirm(`载入扶梯报价 ${entry.quotationNo || ''}？当前草稿将被替换。`)) return;
+    const nextState = { ...initialState, ...entry.state };
+    setState(nextState);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+  };
+
+  const deleteFromHistory = (id: string) => {
+    const updated = quoteHistory.filter((entry) => entry.id !== id);
+    setQuoteHistory(updated);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
   };
 
   const resetDraft = () => {
@@ -212,16 +247,42 @@ export default function EscalatorQuotePage() {
 
   return (
     <main>
-      <div className="flex flex-col gap-4 bg-gray-100 p-4 md:flex-row">
+      <div className="bg-gray-100 p-4">
+        <div className="sticky top-0 z-20 mb-4 rounded-lg bg-white/95 p-3 shadow-md backdrop-blur no-print">
+          <div className="flex flex-wrap gap-2">
+              <Link href="/" className="rounded-lg bg-slate-700 px-6 py-3 text-center text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-slate-600">
+                电梯报价
+              </Link>
+              <Link href="/pi" className="rounded-lg bg-slate-900 px-6 py-3 text-center text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-slate-700">
+                PI 制作
+              </Link>
+              <Link href="/packing-list" className="rounded-lg bg-slate-700 px-6 py-3 text-center text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-slate-600">
+                箱单制作
+              </Link>
+              <Link href="/escalator" className="rounded-lg bg-orange-600 px-6 py-3 text-center text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-orange-700">
+                扶梯报价
+              </Link>
+              <button onClick={handleGeneratePDF} className="rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-blue-700">
+                {isClient && window !== window.top ? '新窗口打开并生成 PDF' : '生成 PDF'}
+              </button>
+              <button onClick={handleExportWord} className="rounded-lg bg-emerald-600 px-6 py-3 text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-emerald-700">
+                Word
+              </button>
+              <button onClick={resetDraft} className="rounded-lg bg-red-500 px-6 py-3 text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-red-600">
+                新建报价
+              </button>
+              <button onClick={saveDraft} className={`rounded-lg px-6 py-3 text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 ${saved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
+                {saved ? '已保存' : '保存到报价库'}
+              </button>
+          </div>
+        </div>
+        <div className="flex flex-col gap-4 md:flex-row">
         <section className="no-print w-full space-y-4 md:w-1/2">
-          <div className="flex items-center justify-between">
+          <div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">扶梯报价</h1>
               <p className="text-sm text-gray-500">Escalator quotation</p>
             </div>
-            <Link href="/" className="rounded-md bg-slate-700 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-              返回电梯报价
-            </Link>
           </div>
 
           <div className={sectionClass}>
@@ -423,24 +484,9 @@ export default function EscalatorQuotePage() {
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <button onClick={saveDraft} className={`rounded-lg px-4 py-2 font-semibold text-white ${saved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
-              {saved ? '已保存' : '保存草稿'}
-            </button>
-            <button onClick={resetDraft} className="rounded-lg bg-gray-600 px-4 py-2 font-semibold text-white hover:bg-gray-700">重置</button>
-          </div>
         </section>
 
         <section className="print-only-full-width sticky top-4 h-screen w-full overflow-y-auto md:w-1/2">
-          <div className="no-print mb-4 flex gap-2">
-            <button onClick={handleGeneratePDF} className="flex-1 rounded-lg bg-blue-600 p-2 font-semibold text-white shadow-md hover:bg-blue-700">
-              {isClient && window !== window.top ? '新窗口打开并生成 PDF' : '生成 PDF'}
-            </button>
-            <button onClick={handleExportWord} className="rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white shadow-md hover:bg-emerald-700">
-              Word
-            </button>
-          </div>
-
           <div className="w-full rounded-lg bg-white p-4 text-[12px] leading-snug text-black shadow-sm print:p-0 print:shadow-none">
             <Header />
             <div className="p-4">
@@ -575,6 +621,77 @@ export default function EscalatorQuotePage() {
             </div>
           </div>
         </section>
+        </div>
+
+        {isClient && (
+          <div className="mt-6 no-print">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-700">
+                扶梯历史报价
+                <span className="ml-2 text-sm font-normal text-gray-400">{quoteHistory.length} 份</span>
+              </h2>
+              {quoteHistory.length > 0 && (
+                <button
+                  onClick={() => {
+                    if (window.confirm('清空全部扶梯历史？')) {
+                      setQuoteHistory([]);
+                      localStorage.removeItem(HISTORY_KEY);
+                    }
+                  }}
+                  className="text-xs text-red-400 hover:text-red-600"
+                >
+                  清空
+                </button>
+              )}
+            </div>
+
+            {quoteHistory.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-gray-200 bg-white p-6 text-center text-sm text-gray-400">
+                还没有保存的扶梯报价。填好后点击顶部「保存草稿」即可保存到历史。
+              </div>
+            ) : (
+              <div className="overflow-hidden rounded-lg border border-gray-200 bg-white divide-y divide-gray-100">
+                {quoteHistory.map((entry) => {
+                  const savedAt = new Date(entry.savedAt).toLocaleDateString('zh-CN', {
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  });
+                  const total = entry.grandTotal ? `$${Math.round(entry.grandTotal).toLocaleString()}` : '—';
+                  return (
+                    <div key={entry.id} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-orange-50">
+                      <span className="w-12 shrink-0 text-center text-xs font-bold text-orange-600">{entry.quotationType}</span>
+                      <span className="w-24 shrink-0 text-xs text-gray-400">{entry.quotationDate}</span>
+                      <div className="w-40 shrink-0">
+                        <div className="truncate text-sm font-bold text-gray-800">{entry.quotationNo}</div>
+                        <div className="truncate text-xs text-gray-400">{entry.projectName}</div>
+                      </div>
+                      <div className="min-w-0 flex-1 truncate text-xs text-gray-500">{entry.customer}</div>
+                      <span className="w-20 shrink-0 text-right text-xs text-gray-500">{entry.escalatorCount || 0} 台</span>
+                      <span className="w-24 shrink-0 text-right text-sm font-semibold text-gray-700">{total}</span>
+                      <span className="w-20 shrink-0 text-right text-xs text-gray-400">{savedAt}</span>
+                      <div className="flex shrink-0 gap-1.5">
+                        <button
+                          onClick={() => loadFromHistory(entry)}
+                          className="rounded bg-blue-500 px-3 py-1 text-xs text-white transition-colors hover:bg-blue-600"
+                        >
+                          载入
+                        </button>
+                        <button
+                          onClick={() => deleteFromHistory(entry.id)}
+                          className="rounded border border-red-200 px-2 py-1 text-xs text-red-400 transition-colors hover:border-red-400 hover:text-red-600"
+                        >
+                          删除
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </main>
   );

@@ -342,38 +342,70 @@ const Quote = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="p-4">
+        <div className="sticky top-0 z-20 mb-4 rounded-lg bg-white/95 p-3 shadow-md backdrop-blur no-print">
+          <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:flex xl:flex-wrap">
+              <button onClick={handleImportClick} className="py-2 px-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
+                导入草稿
+              </button>
+              <Link href="/pi" className="py-2 px-3 bg-slate-900 text-white rounded-lg hover:bg-slate-700 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
+                PI 制作
+              </Link>
+              <Link href="/packing-list" className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
+                箱单制作
+              </Link>
+              <Link href="/escalator" className="py-2 px-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
+                扶梯报价
+              </Link>
+              <button onClick={handleExport} className="py-2 px-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
+                导出草稿
+              </button>
+              <button onClick={() => window.confirm('确认新建报价？当前草稿将会丢失。') && resetToDefaults()} className="py-2 px-3 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
+                新建报价
+              </button>
+              <button onClick={handleSaveToLibrary} className={`py-2 px-3 text-white rounded-lg text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all ${libSaved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
+                {libSaved ? '✓ 已保存！' : '保存到报价库'}
+              </button>
+            </div>
+            <div className="grid grid-cols-[1fr_auto_auto] gap-2 xl:min-w-[480px] xl:justify-end">
+              <button onClick={handleGeneratePDF} className="p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 font-semibold">
+                {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
+              </button>
+              <button
+                onClick={handleExportWord}
+                className="px-4 p-2 bg-emerald-600 text-white rounded-lg shadow-md hover:bg-emerald-700 font-semibold tracking-wide"
+                title="Export as Word document"
+              >
+                📄 Word
+              </button>
+              <select
+                value={language}
+                onChange={(e) => setField('language', e.target.value)}
+                className="px-3 py-2 bg-gray-700 text-white rounded-lg shadow-md hover:bg-gray-800 font-semibold text-sm cursor-pointer"
+                title="Switch output language"
+              >
+                <option value="en">🇬🇧 EN</option>
+                <option value="zh">🇨🇳 中文</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="pt">🇧🇷 PT</option>
+                <option value="fr">🇫🇷 FR</option>
+                <option value="ru">🇷🇺 RU</option>
+              </select>
+            </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept=".json"
+            />
+          </div>
+        </div>
         <div className="flex flex-col md:flex-row md:space-x-4">
           {/* Left Side - Inputs */}
           <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md no-print">
-            <div className="flex justify-between items-start mb-4">
+            <div className="mb-4">
               <h2 className="text-xl font-semibold">报价详情</h2>
-              <div className="flex gap-2">
-                  <button onClick={handleImportClick} className="py-2 px-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
-                    导入草稿
-                  </button>
-                  <Link href="/pi" className="py-2 px-3 bg-slate-900 text-white rounded-lg hover:bg-slate-700 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
-                    PI 制作
-                  </Link>
-                  <Link href="/packing-list" className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
-                    Packing List
-                  </Link>
-                  <button onClick={handleExport} className="py-2 px-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
-                    导出草稿
-                  </button>
-                  <button onClick={() => window.confirm('确认新建报价？当前草稿将会丢失。') && resetToDefaults()} className="py-2 px-3 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
-                    新建报价
-                  </button>
-                  <button onClick={handleSaveToLibrary} className={`py-2 px-3 text-white rounded-lg text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all ${libSaved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
-                    {libSaved ? '✓ 已保存！' : '保存到报价库'}
-                  </button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    className="hidden"
-                    accept=".json"
-                  />
-              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
@@ -712,37 +744,6 @@ const Quote = () => {
 
           {/* Right Side - Preview */}
           <div className="w-full md:w-1/2 sticky top-4 h-screen overflow-y-auto print-only-full-width">
-            <div className="flex gap-2 mb-4 no-print">
-              <Link
-                href="/escalator"
-                className="px-4 p-2 bg-orange-600 text-white rounded-lg shadow-md hover:bg-orange-700 font-semibold tracking-wide"
-              >
-                扶梯报价
-              </Link>
-              <button onClick={handleGeneratePDF} className="flex-1 p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700">
-                {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
-              </button>
-              <button
-                onClick={handleExportWord}
-                className="px-4 p-2 bg-emerald-600 text-white rounded-lg shadow-md hover:bg-emerald-700 font-semibold tracking-wide"
-                title="Export as Word document"
-              >
-                📄 Word
-              </button>
-              <select
-                value={language}
-                onChange={(e) => setField('language', e.target.value)}
-                className="px-3 py-2 bg-gray-700 text-white rounded-lg shadow-md hover:bg-gray-800 font-semibold text-sm cursor-pointer"
-                title="Switch output language"
-              >
-                <option value="en">🇬🇧 EN</option>
-                <option value="zh">🇨🇳 中文</option>
-                <option value="es">🇪🇸 ES</option>
-                <option value="pt">🇧🇷 PT</option>
-                <option value="fr">🇫🇷 FR</option>
-                <option value="ru">🇷🇺 RU</option>
-              </select>
-            </div>
             <div className="w-full p-4 bg-white rounded-lg shadow-md">
               <Header />
               <div className="p-4">
