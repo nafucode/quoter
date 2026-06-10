@@ -777,7 +777,7 @@ textarea:focus {
 }
 
 .decoration-image.medium {
-    height: 170px;
+    height: 250px;
 }
 
 .decoration-image img {
@@ -799,7 +799,7 @@ textarea:focus {
 }
 
 .decoration-image.cop-cell img {
-    max-width: 30%;
+    max-width: 24%;
 }
 
 .decoration-image.lop-cell img {
