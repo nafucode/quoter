@@ -762,28 +762,30 @@ textarea:focus {
     display: grid;
     place-items: center;
     padding: 8px;
+    overflow: hidden;
     text-align: center;
     font-size: 11px;
     line-height: 1.35;
 }
 
 .decoration-image.tall {
-    min-height: 245px;
+    height: 245px;
 }
 
 .decoration-image.short {
-    min-height: 92px;
+    height: 92px;
 }
 
 .decoration-image.medium {
-    min-height: 170px;
+    height: 170px;
 }
 
 .decoration-image img {
     display: block;
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
+    object-position: center;
 }
 
 .empty-effect {
