@@ -14,6 +14,7 @@ const quoteHelper = document.getElementById('quote-helper');
 
 const RECORDS_KEY = 'xinfuji_contract_records';
 const QUOTATION_KEY = 'nafu_trade_quotations';
+const QUOTER_HISTORY_KEY = 'quoter_history';
 let quotationHistory = [];
 
 const currencySettings = {
@@ -186,6 +187,69 @@ function renderGoodsHead(russianContract) {
     `;
 }
 
+function compactValue(value) {
+    if (value === undefined || value === null || value === '') return '';
+    if (typeof value === 'object') {
+        return value.name || value.label || value.model || value.text || value.value || '';
+    }
+    return String(value);
+}
+
+function specRow(parameter, value) {
+    const cleanValue = compactValue(value);
+    return cleanValue ? { parameter, value: cleanValue } : null;
+}
+
+function normalizeElevatorItem(elevator = {}, index = 0) {
+    const quantity = Number(elevator.qty || elevator.quantity || 1);
+    const unitPrice = Number(elevator.unitPrice || elevator.price || 0);
+    const capacity = compactValue(elevator.capacity || elevator.load);
+    const speed = compactValue(elevator.speed);
+    const floorsStops = compactValue(elevator.floorsStops || elevator.floors || elevator.stops);
+    const nameParts = [compactValue(elevator.type || elevator.elevatorType || elevator.name || elevator.description || 'Elevator'), capacity, speed].filter(Boolean);
+    const description = [
+        compactValue(elevator.description),
+        capacity ? `Capacity: ${capacity}` : '',
+        speed ? `Speed: ${speed}` : '',
+        floorsStops ? `Floors/Stops: ${floorsStops}` : ''
+    ].filter(Boolean).join('; ');
+
+    const cabinEffect = elevator.cabinEffect || {};
+    const specs = [
+        specRow('Elevator Type', elevator.type || elevator.elevatorType || elevator.description),
+        specRow('Capacity', capacity),
+        specRow('Speed', speed),
+        specRow('Floors / Stops', floorsStops),
+        specRow('Quantity', quantity),
+        specRow('Machine Room', elevator.machineRoom || elevator.machineRoomType),
+        specRow('Door Opening', elevator.doorOpening || elevator.doorWidth),
+        specRow('Door Type', elevator.doorType),
+        specRow('Control System', elevator.controlSystem),
+        specRow('Drive System', elevator.driveSystem),
+        specRow('Cabin', cabinEffect.cabin || elevator.cabin),
+        specRow('Ceiling', cabinEffect.ceiling || elevator.ceiling),
+        specRow('Floor', cabinEffect.floor || elevator.floor),
+        specRow('COP', cabinEffect.button || elevator.cop),
+        specRow('LOP', cabinEffect.lop || elevator.lop),
+        specRow('Landing Door', cabinEffect.landingDoor || elevator.landingDoor),
+        specRow('Handrail', cabinEffect.handrail || elevator.handrail),
+        specRow('Certification', elevator.certificationStandard || elevator.certification)
+    ].filter(Boolean);
+
+    return {
+        id: elevator.id || `elevator-${index + 1}`,
+        name: nameParts.join(' ') || `Elevator ${index + 1}`,
+        description: description || compactValue(elevator.description) || 'Elevator specification from saved quotation.',
+        imageDataUrl: elevator.imageDataUrl || '',
+        cabinStyleImagePath: compactValue(cabinEffect.cabinImagePath || elevator.cabinStyleImagePath || elevator.imagePath),
+        quantity,
+        unitPrice,
+        totalPrice: Number(elevator.totalPrice || quantity * unitPrice || 0),
+        advantages: Array.isArray(elevator.advantages) ? elevator.advantages.filter(Boolean) : [],
+        specifications: specs
+    };
+}
+
 function normalizeQuoteItem(item = {}) {
     const quantity = Number(item.quantity || 0);
     const unitPrice = Number(item.unitPrice || item.price || item.costPrice || 0);
@@ -212,24 +276,39 @@ function normalizeQuoteItem(item = {}) {
 }
 
 function normalizeQuotation(quote = {}, index = 0) {
-    const items = Array.isArray(quote.items) ? quote.items.map(normalizeQuoteItem) : [];
+    const stateElevators = Array.isArray(quote.state?.elevators) ? quote.state.elevators : [];
+    const items = Array.isArray(quote.items) && quote.items.length
+        ? quote.items.map(normalizeQuoteItem)
+        : stateElevators.map(normalizeElevatorItem);
     const totalAmount = Number(quote.totalAmount || quote.grandTotal || items.reduce((sum, item) => sum + item.totalPrice, 0));
     const customer = quote.customerSnapshot || {};
     return {
-        id: quote.id || quote.quotationNo || `quote-${index}`,
+        id: String(quote.id || quote.quotationNo || `quote-${index}`),
         quotationNo: quote.quotationNo || quote.quoteNo || `Quotation ${index + 1}`,
         issueDate: quote.issueDate || quote.quotationDate || quote.savedAt || quote.createdAt || '',
         customerName: customer.companyName || quote.companyName || quote.customerName || '',
-        projectName: quote.projectName || '',
-        currency: quote.currency || 'USD',
+        projectName: quote.projectName || quote.state?.projectName || '',
+        currency: quote.currency || quote.targetCurrency || quote.state?.targetCurrency || 'USD',
         totalAmount,
         items,
         raw: quote
     };
 }
 
+function dedupeQuotations(quotes) {
+    const seen = new Set();
+    return quotes.filter((quote) => {
+        const key = quote.id || quote.quotationNo;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
 function loadQuotationHistory() {
-    quotationHistory = readJsonStorage(QUOTATION_KEY, []).map(normalizeQuotation);
+    const quoterHistory = readJsonStorage(QUOTER_HISTORY_KEY, []);
+    const legacyHistory = readJsonStorage(QUOTATION_KEY, []);
+    quotationHistory = dedupeQuotations([...quoterHistory, ...legacyHistory].map(normalizeQuotation));
     renderQuoteSelect();
 }
 
@@ -238,7 +317,7 @@ function renderQuoteSelect(selectedId = quoteSelect.value) {
         quoteSelect.innerHTML = '<option value="">No saved quotations found / 未找到历史报价</option>';
         quoteSelect.disabled = true;
         includeSpecificationInput.checked = false;
-        quoteHelper.textContent = '未读取到同一浏览器域名下的报价历史。请先在报价工具保存报价，或确保合同工具和报价工具在同一域名打开。';
+        quoteHelper.textContent = '未读取到报价器历史。请先在报价器首页点击「保存到报价库」，然后回到这里点击刷新。';
         return;
     }
 
@@ -258,7 +337,7 @@ function renderQuoteSelect(selectedId = quoteSelect.value) {
         quoteSelect.value = quotationHistory[0]?.id || '';
     }
     includeSpecificationInput.checked = Boolean(quoteSelect.value);
-    quoteHelper.textContent = `已读取 ${quotationHistory.length} 份历史报价。Specification 附件会跳过报价第一页，只保留产品规格页。`;
+    quoteHelper.textContent = `已同步 ${quotationHistory.length} 份报价器历史。Specification 附件会跳过报价第一页，只保留产品规格页。`;
 }
 
 function selectedQuotation() {

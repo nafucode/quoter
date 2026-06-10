@@ -354,6 +354,9 @@ const Quote = () => {
               <Link href="/packing-list" className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
                 箱单制作
               </Link>
+              <Link href="/contract-maker/index.html" className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
+                合同制作
+              </Link>
               <Link href="/escalator" className="py-2 px-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
                 扶梯报价
               </Link>
