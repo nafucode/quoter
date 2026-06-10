@@ -518,9 +518,9 @@ function renderDecorationPage(elevator, fallbackItem, index, quote) {
                 <div class="decoration-title">CABIN</div>
                 <div class="decoration-title">COP</div>
                 <div class="decoration-title">LOP</div>
-                <div class="decoration-image tall">${renderEffectCell(effect.cabinImage || fallbackImage, `Elevator #L${index + 1} cabin`)}</div>
-                <div class="decoration-image tall">${renderEffectCell(effect.copImage, 'COP')}</div>
-                <div class="decoration-image tall">${renderEffectCell(effect.lopImage, 'LOP')}</div>
+                <div class="decoration-image tall cabin-cell">${renderEffectCell(effect.cabinImage || fallbackImage, `Elevator #L${index + 1} cabin`)}</div>
+                <div class="decoration-image tall cop-cell">${renderEffectCell(effect.copImage, 'COP')}</div>
+                <div class="decoration-image tall lop-cell">${renderEffectCell(effect.lopImage, 'LOP')}</div>
                 <div class="decoration-title">CEILING</div>
                 <div class="decoration-title">BUTTON</div>
                 <div class="decoration-title">FLOOR</div>

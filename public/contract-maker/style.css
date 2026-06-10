@@ -769,7 +769,7 @@ textarea:focus {
 }
 
 .decoration-image.tall {
-    height: 245px;
+    height: 420px;
 }
 
 .decoration-image.short {
@@ -791,8 +791,19 @@ textarea:focus {
 }
 
 .decoration-image.tall img {
-    max-width: 74%;
-    max-height: 84%;
+    max-height: 92%;
+}
+
+.decoration-image.cabin-cell img {
+    max-width: 58%;
+}
+
+.decoration-image.cop-cell img {
+    max-width: 30%;
+}
+
+.decoration-image.lop-cell img {
+    max-width: 34%;
 }
 
 .empty-effect {
