@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Maker / 合同制作器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">Contract Studio</p>
+                <h1>Contract Maker / 合同制作器</h1>
+            </div>
+            <div class="topbar-actions">
+                <button class="ghost-button" type="button" id="reset-button">Reset / 重置</button>
+                <button class="ghost-button" type="button" id="save-record-button">Save Record / 保存记录</button>
+                <button class="primary-button" type="button" id="pdf-button">Export PDF / 导出 PDF</button>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <section class="editor-panel" aria-label="Contract editor / 合同信息编辑">
+                <form id="contract-form">
+                    <section class="form-section">
+                        <div class="section-head">
+                            <h2>Basic Information / 基础信息</h2>
+                        </div>
+                        <div class="field-grid">
+                            <label class="field">
+                                <span>Contract No. / 合同号</span>
+                                <input id="contract-number" name="contractNumber" type="text">
+                            </label>
+                            <label class="field">
+                                <span>Contract Date / 日期</span>
+                                <input id="contract-date" name="contractDate" type="date">
+                            </label>
+                            <label class="field">
+                                <span>Signed At / 签订地</span>
+                                <input id="signed-at" name="signedAt" type="text" value="SUZHOU, CHINA">
+                            </label>
+                            <label class="field">
+                                <span>Language Pair / 语言版本</span>
+                                <select id="language-pair" name="languagePair">
+                                    <option value="zh-en">Chinese + English / 中英</option>
+                                    <option value="ru-zh-en">Russian + Chinese + English / 俄中英（三语）</option>
+                                </select>
+                            </label>
+                            <label class="field">
+                                <span>Trade Term / 价格术语</span>
+                                <input id="trade-term" name="tradeTerm" type="text" value="FOB Shanghai">
+                            </label>
+                            <label class="field">
+                                <span>Currency / 币种</span>
+                                <select id="currency" name="currency">
+                                    <option value="USD">USD / 美元</option>
+                                    <option value="CNY">CNY / 人民币</option>
+                                    <option value="EUR">EUR / 欧元</option>
+                                </select>
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <div class="section-head">
+                            <h2>Buyer / 买方</h2>
+                        </div>
+                        <div class="field-grid">
+                            <label class="field field-wide">
+                                <span>Buyer Name / 买方名称</span>
+                                <input id="buyer-name" name="buyerName" type="text" value="HAMER ENGINEERING AND TRADING ONE MEMBER PLC">
+                            </label>
+                            <label class="field field-wide">
+                                <span>Buyer Address / 买方地址</span>
+                                <input id="buyer-address" name="buyerAddress" type="text" value="Addis Ababa, Ethiopia">
+                            </label>
+                            <label class="field">
+                                <span>Buyer Tel / 买方电话</span>
+                                <input id="buyer-tel" name="buyerTel" type="text" value="+251 91 194 9558">
+                            </label>
+                            <label class="field">
+                                <span>Buyer Email / 买方邮箱</span>
+                                <input id="buyer-email" name="buyerEmail" type="email" value="mrlengineeringtrade@gmail.com">
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <div class="section-head section-head-inline">
+                            <h2>Goods / 货物明细</h2>
+                            <button class="small-button" type="button" id="add-line-button">Add Item / 新增项目</button>
+                        </div>
+                        <div class="line-items" id="line-items"></div>
+                    </section>
+
+                    <section class="form-section">
+                        <div class="section-head">
+                            <h2>Terms / 条款变量</h2>
+                        </div>
+                        <div class="field-grid">
+                            <label class="field">
+                                <span>Shipment Days / 装运天数</span>
+                                <input id="shipment-days" name="shipmentDays" type="number" min="1" step="1" value="45">
+                            </label>
+                            <label class="field">
+                                <span>Payment Terms / 付款方式</span>
+                                <input id="payment-terms" name="paymentTerms" type="text" value="100% payment by irrevocable Letter of Credit at sight.">
+                            </label>
+                            <label class="field field-wide">
+                                <span>Price Note / 价格说明</span>
+                                <textarea id="price-note" name="priceNote" rows="2">The price above mentioned includes equipment price and the cost to Shanghai seaport only.</textarea>
+                            </label>
+                            <label class="field field-wide">
+                                <span>Attachments / 附件及图纸号</span>
+                                <textarea id="attachments" name="attachments" rows="3">Technical details see the attachments and drawings. All attachments are indivisible part of this contract.</textarea>
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <div class="section-head section-head-inline">
+                            <h2>Specification Attachment / 规格附件</h2>
+                            <button class="small-button" type="button" id="refresh-quotes-button">Refresh / 刷新</button>
+                        </div>
+                        <div class="field-grid">
+                            <label class="field field-wide">
+                                <span>Historical Quotation / 历史报价</span>
+                                <select id="quote-select" name="quoteSelect"></select>
+                            </label>
+                            <label class="check-field field-wide">
+                                <input id="include-specification" name="includeSpecification" type="checkbox" checked>
+                                <span>Attach selected quotation specs after contract / 将所选报价规格附在合同后面</span>
+                            </label>
+                            <p class="field-help field-wide" id="quote-helper">Select a quotation saved in the quotation app. / 选择报价工具中保存过的历史报价。</p>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <div class="section-head">
+                            <h2>Bank Information / 银行信息</h2>
+                        </div>
+                        <div class="field-grid">
+                            <label class="field field-wide">
+                                <span>Beneficiary Bank / 收款银行</span>
+                                <input id="beneficiary-bank" name="beneficiaryBank" type="text" value="JIANGSU SUZHOU RURAL COMMERCIAL BANK CO., LTD">
+                            </label>
+                            <label class="field field-wide">
+                                <span>Bank Address / 银行地址</span>
+                                <input id="bank-address" name="bankAddress" type="text" value="NO.1777 SOUTH ZHONGSHAN ROAD, SUZHOU, CHINA">
+                            </label>
+                            <label class="field">
+                                <span>A/C No. / 账号</span>
+                                <input id="account-number" name="accountNumber" type="text" value="0706678981420100395359">
+                            </label>
+                            <label class="field">
+                                <span>Swift Code / Swift</span>
+                                <input id="swift-code" name="swiftCode" type="text" value="WJRBCNBWXXX">
+                            </label>
+                            <label class="field">
+                                <span>Intermediary Bank / 中转行</span>
+                                <input id="intermediary-bank" name="intermediaryBank" type="text" value="CITIBANK N.A. NEW YORK">
+                            </label>
+                            <label class="field">
+                                <span>Swift BIC / 中转 Swift</span>
+                                <input id="intermediary-swift" name="intermediarySwift" type="text" value="CITIUS33XXX">
+                            </label>
+                        </div>
+                    </section>
+                </form>
+            </section>
+
+            <aside class="preview-panel" aria-label="Contract preview / 合同预览">
+                <div class="preview-toolbar">
+                    <p>Live Preview</p>
+                    <button class="ghost-button compact" type="button" id="print-preview-button">Print</button>
+                </div>
+
+                <article class="contract-paper" id="contract-paper">
+                    <div class="document-banner">
+                        <img src="images/xinfuji-banner-quote.png" alt="Suzhou Xinfuji Electromechanical Co., Ltd.">
+                    </div>
+
+                    <header class="contract-title">
+                        <p id="preview-secondary-title">销售合同</p>
+                        <h2 id="preview-english-title">SALES CONTRACT</h2>
+                    </header>
+
+                    <section class="contract-meta">
+                        <div>
+                            <span>Contract No:</span>
+                            <strong id="preview-contract-number"></strong>
+                            <em id="preview-contract-number-local"></em>
+                        </div>
+                        <div>
+                            <span>Signed at:</span>
+                            <strong id="preview-signed-at"></strong>
+                            <em id="preview-signed-at-local"></em>
+                        </div>
+                        <div>
+                            <span>Date:</span>
+                            <strong id="preview-date"></strong>
+                            <em id="preview-date-local"></em>
+                        </div>
+                    </section>
+
+                    <section class="party-block">
+                        <div>
+                            <p><strong>THE SELLERS:</strong> SUZHOU XINFUJI ELECTROMECHANICAL CO., LTD.</p>
+                            <p><strong>ADDRESS:</strong> Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China</p>
+                            <p><strong>Tel:</strong> +86 180 1859 9919 &nbsp;&nbsp; <strong>Email:</strong> info@xinfuji.com</p>
+                        </div>
+                        <div>
+                            <p><strong>THE BUYERS:</strong> <span id="preview-buyer-name"></span></p>
+                            <p><strong>ADDRESS:</strong> <span id="preview-buyer-address"></span></p>
+                            <p><strong>Tel:</strong> <span id="preview-buyer-tel"></span> &nbsp;&nbsp; <strong>Email:</strong> <span id="preview-buyer-email"></span></p>
+                        </div>
+                    </section>
+
+                    <p class="legal-note" id="preview-party-note"></p>
+
+                    <table class="goods-table">
+                        <thead id="preview-goods-head">
+                            <tr>
+                                <th>Art No.<br><span>货号</span></th>
+                                <th>Descriptions<br><span>名称及规格</span></th>
+                                <th>Unit<br><span>单位</span></th>
+                                <th>Quantity<br><span>数量</span></th>
+                                <th>Unit Price<br><span>单价</span></th>
+                                <th>Amount<br><span>金额</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="preview-lines"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" id="preview-total-label"></td>
+                                <td id="preview-total"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <section class="total-value">
+                        <p><strong id="preview-total-local-label">总值（大写）：</strong><span id="preview-total-local"></span></p>
+                        <p><strong>Total Value:</strong> <span id="preview-total-words"></span></p>
+                    </section>
+
+                    <section class="clauses" id="preview-clauses"></section>
+
+                    <section class="bank-block">
+                        <h3>BANK INFORMATION <span>银行信息</span></h3>
+                        <div class="bank-grid">
+                            <p><strong>Beneficiary Bank:</strong> <span id="preview-bank"></span></p>
+                            <p><strong>Add of Bank:</strong> <span id="preview-bank-address"></span></p>
+                            <p><strong>A/C No:</strong> <span id="preview-account"></span></p>
+                            <p><strong>Swift Code:</strong> <span id="preview-swift"></span></p>
+                            <p><strong>Intermediary Bank:</strong> <span id="preview-intermediary"></span></p>
+                            <p><strong>Swift BIC:</strong> <span id="preview-intermediary-swift"></span></p>
+                            <p><strong>Beneficiary:</strong> Suzhou Xinfuji Electromechanical Co., Ltd.</p>
+                            <p><strong>Add of Beneficiary:</strong> Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China</p>
+                        </div>
+                    </section>
+
+                    <footer class="signature-grid">
+                        <div>
+                            <p>卖方代表：</p>
+                            <p>Representative of the sellers:</p>
+                            <strong>Authorized signature:</strong>
+                        </div>
+                        <div>
+                            <p>买方代表人：</p>
+                            <p>Representative of the buyers:</p>
+                            <strong>Authorized signature:</strong>
+                        </div>
+                    </footer>
+
+                    <section class="specification-appendix" id="specification-appendix"></section>
+                </article>
+            </aside>
+        </main>
+
+        <section class="records-panel" aria-label="Saved contract records / 已保存合同记录">
+            <div class="records-head">
+                <div>
+                    <p class="eyebrow">Saved Records</p>
+                    <h2>Contract History / 合同记录</h2>
+                </div>
+                <span id="records-count">0 records</span>
+            </div>
+            <div class="records-list" id="records-list">
+                <p class="empty-records">No saved records yet. / 暂无保存记录</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
