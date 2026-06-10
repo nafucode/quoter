@@ -784,10 +784,15 @@ textarea:focus {
     display: block;
     width: auto;
     height: auto;
-    max-width: 100%;
-    max-height: 100%;
+    max-width: 82%;
+    max-height: 82%;
     object-fit: contain;
     object-position: center;
+}
+
+.decoration-image.tall img {
+    max-width: 74%;
+    max-height: 84%;
 }
 
 .empty-effect {
