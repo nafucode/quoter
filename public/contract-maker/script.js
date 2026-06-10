@@ -17,6 +17,54 @@ const QUOTATION_KEY = 'nafu_trade_quotations';
 const QUOTER_HISTORY_KEY = 'quoter_history';
 let quotationHistory = [];
 
+const defaultPartList = [
+    { type: 'section', label: '1. Control system', brand: '', origin: '' },
+    { type: 'item', label: '1、Controller', brand: 'Monarch', origin: 'Suzhou' },
+    { type: 'item', label: '2、Contactor', brand: 'FUJI', origin: 'Japan' },
+    { type: 'item', label: '3、Frequency inverter', brand: 'Monarch', origin: 'Suzhou' },
+    { type: 'section', label: '2. Door system', brand: '', origin: '' },
+    { type: 'item', label: '1、Door operator', brand: 'Shenling/Ouling', origin: 'Ningbo' },
+    { type: 'item', label: '2、Driver', brand: 'Shenling/Ouling', origin: 'Ningbo' },
+    { type: 'section', label: '3. Car Operate system', brand: '', origin: '' },
+    { type: 'item', label: '1、Display', brand: 'XINFUJI', origin: 'Suzhou' },
+    { type: 'item', label: '2、Operate system', brand: 'XINFUJI', origin: 'Suzhou' },
+    { type: 'section', label: '4. Call system', brand: '', origin: '' },
+    { type: 'item', label: '1、Display board', brand: 'XINFUJI', origin: 'Suzhou' },
+    { type: 'item', label: '2、LOP', brand: 'XINFUJI', origin: 'Suzhou' },
+    { type: 'section', label: '5. Traction drive', brand: '', origin: '' },
+    { type: 'item', label: '1、Traction machine', brand: 'MONA DRIVE', origin: 'Suzhou' },
+    { type: 'item', label: '2、Rubber buffer', brand: 'AODEPU', origin: 'Ningbo' },
+    { type: 'item', label: '3、Rotate encoder', brand: 'Huitong', origin: 'Changchun' },
+    { type: 'section', label: '6. Cabin', brand: '', origin: '' },
+    { type: 'item', label: '1、Level switch', brand: 'Monarch', origin: 'Suzhou' },
+    { type: 'item', label: '2、Overload switch', brand: 'XINFUJI', origin: 'Suzhou' },
+    { type: 'item', label: '3、Car parts', brand: 'XINFUJI', origin: 'Suzhou' },
+    { type: 'section', label: '7. Landing door & Jamb', brand: '', origin: '' },
+    { type: 'item', label: '1、Landing door', brand: 'XINFUJI', origin: 'Suzhou' },
+    { type: 'item', label: '2、Jamb', brand: 'XINFUJI', origin: 'Suzhou' },
+    { type: 'section', label: '8. Safety system', brand: '', origin: '' },
+    { type: 'item', label: '1、Safety gear', brand: 'AODEPU', origin: 'Ningbo' },
+    { type: 'item', label: '2、Speed Governor', brand: 'AODEPU', origin: 'Ningbo' },
+    { type: 'item', label: '3、Buffer', brand: 'AODEPU', origin: 'Ningbo' },
+    { type: 'item', label: '4、Light curtain', brand: 'Weco/Sunny', origin: 'Ningbo' },
+    { type: 'section', label: '9. Shaft Material', brand: '', origin: '' },
+    { type: 'item', label: '1、Guide rail', brand: 'Oria/Gaojing', origin: 'Zhejiang' },
+    { type: 'item', label: '2、Counter Weight', brand: 'XINFUJI', origin: 'Suzhou' },
+    { type: 'item', label: '3、Hoist steel ropes', brand: 'Langshan/Saifutian', origin: 'Suzhou' },
+    { type: 'item', label: '4、Traveling cable', brand: 'KERUIDI/HEYANG', origin: 'Suzhou' }
+];
+
+const partListNote = 'Note: In order to further improve product quality and technological innovation, and better meet customer needs, we reserve the right to change the model and origin of the individual parts mentioned above, but we guarantee that the quality and performance of the new parts are not lower than the original parts.';
+
+const standardFeatures = [
+    { category: 'Travel Function', rows: [['VVVF drive', 'VVVF door operator'], ['Independent running', 'Automatic pass without stops'], ['Automatically adjust door opening time', 'UCMP protection'], ['Express door closing', 'Car stops and door open'], ['Car arrival gong', 'Command register cancel'], ['Direct parking', 'Anti-nuisance']] },
+    { category: 'Safety function', rows: [['Photocell protection', 'Fault self-diagnosis'], ['Designated stop', 'Repeated door closing'], ['Overload holding stop', 'Up/down over-run and final limit protection'], ['Anti-stall timer protection', 'Down over-speed protection device'], ['Start protection control', 'Upward over-speed protection device'], ['Inspection operation', 'Steel rope slipping self-detection'], ['Braking force self-detection functions', 'Balance system of self-learning']] },
+    { category: 'Man-machine interface', rows: [['Micro-touch button for car call and hall call', 'Floor and direction indicator in hall'], ['Floor and direction indicator inside car', 'Fire man service functions']] },
+    { category: 'Emergency function', rows: [['Emergency car lighting', 'Inching running'], ['Five-way intercom', 'Fire emergency return']] },
+    { category: 'Energy-saving function', rows: [['Car ventilation, light automatic shut off', 'Remote shut-off']] },
+    { category: 'Optional Functions', rows: [['Leveling when power failure (ARD) included', 'CWT safety gears'], ['Energy-regenerating device', 'Group control'], ['Absolute location positioning system', '3D door protection'], ['Clean anti-bacteria functions of car', 'The second operation COP'], ['Voice announcer', 'Operation box for handicapped'], ['Door opening re-leveling', 'IC card control access function'], ['Remote monitor', 'Camera function in the car']] }
+];
+
 const currencySettings = {
     USD: { symbol: 'USD', english: 'US DOLLARS', local: '美元' },
     CNY: { symbol: 'CNY', english: 'CHINESE YUAN', local: '人民币' },
@@ -291,6 +339,7 @@ function normalizeQuotation(quote = {}, index = 0) {
         currency: quote.currency || quote.targetCurrency || quote.state?.targetCurrency || 'USD',
         totalAmount,
         items,
+        elevators: stateElevators,
         raw: quote
     };
 }
@@ -350,6 +399,201 @@ function imageSourceForItem(item) {
     if (!source) return '';
     if (source.startsWith('data:') || source.startsWith('http://') || source.startsWith('https://')) return source;
     return source;
+}
+
+function fieldValue(value, fallback = '-') {
+    const cleanValue = compactValue(value);
+    return cleanValue || fallback;
+}
+
+function effectValue(effect) {
+    if (!effect) return { type: 'text', value: '' };
+    if (typeof effect === 'string') return { type: 'text', value: effect };
+    return {
+        type: effect.type || (effect.value ? 'image' : 'text'),
+        value: effect.value || effect.image || effect.name || effect.label || ''
+    };
+}
+
+function renderSpecRows(rows) {
+    return rows.map(([label, value]) => `
+        <tr>
+            <th>${escapeHtml(label)}</th>
+            <td>${escapeHtml(fieldValue(value))}</td>
+        </tr>
+    `).join('');
+}
+
+function renderSpecSection(title, rows) {
+    return `
+        <section class="quote-spec-section">
+            <h4>${escapeHtml(title)}</h4>
+            <table class="quote-spec-table">
+                <tbody>${renderSpecRows(rows)}</tbody>
+            </table>
+        </section>
+    `;
+}
+
+function renderEffectCell(effect, label) {
+    const normalized = effectValue(effect);
+    if (!normalized.value) return '<span class="empty-effect">-</span>';
+    if (normalized.type === 'image' || normalized.value.startsWith('data:') || normalized.value.startsWith('http') || normalized.value.startsWith('/')) {
+        return `<img src="${escapeHtml(normalized.value)}" alt="${escapeHtml(label)}">`;
+    }
+    return `<span>${escapeHtml(normalized.value)}</span>`;
+}
+
+function elevatorSpecSections(elevator, fallbackItem, index) {
+    if (!elevator) {
+        const rows = fallbackItem.specifications.length
+            ? fallbackItem.specifications.map((spec) => [spec.parameter || 'Specification', spec.value || '-'])
+            : [
+                ['Description', fallbackItem.description || fallbackItem.name],
+                ['Quantity', fallbackItem.quantity],
+                ['Unit Price', fallbackItem.unitPrice]
+            ];
+        return [renderSpecSection('I. Basic specification', rows)];
+    }
+
+    const functionRows = [
+        ['COP/LOP', elevator.copLop],
+        ...(Array.isArray(elevator.otherFunctions)
+            ? elevator.otherFunctions.filter((func) => func?.checked).map((func) => [func.name, 'Included'])
+            : [])
+    ];
+
+    return [
+        renderSpecSection('I. Basic specification', [
+            ['Description', elevator.description || fallbackItem?.description || `Elevator #L${index + 1}`],
+            ['Type', elevator.type],
+            ['Capacity (KG)', elevator.capacity],
+            ['Speed (M/S)', elevator.speed],
+            ['Floors/Stops', elevator.floorsStops],
+            ['Control System', elevator.controlSystem],
+            ['Serving floors', elevator.servingFloors],
+            ['Entrances', elevator.entrances],
+            ['Power voltage', elevator.powerVoltage],
+            ['Lighting voltage', elevator.lightingVoltage],
+            ['Frequency', elevator.frequency],
+            ['Drive System', elevator.driveSystem]
+        ]),
+        renderSpecSection('II. Hoistway specification', [
+            ['Shaft construction', elevator.shaftConstruction],
+            ['Travel (mm)', elevator.travel],
+            ['Headroom (mm)', elevator.headroom],
+            ['Pit Depth (mm)', elevator.pitDepth],
+            ['Shaft Size (W x D mm)', elevator.shaftSize],
+            ...(elevator.machineRoom === 'MR' ? [['Machine Room Size (W x D x H mm)', elevator.machineRoomSize]] : [])
+        ]),
+        renderSpecSection('III. Car Specification', [
+            ['COP Plate', elevator.copPlate],
+            ['Car Net Dimension', elevator.carNetDimension],
+            ['Car Ceiling', elevator.carCeiling],
+            ['Car Floor', elevator.carFloor],
+            ['Handrail', elevator.carHandrail],
+            ['Left wall finish', elevator.carWall?.left],
+            ['Right wall finish', elevator.carWall?.right],
+            ['Rear wall finish', elevator.carWall?.rear]
+        ]),
+        renderSpecSection('IV. Door specification', [
+            ['Door Opening Type', elevator.doorOpeningType],
+            ['Door Opening Size', elevator.doorOpeningSize],
+            ['Door Header Type', elevator.doorHeaderType],
+            ['1st Floor Door Decoration', elevator.firstFloorDoor],
+            ['Other Floors Door Decoration', elevator.otherFloorsDoor]
+        ]),
+        renderSpecSection('V. Function', functionRows.length ? functionRows : [['Standard function', 'Included']])
+    ];
+}
+
+function renderDecorationPage(elevator, fallbackItem, index, quote) {
+    const effect = elevator?.cabinEffect || {};
+    const fallbackImage = imageSourceForItem(fallbackItem || {});
+    return `
+        <article class="quote-doc-page decoration-page">
+            <h3>Decoration Effect</h3>
+            <p class="decoration-note">(Images are for reference only, subject to the real object)</p>
+            <div class="decoration-grid">
+                <div class="decoration-title">CABIN</div>
+                <div class="decoration-title">COP</div>
+                <div class="decoration-title">LOP</div>
+                <div class="decoration-image tall">${renderEffectCell(effect.cabinImage || fallbackImage, `Elevator #L${index + 1} cabin`)}</div>
+                <div class="decoration-image tall">${renderEffectCell(effect.copImage, 'COP')}</div>
+                <div class="decoration-image tall">${renderEffectCell(effect.lopImage, 'LOP')}</div>
+                <div class="decoration-title">CEILING</div>
+                <div class="decoration-title">BUTTON</div>
+                <div class="decoration-title">FLOOR</div>
+                <div class="decoration-image short">${renderEffectCell(effect.ceiling, 'Ceiling')}</div>
+                <div class="decoration-image short">${renderEffectCell(effect.button, 'Button')}</div>
+                <div class="decoration-image short">${renderEffectCell(effect.floor, 'Floor')}</div>
+                <div class="decoration-title">LANDING DOOR</div>
+                <div class="decoration-title">HANDRAIL</div>
+                <div class="decoration-title">COP LOGO</div>
+                <div class="decoration-image medium">${renderEffectCell(effect.landingDoor, 'Landing Door')}</div>
+                <div class="decoration-image medium">${renderEffectCell(effect.handrail, 'Handrail')}</div>
+                <div class="decoration-image medium">${renderEffectCell(effect.copLogo, 'COP Logo')}</div>
+            </div>
+            <p class="quote-doc-footer">Quotation Date: ${escapeHtml(formatDate(quote.issueDate || todayValue()))}</p>
+        </article>
+    `;
+}
+
+function quotePartList(quote) {
+    return Array.isArray(quote.raw?.state?.partList) && quote.raw.state.partList.length
+        ? quote.raw.state.partList
+        : defaultPartList;
+}
+
+function renderPartListPage(quote) {
+    const rows = quotePartList(quote);
+    return `
+        <article class="quote-doc-page part-list-page">
+            <h3>Part List</h3>
+            <table class="quote-part-table">
+                <thead>
+                    <tr>
+                        <th>Part</th>
+                        <th>Brand</th>
+                        <th>Origin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows.map((row) => row.type === 'section' ? `
+                        <tr class="part-section">
+                            <td colspan="3">${escapeHtml(row.label)}</td>
+                        </tr>
+                    ` : `
+                        <tr>
+                            <td>${escapeHtml(row.label || '')}</td>
+                            <td>${escapeHtml(row.brand || '')}</td>
+                            <td>${escapeHtml(row.origin || '')}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <p class="part-note">${escapeHtml(partListNote)}</p>
+        </article>
+    `;
+}
+
+function renderFunctionsPage() {
+    return `
+        <article class="quote-doc-page functions-page">
+            <h3>Functions</h3>
+            <table class="quote-function-table">
+                <tbody>
+                    ${standardFeatures.map((group) => group.rows.map((row, index) => `
+                        <tr>
+                            ${index === 0 ? `<th rowspan="${group.rows.length}">${escapeHtml(group.category)}</th>` : ''}
+                            <td>${escapeHtml(row[0])}</td>
+                            <td>${escapeHtml(row[1])}</td>
+                        </tr>
+                    `).join('')).join('')}
+                </tbody>
+            </table>
+        </article>
+    `;
 }
 
 function createLineItem(line = { artNo: '', description: '', unit: '台 Unit', quantity: 1, price: 0 }) {
@@ -563,54 +807,27 @@ function renderSpecificationAppendix(quote) {
         return;
     }
 
+    const elevators = quote.elevators.length ? quote.elevators : quote.items.map(() => null);
+    const showPartList = quote.raw?.state?.showPartList !== false;
+    const showFunctionList = quote.raw?.state?.showFunctionList !== false;
+
     appendix.innerHTML = `
-        <div class="appendix-cover">
-            <p>附件 / Appendix</p>
-            <h2>Specification</h2>
-            <span>${escapeHtml(quote.quotationNo)}${quote.customerName ? ` · ${escapeHtml(quote.customerName)}` : ''}</span>
-        </div>
-        ${quote.items.map((item, index) => {
-            const imageSource = imageSourceForItem(item);
-            const specs = item.specifications.length
-                ? item.specifications
-                : [
-                    { parameter: 'Product', value: item.name },
-                    { parameter: 'Description', value: item.description || '-' },
-                    { parameter: 'Quantity', value: item.quantity || '-' }
-                ];
+        ${elevators.map((elevator, index) => {
+            const item = quote.items[index] || quote.items[0] || {};
             return `
-                <article class="spec-page">
-                    <header class="spec-page-head">
-                        <span>Specification ${index + 1}</span>
-                        <h3>${escapeHtml(item.name)}</h3>
-                        <p>${escapeHtml(item.description || '-')}</p>
-                    </header>
-                    <div class="spec-detail-grid">
-                        <div class="spec-image-box">
-                            ${imageSource ? `<img src="${escapeHtml(imageSource)}" alt="${escapeHtml(item.name)}">` : '<span>Product image</span>'}
-                        </div>
-                        <table class="spec-table">
-                            <tbody>
-                                ${specs.map((spec) => `
-                                    <tr>
-                                        <th>${escapeHtml(spec.parameter || '-')}</th>
-                                        <td>${escapeHtml(spec.value || '-')}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                <article class="quote-doc-page specification-page">
+                    <div class="quote-doc-rule"></div>
+                    <h2>Specifications</h2>
+                    <h3>Elevator #L${index + 1} Specifications</h3>
+                    <div class="quote-spec-groups">
+                        ${elevatorSpecSections(elevator, item, index).join('')}
                     </div>
-                    ${item.advantages.length ? `
-                        <section class="spec-advantages">
-                            <h4>Key Advantages</h4>
-                            <ul>
-                                ${item.advantages.map((advantage) => `<li>${escapeHtml(advantage)}</li>`).join('')}
-                            </ul>
-                        </section>
-                    ` : ''}
                 </article>
+                ${renderDecorationPage(elevator, item, index, quote)}
             `;
         }).join('')}
+        ${showPartList ? renderPartListPage(quote) : ''}
+        ${showFunctionList ? renderFunctionsPage() : ''}
     `;
 }
 

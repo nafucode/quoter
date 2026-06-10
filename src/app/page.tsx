@@ -134,6 +134,7 @@ const Quote = () => {
         certificationStandard: s.certificationStandard || 'CE Certification',
         showCertificationStandard: s.showCertificationStandard ?? false,
         showPartList: s.showPartList, showFunctionList: s.showFunctionList,
+        partList: s.partList,
       };
       const quote = {
         quotationNo: s.quotationNo, projectName: s.projectName,
