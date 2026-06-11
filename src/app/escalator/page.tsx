@@ -184,7 +184,7 @@ export default function EscalatorQuotePage() {
       savedAt: new Date().toISOString(),
       state,
     };
-    const updated = [historyEntry, ...quoteHistory.filter((entry) => entry.quotationNo !== state.quotationNo)].slice(0, 50);
+    const updated = [historyEntry, ...quoteHistory.filter((entry) => entry.quotationNo !== state.quotationNo)].slice(0, 200);
     setQuoteHistory(updated);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
     setSaved(true);

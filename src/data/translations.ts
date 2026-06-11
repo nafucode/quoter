@@ -1,4 +1,4 @@
-export type Lang = 'en' | 'zh' | 'es' | 'pt' | 'fr' | 'ru';
+export type Lang = 'en' | 'zh' | 'es' | 'pt' | 'fr' | 'vi' | 'ru';
 
 export const translations = {
   en: {
@@ -488,6 +488,104 @@ export const translations = {
 
     // Footer
     quotationDate: 'Date du Devis',
+  },
+
+  vi: {
+    // Header
+    quotation: 'Báo giá',
+    company: 'Công ty',
+    quotationNo: 'Số báo giá',
+    projectName: 'Dự án',
+    quotationType: 'Loại báo giá',
+
+    // Price table
+    priceTitle: 'Giá - Tiền tệ: USD',
+    colDescription: 'Mô tả',
+    colSpecs: 'Thông số',
+    colQty: 'SL-bộ',
+    colUnitPrice: 'Đơn giá',
+    colTotalPrice: 'Thành tiền',
+    freight: (dest: string) => `Phí địa phương và vận chuyển từ nhà máy đến ${dest} :`,
+    totalAmount: 'Tổng cộng :',
+
+    // Terms
+    delivery: 'I. Thời gian giao hàng:',
+    deliverySuffix: 'ngày sau khi nhận tiền đặt cọc và xác nhận bản vẽ.',
+    paymentTerm: 'II. Điều khoản thanh toán:',
+    warranty: 'III. Bảo hành:',
+    warrantySuffix: 'tháng kể từ khi hàng đến cảng đích.',
+    priceValidity: 'IV. Hiệu lực báo giá:',
+    complianceStandard: 'V. Tiêu chuẩn tuân thủ:',
+    days: 'ngày',
+    until: 'đến',
+
+    // Specifications
+    specificationsTitle: 'Thông số kỹ thuật',
+    elevatorHeader: (id: number) => `Thang máy #L${id} Thông số`,
+    secBasic: 'I. Thông số cơ bản',
+    secHoistway: 'II. Thông số giếng thang',
+    secCar: 'III. Thông số cabin',
+    secDoor: 'IV. Thông số cửa',
+    secFunction: 'V. Chức năng',
+
+    // Spec labels
+    specDescription: 'Mô tả',
+    specType: 'Loại',
+    specCapacity: 'Tải trọng (KG)',
+    specSpeed: 'Tốc độ (M/S)',
+    specFloors: 'Tầng/Điểm dừng',
+    specControl: 'Hệ thống điều khiển',
+    specServing: 'Tầng phục vụ (hiển thị COP)',
+    specEntrances: 'Lối vào',
+    specPower: 'Điện áp nguồn',
+    specLighting: 'Điện áp chiếu sáng',
+    specFrequency: 'Tần số',
+    specDrive: 'Hệ thống truyền động',
+    specShaftConst: 'Kết cấu giếng thang',
+    specTravel: 'Hành trình (mm)',
+    specHeadroom: 'Chiều cao OH (mm)',
+    specPit: 'Độ sâu hố pit (mm)',
+    specShaftSize: 'Kích thước giếng thang (R x S mm)',
+    specMachineRoom: 'Phòng máy (R x S x C mm)',
+    specCopPlate: 'Bảng COP',
+    specCarDim: 'Kích thước lọt lòng cabin',
+    specCeiling: 'Trần cabin',
+    specCarFloor: 'Sàn cabin',
+    specHandrail: 'Tay vịn',
+    specWallLeft: 'Hoàn thiện vách trái',
+    specWallRight: 'Hoàn thiện vách phải',
+    specWallRear: 'Hoàn thiện vách sau',
+    specDoorType: 'Kiểu mở cửa',
+    specDoorSize: 'Kích thước mở cửa (R x C mm)',
+    specDoorHeader: 'Loại đầu cửa',
+    specDoor1st: 'Trang trí cửa tầng 1',
+    specDoorOther: 'Trang trí cửa các tầng khác',
+    specCopLop: 'COP/LOP',
+    specIncluded: 'Bao gồm',
+
+    // Cabin effect
+    decorationTitle: 'Hiệu ứng trang trí',
+    decorationNote: '(Hình ảnh chỉ để tham khảo, căn cứ theo sản phẩm thực tế)',
+    cabin: 'CABIN',
+    cop: 'COP',
+    lop: 'LOP',
+    cellCeiling: 'TRẦN',
+    cellButton: 'NÚT BẤM',
+    cellFloor: 'SÀN',
+    landingDoor: 'CỬA TẦNG',
+    handrail: 'TAY VỊN',
+    copLogo: 'LOGO COP',
+
+    // Part list
+    partListTitle: 'Danh sách linh kiện',
+    partListColPart: 'Linh kiện',
+    partListColBrand: 'Thương hiệu',
+    partListColOrigin: 'Xuất xứ',
+    partListNote: 'Ghi chú: Nhằm không ngừng nâng cao chất lượng sản phẩm và đổi mới công nghệ, đồng thời đáp ứng tốt hơn nhu cầu của khách hàng, chúng tôi có quyền thay đổi model và xuất xứ của một số linh kiện nêu trên, nhưng cam kết chất lượng và hiệu năng của linh kiện mới không thấp hơn linh kiện ban đầu.',
+    standardFeaturesTitle: 'Chức năng',
+
+    // Footer
+    quotationDate: 'Ngày báo giá',
   },
 
   ru: {

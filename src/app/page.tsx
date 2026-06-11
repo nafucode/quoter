@@ -10,6 +10,7 @@ import { generateWordBlob } from '@/utils/generateWord';
 import { translateValueToZh } from '@/data/zhValueMap';
 import { translateValueToEs } from '@/data/esValueMap';
 import { translateValueToFr } from '@/data/frValueMap';
+import { translateValueToVi } from '@/data/viValueMap';
 import { standardFeatures } from '@/data/standardFeatures';
 
 const Quote = () => {
@@ -56,6 +57,7 @@ const Quote = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const HISTORY_KEY = 'quoter_history';
+  const CURRENT_CONTRACT_QUOTE_KEY = 'quoter_current_contract_quote';
 
   useEffect(() => {
     setIsClient(true);
@@ -67,7 +69,7 @@ const Quote = () => {
 
   const saveToHistory = (entry: any) => {
     setQuoteHistory(prev => {
-      const updated = [entry, ...prev].slice(0, 50); // 最多保留50条
+      const updated = [entry, ...prev].slice(0, 200); // 最多保留200条
       localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
       return updated;
     });
@@ -87,6 +89,66 @@ const Quote = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const buildCurrentQuoteEntry = () => {
+    const s = useQuoteStore.getState();
+    const libraryImage = (value: unknown) =>
+      typeof value === 'string' && value.startsWith('/') ? value : '';
+    const safeHybrid = (field: any) => {
+      if (field?.type === 'text') return { type: 'text', value: field.value || '' };
+      if (field?.type === 'image') return { type: 'image', value: libraryImage(field.value) };
+      return { type: field?.type || 'text', value: '' };
+    };
+    const safeElevators = s.elevators.map((e: any) => ({
+      ...e,
+      cabinEffect: {
+        cabinImage: libraryImage(e.cabinEffect?.cabinImage),
+        copImage: libraryImage(e.cabinEffect?.copImage),
+        lopImage: libraryImage(e.cabinEffect?.lopImage),
+        ceiling: safeHybrid(e.cabinEffect?.ceiling),
+        button: safeHybrid(e.cabinEffect?.button),
+        floor: safeHybrid(e.cabinEffect?.floor),
+        landingDoor: safeHybrid(e.cabinEffect?.landingDoor),
+        handrail: safeHybrid(e.cabinEffect?.handrail),
+        copLogo: safeHybrid(e.cabinEffect?.copLogo),
+      },
+    }));
+    const safeState = {
+      companyName: s.companyName, quotationNo: s.quotationNo, projectName: s.projectName,
+      quotationType: s.quotationType, quotationDate: s.quotationDate,
+      elevators: safeElevators, freightDestination: s.freightDestination,
+      freightCost: s.freightCost, exchangeRate: s.exchangeRate, targetCurrency: s.targetCurrency,
+      nextId: s.nextId, deliveryDays: s.deliveryDays, paymentTerm: s.paymentTerm,
+      warrantyMonths: s.warrantyMonths, priceValidityDays: s.priceValidityDays,
+      certificationStandard: s.certificationStandard || 'CE Certification',
+      showCertificationStandard: s.showCertificationStandard ?? false,
+      showPartList: s.showPartList, showFunctionList: s.showFunctionList,
+      partList: s.partList,
+    };
+    return {
+      id: `current-${Date.now()}`,
+      quotationNo: s.quotationNo || 'Current quotation',
+      projectName: s.projectName,
+      companyName: s.companyName,
+      quotationType: s.quotationType,
+      quotationDate: s.quotationDate,
+      grandTotal,
+      targetCurrency: s.targetCurrency,
+      elevatorCount: s.elevators.length,
+      elevatorTypes: s.elevators.map((e: any) => e.type).filter(Boolean),
+      savedAt: new Date().toISOString(),
+      state: safeState,
+      source: 'current-quote',
+    };
+  };
+
+  const persistCurrentQuoteForContract = () => {
+    try {
+      localStorage.setItem(CURRENT_CONTRACT_QUOTE_KEY, JSON.stringify(buildCurrentQuoteEntry()));
+    } catch (err) {
+      console.warn('Failed to prepare contract quote', err);
+    }
+  };
+
   // Receive a quote from the SEO workbench library and restore it
   useEffect(() => {
     const handler = (e: MessageEvent) => {
@@ -103,46 +165,16 @@ const Quote = () => {
   const handleSaveToLibrary = () => {
     try {
       const s = useQuoteStore.getState();
-      const libraryImage = (value: unknown) =>
-        typeof value === 'string' && value.startsWith('/') ? value : '';
-      const safeHybrid = (field: any) => {
-        if (field?.type === 'text') return { type: 'text', value: field.value || '' };
-        if (field?.type === 'image') return { type: 'image', value: libraryImage(field.value) };
-        return { type: field?.type || 'text', value: '' };
-      };
-      const safeElevators = s.elevators.map((e: any) => ({
-        ...e,
-        cabinEffect: {
-          cabinImage: libraryImage(e.cabinEffect?.cabinImage),
-          copImage: libraryImage(e.cabinEffect?.copImage),
-          lopImage: libraryImage(e.cabinEffect?.lopImage),
-          ceiling: safeHybrid(e.cabinEffect?.ceiling),
-          button: safeHybrid(e.cabinEffect?.button),
-          floor: safeHybrid(e.cabinEffect?.floor),
-          landingDoor: safeHybrid(e.cabinEffect?.landingDoor),
-          handrail: safeHybrid(e.cabinEffect?.handrail),
-          copLogo: safeHybrid(e.cabinEffect?.copLogo),
-        },
-      }));
-      const safeState = {
-        companyName: s.companyName, quotationNo: s.quotationNo, projectName: s.projectName,
-        quotationType: s.quotationType, quotationDate: s.quotationDate,
-        elevators: safeElevators, freightDestination: s.freightDestination,
-        freightCost: s.freightCost, exchangeRate: s.exchangeRate, targetCurrency: s.targetCurrency,
-        nextId: s.nextId, deliveryDays: s.deliveryDays, paymentTerm: s.paymentTerm,
-        warrantyMonths: s.warrantyMonths, priceValidityDays: s.priceValidityDays,
-        certificationStandard: s.certificationStandard || 'CE Certification',
-        showCertificationStandard: s.showCertificationStandard ?? false,
-        showPartList: s.showPartList, showFunctionList: s.showFunctionList,
-        partList: s.partList,
-      };
+      const historyEntry: any = buildCurrentQuoteEntry();
+      historyEntry.id = Date.now();
+      delete historyEntry.source;
       const quote = {
         quotationNo: s.quotationNo, projectName: s.projectName,
         companyName: s.companyName, quotationType: s.quotationType,
         quotationDate: s.quotationDate, grandTotal,
         targetCurrency: s.targetCurrency, elevatorCount: s.elevators.length,
         savedAt: new Date().toISOString(),
-        state: safeState,
+        state: historyEntry.state,
       };
 
       // 如果在 iframe 里（SEO 工作台），通知父窗口保存到报价库
@@ -151,16 +183,6 @@ const Quote = () => {
       }
 
       // 保存到本地历史
-      const historyEntry = {
-        id: Date.now(),
-        quotationNo: s.quotationNo, projectName: s.projectName,
-        companyName: s.companyName, quotationType: s.quotationType,
-        quotationDate: s.quotationDate, grandTotal,
-        targetCurrency: s.targetCurrency, elevatorCount: s.elevators.length,
-        elevatorTypes: s.elevators.map((e: any) => e.type).filter(Boolean),
-        savedAt: new Date().toISOString(),
-        state: safeState,
-      };
       saveToHistory(historyEntry);
 
       setLibSaved(true);
@@ -278,6 +300,7 @@ const Quote = () => {
     if (language === 'zh') return translateValueToZh(v);
     if (language === 'es') return translateValueToEs(v);
     if (language === 'fr') return translateValueToFr(v);
+    if (language === 'vi') return translateValueToVi(v);
     return v;
   };
 
@@ -355,7 +378,7 @@ const Quote = () => {
               <Link href="/packing-list" className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
                 箱单制作
               </Link>
-              <Link href="/contract-maker/index.html" className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
+              <Link href="/contract-maker/index.html?from=quote" onClick={persistCurrentQuoteForContract} className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
                 合同制作
               </Link>
               <Link href="/escalator" className="py-2 px-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
@@ -393,6 +416,7 @@ const Quote = () => {
                 <option value="es">🇪🇸 ES</option>
                 <option value="pt">🇧🇷 PT</option>
                 <option value="fr">🇫🇷 FR</option>
+                <option value="vi">🇻🇳 VI</option>
                 <option value="ru">🇷🇺 RU</option>
               </select>
             </div>

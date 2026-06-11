@@ -9,6 +9,7 @@ import { standardFeatures } from '@/data/standardFeatures';
 import { translateValueToZh } from '@/data/zhValueMap';
 import { translateValueToEs } from '@/data/esValueMap';
 import { translateValueToFr } from '@/data/frValueMap';
+import { translateValueToVi } from '@/data/viValueMap';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -21,6 +22,7 @@ const translateValueForLang = (value: string, lang: Lang) => {
   if (lang === 'zh') return translateValueToZh(value);
   if (lang === 'es') return translateValueToEs(value);
   if (lang === 'fr') return translateValueToFr(value);
+  if (lang === 'vi') return translateValueToVi(value);
   return value;
 };
 

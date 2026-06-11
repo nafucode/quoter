@@ -488,7 +488,7 @@ export default function ProformaInvoicePage() {
     };
 
     setPiHistory((current) => {
-      const updated = [entry, ...current].slice(0, 50);
+      const updated = [entry, ...current].slice(0, 200);
       localStorage.setItem(PI_HISTORY_KEY, JSON.stringify(updated));
       return updated;
     });
