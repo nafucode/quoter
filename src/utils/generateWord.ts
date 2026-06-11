@@ -467,7 +467,7 @@ export async function generateWordBlob(state: {
       children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
     }
     children.push(
-      para([bold(t.elevatorHeader(elev.id ?? idx + 1), 22)], {
+      para([bold(elev.title || t.elevatorHeader(elev.id ?? idx + 1), 22)], {
         align: AlignmentType.CENTER,
         spacingAfter: 80,
       }),

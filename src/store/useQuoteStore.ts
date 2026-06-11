@@ -96,6 +96,7 @@ export const useQuoteStore = create<QuoteState>()(
         const newElevator = {
           ...base,
           id: state.nextId,
+          title: `Elevator #L${state.nextId}`,
           isCollapsed: false,
           cabinEffect: last ? JSON.parse(JSON.stringify(last.cabinEffect ?? elevatorTemplate.cabinEffect)) : { ...elevatorTemplate.cabinEffect },
           carWall: { ...(last?.carWall ?? elevatorTemplate.carWall) },

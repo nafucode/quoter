@@ -867,7 +867,7 @@ const Quote = () => {
                     <div key={elevator.id}>
                       {/* Specifications Section */}
                       <div className={index > 0 ? 'break-before-page' : ''}>
-                        <h4 className="text-md font-semibold mt-4 text-gray-700 print-elevator-header">{t.elevatorHeader(elevator.id)}</h4>
+                        <h4 className="text-md font-semibold mt-4 text-gray-700 print-elevator-header">{elevator.title || t.elevatorHeader(elevator.id)}</h4>
                         <div className="text-sm">
                           <div className="break-inside-avoid">
                             <h4 id={`preview-basic-spec-${elevator.id}`} className={`text-md font-semibold mt-2 border-b px-2 py-1 ${focusedSection === `basic-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>{t.secBasic}</h4>

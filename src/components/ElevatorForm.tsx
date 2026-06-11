@@ -120,7 +120,11 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
     <div className="border-t mt-4 pt-4">
       {pickerState.isOpen && <StylePicker {...getPickerProps()} onSelect={handleStyleSelect} onClose={() => setPickerState({ isOpen: false, type: '' })} />}
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Elevator #L{elevator.id}</h3>
+        <input
+          value={elevator.title || `Elevator #L${elevator.id}`}
+          onChange={(e) => updateElevator(elevator.id, 'title', e.target.value)}
+          className="w-full max-w-xs rounded-md border border-transparent bg-transparent px-2 py-1 text-lg font-semibold focus:border-blue-400 focus:bg-white focus:outline-none"
+        />
         <div>
           <button onClick={() => toggleElevatorCollapse(elevator.id)} className="px-3 py-1 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600 mr-2">
             {elevator.isCollapsed ? 'Expand' : 'Collapse'}
