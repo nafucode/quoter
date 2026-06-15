@@ -17,6 +17,8 @@ import {
   EscalatorPriceRow,
   EscalatorSpecGroup,
 } from '@/data/escalatorDefaults';
+import { escalatorTranslations } from '@/data/escalatorTranslations';
+import { Lang } from '@/data/translations';
 
 export type EscalatorQuoteWordState = {
   customer: string;
@@ -36,6 +38,7 @@ export type EscalatorQuoteWordState = {
   specGroups: EscalatorSpecGroup[];
   configRows: EscalatorConfigRow[];
   functionRows: EscalatorFunctionRow[];
+  language: Lang;
 };
 
 const BORDER = { style: BorderStyle.SINGLE, size: 1, color: '888888' } as const;
@@ -102,16 +105,15 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
   );
   const isExw = state.quotationType === 'EXW';
   const grandTotal = priceTotal + (isExw ? 0 : Number(state.freightCost || 0));
+  const et = escalatorTranslations[state.language] || escalatorTranslations.en;
 
   const children: (Paragraph | Table)[] = [
-    para('Quotation', { bold: true, size: 32, align: AlignmentType.CENTER }),
-    para(
-      'We thank you very much for your enquiry. In the meantime, should you have any questions, please do not hesitate to contact us. We refer to the above mention project and would like to submit our price to you.',
-    ),
-    para(`Customer: ${state.customer}        Term: ${state.quotationType}`, { bold: true }),
-    para(`Quotation No.: ${state.quotationNo}        Project: ${state.projectName}`),
-    para(`Quotation Date: ${state.quotationDate}`),
-    para('I. Product & Price', { bold: true, size: 22 }),
+    para(et.quotation, { bold: true, size: 32, align: AlignmentType.CENTER }),
+    para(et.intro),
+    para(`${et.customer}: ${state.customer}        ${et.term}: ${state.quotationType}`, { bold: true }),
+    para(`${et.quotationNo}: ${state.quotationNo}        ${et.project}: ${state.projectName}`),
+    para(`${et.date}: ${state.quotationDate}`),
+    para(et.productPrice, { bold: true, size: 22 }),
   ];
 
   const priceWidths = [820, 2600, 900, 1000, 900, 1300, 1840];
@@ -119,7 +121,7 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
     table(
       [
         new TableRow({
-          children: ['Lift NO.', 'Description', 'Speed / (m/s)', 'Inclination / (°)', 'Quantity (Unit)', 'Unit Price ($)', 'Total Price ($)'].map((h, i) =>
+          children: [et.liftNo, et.description, et.speed, et.inclination, et.quantity, et.unitPrice, et.totalPrice].map((h, i) =>
             cell(h, { width: priceWidths[i], bold: true, bg: 'EDEDED' }),
           ),
         }),
@@ -150,7 +152,7 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
           ? [
             new TableRow({
               children: [
-                cell(`Local freight container from factory to ${state.freightDestination} :`, {
+                cell(et.freight(state.freightDestination), {
                   colSpan: 6,
                   align: AlignmentType.RIGHT,
                 }),
@@ -161,7 +163,7 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
           : []),
         new TableRow({
           children: [
-            cell(`Total ${state.quotationType}${!isExw ? ` ${state.freightDestination}` : ''}`, {
+            cell(et.total(state.quotationType, !isExw ? state.freightDestination : ''), {
               colSpan: 6,
               bold: true,
               align: AlignmentType.RIGHT,
@@ -176,17 +178,17 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
   );
 
   children.push(
-    para(`Note: (1) Price refer to exchange 1 USD=${state.exchangeRateBasis} RMB, in case the exchange rate fluctuates over ±2%, when sign the contract, the price will be adjusted accordingly.`),
-    para('(2) Installation & commission & certificate cost is not included.'),
-    para(`(3) Quotation valid period: ${state.validityDays} days`),
-    para(`(4) Total need ${state.containerEstimate} containers estimate.`),
-    para('II. Payment term', { bold: true, size: 22 }),
+    para(et.exchangeNote(state.exchangeRateBasis)),
+    para(et.installNote),
+    para(et.validityNote(state.validityDays)),
+    para(et.containersNote(state.containerEstimate)),
+    para(et.paymentTerm, { bold: true, size: 22 }),
     para(state.paymentTerm),
-    para('III. Delivery date', { bold: true, size: 22 }),
-    para(`${state.deliveryDays} days after both parties confirmed the detailed builder's work drawing, signed the commodity contract and received prepayment.`),
-    para('IV. Warranty period', { bold: true, size: 22 }),
-    para(`${state.warrantyMonths} months after shipping date. (Core components)`),
-    para('Specification', { bold: true, size: 24, align: AlignmentType.CENTER }),
+    para(et.deliveryDate, { bold: true, size: 22 }),
+    para(et.deliveryText(state.deliveryDays)),
+    para(et.warrantyPeriod, { bold: true, size: 22 }),
+    para(et.warrantyText(state.warrantyMonths)),
+    para(et.specification, { bold: true, size: 24, align: AlignmentType.CENTER }),
   );
 
   const specWidths = [3000, ...state.specGroups.map(() => Math.floor(6360 / state.specGroups.length))];
@@ -195,7 +197,7 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
       [
         new TableRow({
           children: [
-            cell('参数 Specification', { bold: true, bg: 'D9EAF7', width: specWidths[0] }),
+            cell(et.specificationHeader, { bold: true, bg: 'D9EAF7', width: specWidths[0] }),
             ...state.specGroups.map((group, index) =>
               cell(group.no || `E${index + 1}`, { bold: true, bg: 'D9EAF7', width: specWidths[index + 1] }),
             ),
@@ -215,13 +217,13 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
     ),
   );
 
-  children.push(para('主要配置表 / Main Configuration', { bold: true, size: 24, align: AlignmentType.CENTER }));
+  children.push(para(et.configuration, { bold: true, size: 24, align: AlignmentType.CENTER }));
   const configWidths = [700, 3800, 2200, 2660];
   children.push(
     table(
       [
         new TableRow({
-          children: ['序号 NO.', '名称 Name', '品牌 Brand', '备注 Remarks'].map((h, i) =>
+          children: [et.configNo, et.configName, et.configBrand, et.configRemarks].map((h, i) =>
             cell(h, { bold: true, bg: 'EDEDED', width: configWidths[i] }),
           ),
         }),
@@ -241,13 +243,13 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
     ),
   );
 
-  children.push(para('Main Function Description', { bold: true, size: 24, align: AlignmentType.CENTER }));
+  children.push(para(et.functionDescription, { bold: true, size: 24, align: AlignmentType.CENTER }));
   const functionWidths = [700, 3000, 5660];
   children.push(
     table(
       [
         new TableRow({
-          children: ['序号 (No.)', '功能名称 (Function Name)', '功能说明 (Function Description)'].map((h, i) =>
+          children: [et.functionNo, et.functionName, et.functionText].map((h, i) =>
             cell(h, { bold: true, bg: 'EDEDED', width: functionWidths[i] }),
           ),
         }),
@@ -267,9 +269,7 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
   );
 
   children.push(
-    para(
-      'Note: In order to further improve product quality and promote technological innovation, and to better meet customer needs, our company reserves the right to modify the configuration and brand of certain components mentioned above. However, we guarantee that the quality of any updated components will be no lower than that of the original ones.',
-    ),
+    para(et.finalNote),
   );
 
   const doc = new Document({

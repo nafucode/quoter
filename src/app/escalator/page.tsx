@@ -14,6 +14,8 @@ import {
   EscalatorPriceRow,
   EscalatorSpecGroup,
 } from '@/data/escalatorDefaults';
+import { escalatorTranslations } from '@/data/escalatorTranslations';
+import { Lang } from '@/data/translations';
 import { generateEscalatorWordBlob } from '@/utils/generateEscalatorWord';
 
 type EscalatorQuoteState = {
@@ -34,6 +36,7 @@ type EscalatorQuoteState = {
   specGroups: EscalatorSpecGroup[];
   configRows: EscalatorConfigRow[];
   functionRows: EscalatorFunctionRow[];
+  language: Lang;
 };
 
 const todayQuotationNo = () => {
@@ -62,6 +65,7 @@ const initialState: EscalatorQuoteState = {
   specGroups: defaultEscalatorSpecGroups,
   configRows: defaultEscalatorConfigRows,
   functionRows: defaultEscalatorFunctionRows,
+  language: 'en',
 };
 
 const STORAGE_KEY = 'xinfuji-escalator-quote';
@@ -104,6 +108,7 @@ export default function EscalatorQuotePage() {
   );
   const isExw = state.quotationType === 'EXW';
   const grandTotal = priceSubtotal + (isExw ? 0 : Number(state.freightCost || 0));
+  const et = escalatorTranslations[state.language] || escalatorTranslations.en;
 
   const setField = <K extends keyof EscalatorQuoteState>(field: K, value: EscalatorQuoteState[K]) => {
     setState((prev) => ({ ...prev, [field]: value }));
@@ -249,31 +254,52 @@ export default function EscalatorQuotePage() {
     <main>
       <div className="bg-gray-100 p-4">
         <div className="sticky top-0 z-20 mb-4 rounded-lg bg-white/95 p-3 shadow-md backdrop-blur no-print">
-          <div className="flex flex-wrap gap-2">
-              <Link href="/" className="rounded-lg bg-slate-700 px-6 py-3 text-center text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-slate-600">
+          <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:flex xl:flex-wrap">
+              <Link href="/" className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
                 电梯报价
               </Link>
-              <Link href="/pi" className="rounded-lg bg-slate-900 px-6 py-3 text-center text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-slate-700">
+              <Link href="/pi" className="py-2 px-3 bg-slate-900 text-white rounded-lg hover:bg-slate-700 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
                 PI 制作
               </Link>
-              <Link href="/packing-list" className="rounded-lg bg-slate-700 px-6 py-3 text-center text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-slate-600">
+              <Link href="/packing-list" className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
                 箱单制作
               </Link>
-              <Link href="/escalator" className="rounded-lg bg-orange-600 px-6 py-3 text-center text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-orange-700">
+              <Link href="/contract-maker/index.html?from=quote" className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
+                合同制作
+              </Link>
+              <Link href="/escalator" className="py-2 px-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
                 扶梯报价
               </Link>
-              <button onClick={handleGeneratePDF} className="rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-blue-700">
-                {isClient && window !== window.top ? '新窗口打开并生成 PDF' : '生成 PDF'}
-              </button>
-              <button onClick={handleExportWord} className="rounded-lg bg-emerald-600 px-6 py-3 text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-emerald-700">
-                Word
-              </button>
-              <button onClick={resetDraft} className="rounded-lg bg-red-500 px-6 py-3 text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 hover:bg-red-600">
+              <button onClick={resetDraft} className="py-2 px-3 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
                 新建报价
               </button>
-              <button onClick={saveDraft} className={`rounded-lg px-6 py-3 text-base font-semibold tracking-wide text-white shadow-md transition-all active:scale-95 ${saved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
+              <button onClick={saveDraft} className={`py-2 px-3 text-white rounded-lg text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all ${saved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
                 {saved ? '已保存' : '保存到报价库'}
               </button>
+            </div>
+            <div className="grid grid-cols-[1fr_auto_auto] gap-2 xl:min-w-[480px] xl:justify-end">
+              <button onClick={handleGeneratePDF} className="p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 font-semibold">
+                {isClient && window !== window.top ? '新窗口打开并生成 PDF' : '生成 PDF'}
+              </button>
+              <button onClick={handleExportWord} className="px-4 p-2 bg-emerald-600 text-white rounded-lg shadow-md hover:bg-emerald-700 font-semibold tracking-wide">
+                📄 Word
+              </button>
+              <select
+                value={state.language}
+                onChange={(e) => setField('language', e.target.value as Lang)}
+                className="px-3 py-2 bg-gray-700 text-white rounded-lg shadow-md hover:bg-gray-800 font-semibold text-sm cursor-pointer"
+                title="Switch output language"
+              >
+                <option value="en">🇬🇧 EN</option>
+                <option value="zh">🇨🇳 中文</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="pt">🇧🇷 PT</option>
+                <option value="fr">🇫🇷 FR</option>
+                <option value="vi">🇻🇳 VI</option>
+                <option value="ru">🇷🇺 RU</option>
+              </select>
+            </div>
           </div>
         </div>
         <div className="flex flex-col gap-4 md:flex-row">
@@ -490,24 +516,23 @@ export default function EscalatorQuotePage() {
           <div className="w-full rounded-lg bg-white p-4 text-[12px] leading-snug text-black shadow-sm print:p-0 print:shadow-none">
             <Header />
             <div className="p-4">
-            <h2 className="mb-4 border-b pb-2 text-3xl font-bold">Quotation</h2>
+            <h2 className="mb-4 border-b pb-2 text-3xl font-bold">{et.quotation}</h2>
             <p className="mb-4">
-              We thank you very much for your enquiry. In the meantime, should you have any questions, please do not hesitate to contact us.
-              We refer to the above mention project and would like to submit our price to you.
+              {et.intro}
             </p>
             <div className="mb-3 grid grid-cols-2 gap-2">
-              <p><b>Customer:</b> {state.customer}</p>
-              <p><b>Term:</b> {state.quotationType}</p>
-              <p><b>Quotation No.:</b> {state.quotationNo}</p>
-              <p><b>Project:</b> {state.projectName}</p>
-              <p><b>Date:</b> {state.quotationDate}</p>
+              <p><b>{et.customer}:</b> {state.customer}</p>
+              <p><b>{et.term}:</b> {state.quotationType}</p>
+              <p><b>{et.quotationNo}:</b> {state.quotationNo}</p>
+              <p><b>{et.project}:</b> {state.projectName}</p>
+              <p><b>{et.date}:</b> {state.quotationDate}</p>
             </div>
 
-            <h3 className="mb-2 mt-4 text-base font-bold">I. Product & Price</h3>
+            <h3 className="mb-2 mt-4 text-base font-bold">{et.productPrice}</h3>
             <table className={previewTable}>
               <thead>
                 <tr>
-                  {['Lift NO.', 'Description', 'Speed / (m/s)', 'Inclination / (°)', 'Quantity (Unit)', 'Unit Price ($)', 'Total Price ($)'].map((h) => (
+                  {[et.liftNo, et.description, et.speed, et.inclination, et.quantity, et.unitPrice, et.totalPrice].map((h) => (
                     <th key={h} className={thClass}>{h}</th>
                   ))}
                 </tr>
@@ -536,35 +561,35 @@ export default function EscalatorQuotePage() {
                 ))}
                 {!isExw && (
                   <tr>
-                    <td className={`${tdClass} text-right`} colSpan={6}>Local freight container from factory to {state.freightDestination} :</td>
+                    <td className={`${tdClass} text-right`} colSpan={6}>{et.freight(state.freightDestination)}</td>
                     <td className={`${tdClass} text-right`}>{money(state.freightCost)}</td>
                   </tr>
                 )}
                 <tr className="bg-yellow-100 font-bold">
-                  <td className={`${tdClass} text-right`} colSpan={6}>Total {state.quotationType}{!isExw ? ` ${state.freightDestination}` : ''}</td>
+                  <td className={`${tdClass} text-right`} colSpan={6}>{et.total(state.quotationType, !isExw ? state.freightDestination : '')}</td>
                   <td className={`${tdClass} text-right`}>{money(grandTotal)}</td>
                 </tr>
               </tbody>
             </table>
 
             <div className="mt-4 space-y-1">
-              <p>Note: (1) Price refer to exchange 1 USD={state.exchangeRateBasis} RMB, in case the exchange rate fluctuates over ±2%, when sign the contract, the price will be adjusted accordingly.</p>
-              <p>(2) Installation & commission & certificate cost is not included.</p>
-              <p>(3) Quotation valid period: {state.validityDays} days</p>
-              <p>(4) Total need {state.containerEstimate} containers estimate.</p>
-              <p><b>II. Payment term</b></p>
+              <p>{et.exchangeNote(state.exchangeRateBasis)}</p>
+              <p>{et.installNote}</p>
+              <p>{et.validityNote(state.validityDays)}</p>
+              <p>{et.containersNote(state.containerEstimate)}</p>
+              <p><b>{et.paymentTerm}</b></p>
               <p>{state.paymentTerm}</p>
-              <p><b>III. Delivery date</b></p>
-              <p>{state.deliveryDays} days after both parties confirmed the detailed builder&apos;s work drawing, signed the commodity contract and received prepayment.</p>
-              <p><b>IV. Warranty period</b></p>
-              <p>{state.warrantyMonths} months after shipping date. (Core components)</p>
+              <p><b>{et.deliveryDate}</b></p>
+              <p>{et.deliveryText(state.deliveryDays)}</p>
+              <p><b>{et.warrantyPeriod}</b></p>
+              <p>{et.warrantyText(state.warrantyMonths)}</p>
             </div>
 
-            <h3 className="mb-2 mt-6 text-center text-lg font-bold break-before-page">Specification</h3>
+            <h3 className="mb-2 mt-6 text-center text-lg font-bold break-before-page">{et.specification}</h3>
             <table className={previewTable}>
               <thead>
                 <tr>
-                  <th className={thClass}>参数 Specification</th>
+                  <th className={thClass}>{et.specificationHeader}</th>
                   {state.specGroups.map((group) => <th key={group.id} className={thClass}>{group.no}</th>)}
                 </tr>
               </thead>
@@ -578,11 +603,11 @@ export default function EscalatorQuotePage() {
               </tbody>
             </table>
 
-            <h3 className="mb-2 mt-6 text-center text-lg font-bold break-before-page">主要配置表 / Main Configuration</h3>
+            <h3 className="mb-2 mt-6 text-center text-lg font-bold break-before-page">{et.configuration}</h3>
             <table className={previewTable}>
               <thead>
                 <tr>
-                  {['序号 NO.', '名称 Name', '品牌 Brand', '备注 Remarks'].map((h) => <th key={h} className={thClass}>{h}</th>)}
+                  {[et.configNo, et.configName, et.configBrand, et.configRemarks].map((h) => <th key={h} className={thClass}>{h}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -597,11 +622,11 @@ export default function EscalatorQuotePage() {
               </tbody>
             </table>
 
-            <h3 className="mb-2 mt-6 text-center text-lg font-bold break-before-page">Main Function Description</h3>
+            <h3 className="mb-2 mt-6 text-center text-lg font-bold break-before-page">{et.functionDescription}</h3>
             <table className={previewTable}>
               <thead>
                 <tr>
-                  {['序号 (No.)', '功能名称 (Function Name)', '功能说明 (Function Description)'].map((h) => <th key={h} className={thClass}>{h}</th>)}
+                  {[et.functionNo, et.functionName, et.functionText].map((h) => <th key={h} className={thClass}>{h}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -616,7 +641,7 @@ export default function EscalatorQuotePage() {
             </table>
 
             <p className="mt-5 text-[11px]">
-              Note: In order to further improve product quality and promote technological innovation, and to better meet customer needs, our company reserves the right to modify the configuration and brand of certain components mentioned above. However, we guarantee that the quality of any updated components will be no lower than that of the original ones.
+              {et.finalNote}
             </p>
             </div>
           </div>
