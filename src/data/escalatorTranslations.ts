@@ -1,4 +1,5 @@
 import { Lang } from './translations';
+import { EscalatorSpecGroup } from './escalatorDefaults';
 
 type EscalatorLabels = {
   quotation: string;
@@ -259,3 +260,84 @@ export const escalatorTranslations: Record<Lang, EscalatorLabels> = {
     functionDescription: 'Описание основных функций',
   },
 };
+
+const ES_SPEC_LABELS: Record<keyof EscalatorSpecGroup, string> = {
+  id: 'ID',
+  no: 'N°',
+  type: 'Tipo',
+  qty: 'Cantidad',
+  drawingNo: 'N° de plano civil',
+  inclination: 'Inclinación (°)',
+  stepWidth: 'Ancho del peldaño (mm)',
+  layoutMode: 'Modo de disposición',
+  horizontalSteps: 'Número de peldaños horizontales',
+  runningSpeed: 'Velocidad de operación (m/s)',
+  travelingHeight: 'Altura de elevación',
+  horizontalSpan: 'Luz horizontal',
+  motorPower: 'Potencia del motor',
+  frequencyConversion: 'Con variador de frecuencia',
+  handrailColor: 'Color de la banda del pasamanos',
+  handrailSpec: 'Especificación de la banda del pasamanos',
+  railingHeight: 'Altura de la balaustrada',
+  railingMaterial: 'Material/Color de la balaustrada',
+  supportMaterial: 'Material del soporte del pasamanos',
+  coverPlateMaterial: 'Material de cubiertas interior y exterior',
+  apronPlateMaterial: 'Material del panel de faldilla',
+  stepType: 'Tipo de peldaño',
+  stepColor: 'Color del peldaño',
+  combColor: 'Color del peine',
+  combStructure: 'Estructura del peine',
+  movableCoverPlate: 'Tipo de placa de cubierta móvil',
+  machineRoomStandard: 'Longitud estándar de sala de máquinas',
+  upperMachineRoomLengthening: 'Alargamiento sala de máquinas superior',
+  lowerMachineRoomLengthening: 'Alargamiento sala de máquinas inferior',
+  lowerMachineRoomShortening: 'Acortamiento sala de máquinas inferior',
+  intermediateSupports: 'Número de soportes intermedios',
+  transportation: 'Modo de transporte y forma de entrega',
+  installationEnvironment: 'Entorno de instalación',
+  mainPower: 'Alimentación principal',
+  lightingPower: 'Alimentación de iluminación',
+  voltageDifference: 'Variación de tensión',
+};
+
+const ES_VALUE_MAP: [RegExp, string][] = [
+  [/Escalators\s*\(H=(.*?)\)/gi, 'Escaleras mecánicas (H=$1)'],
+  [/304 stainless steel exterior cladding material 1\.0mm ____ m²/gi, 'Revestimiento exterior de acero inoxidable 304 1.0mm ____ m²'],
+  [/\bEscalator\b/gi, 'Escalera mecánica'],
+  [/\bParallel\b/gi, 'Paralelo'],
+  [/Specific accounting required/gi, 'Requiere cálculo específico'],
+  [/\bYes\b/gi, 'Sí'],
+  [/\bNo\b/gi, 'No'],
+  [/\bBlack\b/gi, 'Negro'],
+  [/Width\s*100\s*mm/gi, 'Ancho 100 mm'],
+  [/Glass\s*\/\s*Transparent/gi, 'Vidrio/Transparente'],
+  [/St\.St\.?\s*304/gi, 'Acero inox. 304'],
+  [/St\.St\.?\s*430/gi, 'Acero inox. 430'],
+  [/Stainless steel color/gi, 'Color acero inoxidable'],
+  [/Aluminum alloy/gi, 'Aleación de aluminio'],
+  [/\bNone\b/gi, 'Ninguno'],
+  [/\bContainer\b/gi, 'Contenedor'],
+  [/\bIndoor\b/gi, 'Interior'],
+  [/AC\s*380V,\s*3\s*phase,\s*50\s*Hz/gi, 'CA 380V, 3 fases, 50 Hz'],
+  [/AC\s*220V,\s*single\s*phase,\s*50Hz/gi, 'CA 220V, monofásico, 50 Hz'],
+  [/\b3\s*phase\b/gi, '3 fases'],
+  [/single\s*phase/gi, 'monofásico'],
+];
+
+export function translateEscalatorSpecLabel(
+  label: string,
+  key: keyof EscalatorSpecGroup,
+  lang: Lang,
+) {
+  if (lang === 'es') return ES_SPEC_LABELS[key] || label;
+  return label;
+}
+
+export function translateEscalatorValue(value: string | number, lang: Lang) {
+  let result = String(value ?? '');
+  if (lang !== 'es') return result;
+  for (const [pattern, replacement] of ES_VALUE_MAP) {
+    result = result.replace(pattern, replacement);
+  }
+  return result;
+}

@@ -17,7 +17,11 @@ import {
   EscalatorPriceRow,
   EscalatorSpecGroup,
 } from '@/data/escalatorDefaults';
-import { escalatorTranslations } from '@/data/escalatorTranslations';
+import {
+  escalatorTranslations,
+  translateEscalatorSpecLabel,
+  translateEscalatorValue,
+} from '@/data/escalatorTranslations';
 import { Lang } from '@/data/translations';
 
 export type EscalatorQuoteWordState = {
@@ -130,7 +134,7 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
             ? new TableRow({
               children: [
                 cell(row.liftNo),
-                cell(row.description, { colSpan: 3, align: AlignmentType.LEFT }),
+                cell(translateEscalatorValue(row.description, state.language), { colSpan: 3, align: AlignmentType.LEFT }),
                 cell(row.quantity),
                 cell(money(row.unitPrice)),
                 cell(money(Number(row.quantity || 0) * Number(row.unitPrice || 0))),
@@ -139,7 +143,7 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
             : new TableRow({
               children: [
                 cell(row.liftNo),
-                cell(row.description, { align: AlignmentType.LEFT }),
+                cell(translateEscalatorValue(row.description, state.language), { align: AlignmentType.LEFT }),
                 cell(row.speed),
                 cell(row.inclination),
                 cell(row.quantity),
@@ -207,8 +211,8 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
           (row) =>
             new TableRow({
               children: [
-                cell(row.label, { align: AlignmentType.LEFT }),
-                ...state.specGroups.map((group) => cell(String(group[row.key] ?? ''))),
+                cell(translateEscalatorSpecLabel(row.label, row.key, state.language), { align: AlignmentType.LEFT }),
+                ...state.specGroups.map((group) => cell(translateEscalatorValue(String(group[row.key] ?? ''), state.language))),
               ],
             }),
         ),

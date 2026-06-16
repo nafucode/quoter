@@ -19,6 +19,7 @@ type PiItem = {
 
 type PiForm = {
   sellerTel: string;
+  projectName: string;
   buyerName: string;
   buyerTel: string;
   buyerEmail: string;
@@ -77,6 +78,7 @@ type QuoteElevator = {
 
 type QuoteSnapshot = {
   companyName?: string;
+  projectName?: string;
   quotationNo?: string;
   quotationDate?: string;
   quotationType?: string;
@@ -126,6 +128,7 @@ const sellerTelOptions = [
 
 const initialForm: PiForm = {
   sellerTel: "+86 18018599919",
+  projectName: "Project",
   buyerName: "FRANK EGBORO",
   buyerTel: "+234 803 345 4299",
   buyerEmail: "",
@@ -348,6 +351,7 @@ function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
 
   return {
     ...current,
+    projectName: source.projectName || current.projectName,
     buyerName: source.companyName || current.buyerName,
     contractNo: source.quotationNo || current.contractNo,
     issueDate: dateForPi(source.quotationDate || "") || current.issueDate,
@@ -498,6 +502,25 @@ export default function ProformaInvoicePage() {
     setTimeout(() => setPiSaved(false), 1800);
   };
 
+  const buildPiFileTitle = () => {
+    const sanitize = (value: string) =>
+      String(value || "")
+        .replace(/[/\\?%*:|"<>]/g, "-")
+        .trim();
+    const buyer = sanitize(form.buyerName) || "Customer";
+    const project = sanitize(form.projectName) || sanitize(form.contractNo) || "Project";
+    return `PI-${buyer}-${project}`;
+  };
+
+  const handlePrintPdf = () => {
+    const prevTitle = document.title;
+    document.title = buildPiFileTitle();
+    window.print();
+    setTimeout(() => {
+      document.title = prevTitle;
+    }, 500);
+  };
+
   const loadPiFromHistory = (entry: PiHistoryEntry) => {
     setForm(normalizePiForm(entry.form));
     setActivePiHistoryId(entry.id);
@@ -540,6 +563,7 @@ export default function ProformaInvoicePage() {
 
   const textFields: Array<[keyof PiForm, string, "input" | "textarea"]> = [
     ["sellerTel", "Seller Tel", "input"],
+    ["projectName", "Project Name", "input"],
     ["buyerName", "Messrs.", "input"],
     ["buyerTel", "Tel", "input"],
     ["buyerEmail", "Email", "input"],
@@ -593,7 +617,7 @@ export default function ProformaInvoicePage() {
               返回报价
             </Link>
             <button
-              onClick={() => window.print()}
+              onClick={handlePrintPdf}
               className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
             >
               打印 / PDF

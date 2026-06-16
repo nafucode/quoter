@@ -14,7 +14,11 @@ import {
   EscalatorPriceRow,
   EscalatorSpecGroup,
 } from '@/data/escalatorDefaults';
-import { escalatorTranslations } from '@/data/escalatorTranslations';
+import {
+  escalatorTranslations,
+  translateEscalatorSpecLabel,
+  translateEscalatorValue,
+} from '@/data/escalatorTranslations';
 import { Lang } from '@/data/translations';
 import { generateEscalatorWordBlob } from '@/utils/generateEscalatorWord';
 
@@ -542,7 +546,7 @@ export default function EscalatorQuotePage() {
                   isPriceExtraRow(row) ? (
                     <tr key={row.id}>
                       <td className={`${tdClass} text-center`}>{row.liftNo}</td>
-                      <td className={tdClass} colSpan={3}>{row.description}</td>
+                      <td className={tdClass} colSpan={3}>{translateEscalatorValue(row.description, state.language)}</td>
                       <td className={`${tdClass} text-center`}>{row.quantity}</td>
                       <td className={`${tdClass} text-right`}>{money(row.unitPrice)}</td>
                       <td className={`${tdClass} text-right`}>{money(Number(row.quantity || 0) * Number(row.unitPrice || 0))}</td>
@@ -550,7 +554,7 @@ export default function EscalatorQuotePage() {
                   ) : (
                     <tr key={row.id}>
                       <td className={`${tdClass} text-center`}>{row.liftNo}</td>
-                      <td className={tdClass}>{row.description}</td>
+                      <td className={tdClass}>{translateEscalatorValue(row.description, state.language)}</td>
                       <td className={`${tdClass} text-center`}>{row.speed}</td>
                       <td className={`${tdClass} text-center`}>{row.inclination}</td>
                       <td className={`${tdClass} text-center`}>{row.quantity}</td>
@@ -596,8 +600,12 @@ export default function EscalatorQuotePage() {
               <tbody>
                 {escalatorSpecRows.map((row) => (
                   <tr key={row.key}>
-                    <td className={`${tdClass} font-medium`}>{row.label}</td>
-                    {state.specGroups.map((group) => <td key={`${group.id}-${row.key}`} className={`${tdClass} text-center`}>{String(group[row.key] ?? '')}</td>)}
+                    <td className={`${tdClass} font-medium`}>{translateEscalatorSpecLabel(row.label, row.key, state.language)}</td>
+                    {state.specGroups.map((group) => (
+                      <td key={`${group.id}-${row.key}`} className={`${tdClass} text-center`}>
+                        {translateEscalatorValue(String(group[row.key] ?? ''), state.language)}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
