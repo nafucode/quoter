@@ -67,6 +67,20 @@ const Quote = () => {
     } catch {}
   }, []);
 
+  const historySequenceById = useMemo(() => {
+    const sequence = new Map<string, string>();
+    [...quoteHistory]
+      .sort((a, b) => {
+        const aTime = new Date(a.savedAt || 0).getTime();
+        const bTime = new Date(b.savedAt || 0).getTime();
+        return aTime - bTime;
+      })
+      .forEach((entry, index) => {
+        sequence.set(String(entry.id), String(index + 1).padStart(3, '0'));
+      });
+    return sequence;
+  }, [quoteHistory]);
+
   const saveToHistory = (entry: any) => {
     setQuoteHistory(prev => {
       const updated = [entry, ...prev].slice(0, 200); // 最多保留200条
@@ -1090,6 +1104,10 @@ const Quote = () => {
                     : '—';
                   return (
                     <div key={entry.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 transition-colors group">
+                      {/* Sequence — oldest saved quote starts from 001 */}
+                      <span className="shrink-0 text-xs font-bold text-gray-500 w-10 text-center tabular-nums">
+                        {historySequenceById.get(String(entry.id)) || '---'}
+                      </span>
                       {/* Badge */}
                       <span className="shrink-0 text-xs font-bold text-blue-600 w-10 text-center leading-tight">
                         {entry.quotationType}
