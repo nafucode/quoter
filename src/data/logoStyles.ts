@@ -9,4 +9,9 @@ export const logoStyles = [
     name: 'DEF Logo',
     previewImage: 'https://xinfuji.com/wp-content/uploads/def-logo.jpg',
   },
+  {
+    id: 'XFJ-LOGO-03',
+    name: 'Swift Lift Logo',
+    previewImage: 'https://xinfuji.com/wp-content/uploads/logo-swift-lift.png',
+  },
 ];
