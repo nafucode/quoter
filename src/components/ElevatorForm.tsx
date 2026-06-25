@@ -7,6 +7,7 @@ import { copStyleGroups } from '@/data/copStyles';
 import { lopStyles } from '@/data/lopStyles';
 import { landingDoorStyles } from '@/data/landingDoorStyles';
 import { handrailStyles } from '@/data/handrailStyles';
+import { logoStyles } from '@/data/logoStyles';
 
 const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFocus: (section: string) => void }) => {
   const { updateElevator, removeElevator, toggleElevatorCollapse } = useQuoteStore();
@@ -97,6 +98,9 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
       case 'handrail':
         newCabinEffect = { ...elevator.cabinEffect, handrail: { type: 'image', value: style.previewImage } };
         break;
+      case 'copLogo':
+        newCabinEffect = { ...elevator.cabinEffect, copLogo: { type: 'image', value: style.previewImage } };
+        break;
       default:
         newCabinEffect = { ...elevator.cabinEffect };
     }
@@ -112,6 +116,7 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
       case 'lop': return { styleGroups: [{ groupName: 'LOP Styles', styles: lopStyles }], title: 'Choose a LOP Style' };
       case 'landingDoor': return { styleGroups: [{ groupName: 'Landing Door Styles', styles: landingDoorStyles }], title: 'Choose a Landing Door Style' };
       case 'handrail': return { styleGroups: [{ groupName: 'Handrail Styles', styles: handrailStyles }], title: 'Choose a Handrail Style' };
+      case 'copLogo': return { styleGroups: [{ groupName: 'Logo Styles', styles: logoStyles }], title: 'Choose a Logo' };
       default: return { styleGroups: [], title: '' };
     }
   };
@@ -427,6 +432,7 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                   onTypeChange={handleHybridTypeChange}
                   onValueChange={handleHybridValueChange}
                   onFileChange={handleHybridFileChange}
+                  onChooseFromLibrary={() => openPicker('copLogo')} 
                 />
               </div>
             </div>
