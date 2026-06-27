@@ -14,4 +14,9 @@ export const lopStyles = [
     name: '黑底白字-标配',
     previewImage: '/lop-styles/黑底白字-标配.png',
   },
+  {
+    id: 'LOP-04',
+    name: '黑底白字-标配 2',
+    previewImage: '/lop-styles/黑底白字-标配 2.png',
+  },
 ];
