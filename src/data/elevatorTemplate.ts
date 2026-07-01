@@ -61,7 +61,7 @@ export const elevatorTemplate = {
     copImage: '',
     lopImage: '',
     ceiling: { type: 'text', value: 'As Picture' },
-    button: { type: 'text', value: 'Round standard' },
+    button: { type: 'text', value: 'Round buttons with Braille' },
     floor: { type: 'text', value: 'PVC As Picture' },
     landingDoor: { type: 'image', value: '' },
     handrail: { type: 'text', value: 'Optional' },
