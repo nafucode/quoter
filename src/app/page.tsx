@@ -36,6 +36,7 @@ const Quote = () => {
     temperedGlass,
     showPartList,
     showFunctionList,
+    partListTemplate,
     partList,
     language,
     setField,
@@ -44,7 +45,10 @@ const Quote = () => {
     fetchExchangeRate,
     importState,
     updatePartListItem,
+    setPartListTemplate,
   } = useQuoteStore();
+
+  const isPlatformPartList = partListTemplate === 'platform';
 
   const t = translations[language];
   const selectedCertificationStandard = certificationStandard || 'CE Certification';
@@ -155,6 +159,7 @@ const Quote = () => {
       certificationStandard: s.certificationStandard || 'CE Certification',
       showCertificationStandard: s.showCertificationStandard ?? false,
       showPartList: s.showPartList, showFunctionList: s.showFunctionList,
+      partListTemplate: s.partListTemplate,
       partList: s.partList,
     };
     return {
@@ -270,6 +275,7 @@ const Quote = () => {
         temperedGlass: s.temperedGlass,
         showPartList: s.showPartList,
         showFunctionList: s.showFunctionList,
+        partListTemplate: s.partListTemplate,
         partList: s.partList,
         language: s.language,
       });
@@ -784,20 +790,71 @@ const Quote = () => {
 
             {/* Part List Editor */}
             <h3 className="text-lg font-semibold mt-6 mb-3 border-t pt-4">Part List<span className="block text-sm font-normal text-gray-500">零部件清单</span></h3>
+            <div className="mb-3">
+              <label className="block text-sm font-medium text-gray-700">Part List Template<span className="block text-xs text-gray-500">配置表模板</span></label>
+              <select
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
+                value={partListTemplate || 'standard'}
+                onChange={(e) => setPartListTemplate(e.target.value as 'standard' | 'platform')}
+              >
+                <option value="standard">Standard Elevator 标准电梯</option>
+                <option value="platform">Platform Lift 平台梯</option>
+              </select>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="text-left p-2 border border-gray-300 w-1/2">Part / 零部件</th>
-                    <th className="text-left p-2 border border-gray-300">Brand / 品牌</th>
-                    <th className="text-left p-2 border border-gray-300">Origin / 产地</th>
-                  </tr>
+                  {isPlatformPartList ? (
+                    <tr className="bg-gray-100">
+                      <th className="text-left p-2 border border-gray-300 w-16">No.</th>
+                      <th className="text-left p-2 border border-gray-300">Category / 类别</th>
+                      <th className="text-left p-2 border border-gray-300">Component / 名称</th>
+                      <th className="text-left p-2 border border-gray-300">Brand / 品牌</th>
+                    </tr>
+                  ) : (
+                    <tr className="bg-gray-100">
+                      <th className="text-left p-2 border border-gray-300 w-1/2">Part / 零部件</th>
+                      <th className="text-left p-2 border border-gray-300">Brand / 品牌</th>
+                      <th className="text-left p-2 border border-gray-300">Origin / 产地</th>
+                    </tr>
+                  )}
                 </thead>
                 <tbody>
                   {partList.map(row =>
                     row.type === 'section' ? (
                       <tr key={row.id} className="bg-gray-50">
-                        <td colSpan={3} className="p-2 border border-gray-300 font-semibold text-gray-700">{row.label}</td>
+                        <td colSpan={isPlatformPartList ? 4 : 3} className="p-2 border border-gray-300 font-semibold text-gray-700">{row.label}</td>
+                      </tr>
+                    ) : isPlatformPartList ? (
+                      <tr key={row.id}>
+                        <td className="p-1 border border-gray-300">
+                          <input
+                            value={row.no || ''}
+                            onChange={(e) => updatePartListItem(row.id, 'no', e.target.value)}
+                            className="w-full p-1 border border-gray-200 rounded text-sm focus:outline-none focus:border-blue-400"
+                          />
+                        </td>
+                        <td className="p-1 border border-gray-300">
+                          <input
+                            value={row.category || ''}
+                            onChange={(e) => updatePartListItem(row.id, 'category', e.target.value)}
+                            className="w-full p-1 border border-gray-200 rounded text-sm focus:outline-none focus:border-blue-400"
+                          />
+                        </td>
+                        <td className="p-1 border border-gray-300">
+                          <input
+                            value={row.label}
+                            onChange={(e) => updatePartListItem(row.id, 'label', e.target.value)}
+                            className="w-full p-1 border border-gray-200 rounded text-sm focus:outline-none focus:border-blue-400"
+                          />
+                        </td>
+                        <td className="p-1 border border-gray-300">
+                          <input
+                            value={row.brand}
+                            onChange={(e) => updatePartListItem(row.id, 'brand', e.target.value)}
+                            className="w-full p-1 border border-gray-200 rounded text-sm focus:outline-none focus:border-blue-400"
+                          />
+                        </td>
                       </tr>
                     ) : (
                       <tr key={row.id}>
@@ -1045,17 +1102,33 @@ const Quote = () => {
                         <h3 className="text-lg font-semibold mb-3">{t.partListTitle}</h3>
                         <table className="w-full text-sm border-collapse printable-table">
                           <thead className="bg-gray-200">
-                            <tr>
-                              <th className="p-2 border border-gray-400 text-left">{t.partListColPart}</th>
-                              <th className="p-2 border border-gray-400 text-left">{t.partListColBrand}</th>
-                              <th className="p-2 border border-gray-400 text-left">{t.partListColOrigin}</th>
-                            </tr>
+                            {isPlatformPartList ? (
+                              <tr>
+                                <th className="p-2 border border-gray-400 text-left">No.</th>
+                                <th className="p-2 border border-gray-400 text-left">Category 类别</th>
+                                <th className="p-2 border border-gray-400 text-left">Component 名称</th>
+                                <th className="p-2 border border-gray-400 text-left">Brand 品牌</th>
+                              </tr>
+                            ) : (
+                              <tr>
+                                <th className="p-2 border border-gray-400 text-left">{t.partListColPart}</th>
+                                <th className="p-2 border border-gray-400 text-left">{t.partListColBrand}</th>
+                                <th className="p-2 border border-gray-400 text-left">{t.partListColOrigin}</th>
+                              </tr>
+                            )}
                           </thead>
                           <tbody>
                             {partList.map(row =>
                               row.type === 'section' ? (
                                 <tr key={row.id} className="bg-gray-100">
-                                  <td colSpan={3} className="p-2 border border-gray-400 font-semibold">{row.label}</td>
+                                  <td colSpan={isPlatformPartList ? 4 : 3} className="p-2 border border-gray-400 font-semibold">{row.label}</td>
+                                </tr>
+                              ) : isPlatformPartList ? (
+                                <tr key={row.id}>
+                                  <td className="p-2 border border-gray-400">{row.no}</td>
+                                  <td className="p-2 border border-gray-400">{row.category}</td>
+                                  <td className="p-2 border border-gray-400">{row.label}</td>
+                                  <td className="p-2 border border-gray-400">{row.brand}</td>
                                 </tr>
                               ) : (
                                 <tr key={row.id}>

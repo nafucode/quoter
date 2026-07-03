@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { elevatorTemplate } from '@/data/elevatorTemplate';
-import { defaultPartList, PartListRow } from '@/data/partListDefaults';
+import { defaultPartList, partListTemplates, PartListRow, PartListTemplate } from '@/data/partListDefaults';
 import { Lang } from '@/data/translations';
 
 const LEGACY_BUTTON_TEXT = 'Round standard';
@@ -66,15 +66,17 @@ interface QuoteState {
   temperedGlass: OptionalItem;
   showPartList: boolean;
   showFunctionList: boolean;
+  partListTemplate: PartListTemplate;
   partList: PartListRow[];
   language: Lang;
   nextId: number;
-  setField: (field: keyof Omit<QuoteState, 'elevators' | 'nextId' | 'setField' | 'addElevator' | 'removeElevator' | 'updateElevator' | 'toggleElevatorCollapse' | 'resetToDefaults' | 'fetchExchangeRate' | 'importState' | 'updatePartListItem'>, value: any) => void;
+  setField: (field: keyof Omit<QuoteState, 'elevators' | 'nextId' | 'setField' | 'addElevator' | 'removeElevator' | 'updateElevator' | 'toggleElevatorCollapse' | 'resetToDefaults' | 'fetchExchangeRate' | 'importState' | 'updatePartListItem' | 'setPartListTemplate'>, value: any) => void;
   addElevator: () => void;
   removeElevator: (id: number) => void;
   updateElevator: (id: number, name: string, value: any) => void;
   toggleElevatorCollapse: (id: number) => void;
-  updatePartListItem: (id: string, field: 'brand' | 'origin', value: string) => void;
+  updatePartListItem: (id: string, field: 'no' | 'category' | 'label' | 'brand' | 'origin', value: string) => void;
+  setPartListTemplate: (template: PartListTemplate) => void;
   resetToDefaults: () => void;
   fetchExchangeRate: () => void;
   importState: (newState: Partial<QuoteState>) => void;
@@ -102,6 +104,7 @@ const initialState = {
   temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', price: 0 },
   showPartList: true,
   showFunctionList: true,
+  partListTemplate: 'standard' as PartListTemplate,
   partList: defaultPartList,
   language: 'en' as Lang,
   nextId: 2,
@@ -155,6 +158,11 @@ export const useQuoteStore = create<QuoteState>()(
           row.id === id ? { ...row, [field]: value } : row
         ),
       })),
+
+      setPartListTemplate: (template) => set({
+        partListTemplate: template,
+        partList: partListTemplates[template].map(row => ({ ...row })),
+      }),
 
       resetToDefaults: () => set({ ...initialState, quotationDate: new Date().toLocaleDateString('en-CA') }),
 

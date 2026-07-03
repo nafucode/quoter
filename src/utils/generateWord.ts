@@ -188,6 +188,7 @@ export async function generateWordBlob(state: {
   temperedGlass: { enabled: boolean; text: string; price: number };
   showPartList?: boolean;
   showFunctionList?: boolean;
+  partListTemplate?: string;
   partList: PartListRow[];
   language: Lang;
 }): Promise<Blob> {
@@ -663,13 +664,28 @@ export async function generateWordBlob(state: {
       para([bold(t.partListTitle, 24)], { align: AlignmentType.CENTER, spacingAfter: 120 }),
     );
 
-    const partCols = [Math.floor(CONTENT_W * 0.5), Math.floor(CONTENT_W * 0.25), CONTENT_W - Math.floor(CONTENT_W * 0.5) - Math.floor(CONTENT_W * 0.25)];
+    const isPlatformPartList = state.partListTemplate === 'platform';
+    const partCols = isPlatformPartList
+      ? [
+          Math.floor(CONTENT_W * 0.08),
+          Math.floor(CONTENT_W * 0.28),
+          Math.floor(CONTENT_W * 0.42),
+          CONTENT_W - Math.floor(CONTENT_W * 0.08) - Math.floor(CONTENT_W * 0.28) - Math.floor(CONTENT_W * 0.42),
+        ]
+      : [Math.floor(CONTENT_W * 0.5), Math.floor(CONTENT_W * 0.25), CONTENT_W - Math.floor(CONTENT_W * 0.5) - Math.floor(CONTENT_W * 0.25)];
     const partRows: TableRow[] = [
-      headerRow([
-        { text: t.partListColPart, width: partCols[0] },
-        { text: t.partListColBrand, width: partCols[1] },
-        { text: t.partListColOrigin, width: partCols[2] },
-      ]),
+      isPlatformPartList
+        ? headerRow([
+            { text: 'No.', width: partCols[0] },
+            { text: 'Category 类别', width: partCols[1] },
+            { text: 'Component 名称', width: partCols[2] },
+            { text: 'Brand 品牌', width: partCols[3] },
+          ])
+        : headerRow([
+            { text: t.partListColPart, width: partCols[0] },
+            { text: t.partListColBrand, width: partCols[1] },
+            { text: t.partListColOrigin, width: partCols[2] },
+          ]),
     ];
 
     state.partList.forEach((row) => {
@@ -677,7 +693,18 @@ export async function generateWordBlob(state: {
         partRows.push(
           new TableRow({
             children: [
-              cell(row.label, { bold: true, bg: 'D9D9D9', colSpan: 3, width: CONTENT_W }),
+              cell(row.label, { bold: true, bg: 'D9D9D9', colSpan: isPlatformPartList ? 4 : 3, width: CONTENT_W }),
+            ],
+          }),
+        );
+      } else if (isPlatformPartList) {
+        partRows.push(
+          new TableRow({
+            children: [
+              cell(row.no || '', { width: partCols[0] }),
+              cell(row.category || '', { width: partCols[1] }),
+              cell(row.label, { width: partCols[2] }),
+              cell(row.brand, { width: partCols[3] }),
             ],
           }),
         );
