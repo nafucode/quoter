@@ -58,12 +58,21 @@ const Quote = () => {
 
   const HISTORY_KEY = 'quoter_history';
   const CURRENT_CONTRACT_QUOTE_KEY = 'quoter_current_contract_quote';
+  const COMPANY_OPTIONS_KEY = 'quoter_company_options';
+
+  const [companyOptions, setCompanyOptions] = useState<string[]>([]);
 
   useEffect(() => {
     setIsClient(true);
     try {
       const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
       setQuoteHistory(saved);
+    } catch {}
+    try {
+      const savedCompanies = JSON.parse(localStorage.getItem(COMPANY_OPTIONS_KEY) || '[]');
+      if (Array.isArray(savedCompanies)) {
+        setCompanyOptions(savedCompanies.filter((name) => typeof name === 'string' && name.trim()));
+      }
     } catch {}
   }, []);
 
@@ -93,6 +102,16 @@ const Quote = () => {
     setQuoteHistory(prev => {
       const updated = prev.filter(e => e.id !== id);
       localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const saveCompanyOption = () => {
+    const trimmedName = companyName.trim();
+    if (!trimmedName) return;
+    setCompanyOptions(prev => {
+      const updated = [trimmedName, ...prev.filter(name => name !== trimmedName)].slice(0, 100);
+      localStorage.setItem(COMPANY_OPTIONS_KEY, JSON.stringify(updated));
       return updated;
     });
   };
@@ -452,11 +471,32 @@ const Quote = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Company Name<span className="block text-xs text-gray-500">公司名称</span></label>
-                <input
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-                  value={companyName}
-                  onChange={(e) => setField('companyName', e.target.value)}
-                />
+                <div className="mt-1 flex gap-2">
+                  <input
+                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                    value={companyName}
+                    onChange={(e) => setField('companyName', e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={saveCompanyOption}
+                    className="shrink-0 rounded-md bg-slate-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-600"
+                  >
+                    保存
+                  </button>
+                </div>
+                {companyOptions.length > 0 && (
+                  <select
+                    className="mt-2 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
+                    value=""
+                    onChange={(e) => e.target.value && setField('companyName', e.target.value)}
+                  >
+                    <option value="">选择已保存公司</option>
+                    {companyOptions.map(name => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Quotation No<span className="block text-xs text-gray-500">报价单号</span></label>
