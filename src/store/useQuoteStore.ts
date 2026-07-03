@@ -4,6 +4,32 @@ import { elevatorTemplate } from '@/data/elevatorTemplate';
 import { defaultPartList, PartListRow } from '@/data/partListDefaults';
 import { Lang } from '@/data/translations';
 
+const LEGACY_BUTTON_TEXT = 'Round standard';
+const DEFAULT_BUTTON_TEXT = 'Round buttons with Braille';
+
+const normalizeCabinEffect = (cabinEffect: any) => {
+  const nextCabinEffect = JSON.parse(JSON.stringify(cabinEffect ?? elevatorTemplate.cabinEffect));
+  if (nextCabinEffect.button?.type === 'text' && nextCabinEffect.button.value === LEGACY_BUTTON_TEXT) {
+    nextCabinEffect.button.value = DEFAULT_BUTTON_TEXT;
+  }
+  return nextCabinEffect;
+};
+
+const normalizeElevator = (elevator: any) => ({
+  ...elevator,
+  cabinEffect: normalizeCabinEffect(elevator?.cabinEffect),
+});
+
+const normalizeQuoteState = (state: any) => {
+  if (!state || typeof state !== 'object') return state;
+  return {
+    ...state,
+    elevators: Array.isArray(state.elevators)
+      ? state.elevators.map(normalizeElevator)
+      : state.elevators,
+  };
+};
+
 // Define types for the state
 interface Elevator {
   id: number;
@@ -98,7 +124,7 @@ export const useQuoteStore = create<QuoteState>()(
           id: state.nextId,
           title: `Elevator #L${state.nextId}`,
           isCollapsed: false,
-          cabinEffect: last ? JSON.parse(JSON.stringify(last.cabinEffect ?? elevatorTemplate.cabinEffect)) : { ...elevatorTemplate.cabinEffect },
+          cabinEffect: normalizeCabinEffect(last?.cabinEffect ?? elevatorTemplate.cabinEffect),
           carWall: { ...(last?.carWall ?? elevatorTemplate.carWall) },
           otherFunctions: (last?.otherFunctions ?? elevatorTemplate.otherFunctions).map((f: any) => ({ ...f })),
         };
@@ -149,20 +175,24 @@ export const useQuoteStore = create<QuoteState>()(
         }
       },
 
-      importState: (newState) => set(newState),
+      importState: (newState) => set(normalizeQuoteState(newState)),
     }),
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
-      version: 1,
+      version: 2,
       migrate: (persistedState: any, version) => {
-        if (version < 1 && persistedState && typeof persistedState === 'object') {
-          return {
+        let nextState = persistedState;
+        if (version < 1 && nextState && typeof nextState === 'object') {
+          nextState = {
             ...persistedState,
             showCertificationStandard: false,
           };
         }
-        return persistedState;
+        if (version < 2) {
+          nextState = normalizeQuoteState(nextState);
+        }
+        return nextState;
       },
     }
   )
