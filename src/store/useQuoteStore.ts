@@ -162,10 +162,10 @@ export const useQuoteStore = create<QuoteState>()(
         const { targetCurrency } = get();
         if (targetCurrency && targetCurrency !== 'USD' && targetCurrency !== '-') {
           try {
-            const response = await fetch(`https://open.er-api.com/v6/latest/USD`);
+            const response = await fetch(`/api/exchange-rate?currency=${encodeURIComponent(targetCurrency)}`);
             const data = await response.json();
-            if (data.rates && data.rates[targetCurrency]) {
-              set({ exchangeRate: data.rates[targetCurrency] });
+            if (data.rate) {
+              set({ exchangeRate: data.rate });
             }
           } catch (error) {
             console.error("Error fetching exchange rate:", error);
