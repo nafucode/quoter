@@ -1,4 +1,4 @@
-export type Lang = 'en' | 'zh' | 'es' | 'pt' | 'fr' | 'vi' | 'ru';
+export type Lang = 'en' | 'zh' | 'es' | 'pt' | 'fr' | 'vi' | 'km' | 'ru';
 
 export const translations = {
   en: {
@@ -586,6 +586,104 @@ export const translations = {
 
     // Footer
     quotationDate: 'Ngày báo giá',
+  },
+
+  km: {
+    // Header
+    quotation: 'សម្រង់តម្លៃ',
+    company: 'ក្រុមហ៊ុន',
+    quotationNo: 'លេខសម្រង់តម្លៃ',
+    projectName: 'ឈ្មោះគម្រោង',
+    quotationType: 'ប្រភេទសម្រង់តម្លៃ',
+
+    // Price table
+    priceTitle: 'តម្លៃ - រូបិយប័ណ្ណ៖ USD',
+    colDescription: 'ការពិពណ៌នា',
+    colSpecs: 'លក្ខណៈបច្ចេកទេស',
+    colQty: 'ចំនួន-ឈុត',
+    colUnitPrice: 'តម្លៃឯកតា',
+    colTotalPrice: 'តម្លៃសរុប',
+    freight: (dest: string) => `ថ្លៃក្នុងស្រុក និងដឹកជញ្ជូនពីរោងចក្រ ទៅ ${dest} :`,
+    totalAmount: 'ចំនួនសរុប :',
+
+    // Terms
+    delivery: 'I. រយៈពេលដឹកជញ្ជូន៖',
+    deliverySuffix: 'ថ្ងៃ បន្ទាប់ពីទទួលប្រាក់កក់ និងបញ្ជាក់គំនូរ។',
+    paymentTerm: 'II. លក្ខខណ្ឌបង់ប្រាក់៖',
+    warranty: 'III. ការធានា៖',
+    warrantySuffix: 'ខែ ចាប់ពីទំនិញមកដល់កំពង់ផែគោលដៅ។',
+    priceValidity: 'IV. សុពលភាពតម្លៃ៖',
+    complianceStandard: 'V. ស្តង់ដារអនុលោម៖',
+    days: 'ថ្ងៃ',
+    until: 'ដល់',
+
+    // Specifications
+    specificationsTitle: 'លក្ខណៈបច្ចេកទេស',
+    elevatorHeader: (id: number) => `លក្ខណៈបច្ចេកទេសជណ្តើរយន្ត #L${id}`,
+    secBasic: 'I. លក្ខណៈមូលដ្ឋាន',
+    secHoistway: 'II. លក្ខណៈអណ្តូងជណ្តើរយន្ត',
+    secCar: 'III. លក្ខណៈកាប៊ីន',
+    secDoor: 'IV. លក្ខណៈទ្វារ',
+    secFunction: 'V. មុខងារ',
+
+    // Spec labels
+    specDescription: 'ការពិពណ៌នា',
+    specType: 'ប្រភេទ',
+    specCapacity: 'សមត្ថភាព (KG)',
+    specSpeed: 'ល្បឿន (M/S)',
+    specFloors: 'ជាន់/ចំណត',
+    specControl: 'ប្រព័ន្ធគ្រប់គ្រង',
+    specServing: 'ជាន់បម្រើ (បង្ហាញលើ COP)',
+    specEntrances: 'ច្រកចូល',
+    specPower: 'តង់ស្យុងថាមពល',
+    specLighting: 'តង់ស្យុងភ្លើងបំភ្លឺ',
+    specFrequency: 'ប្រេកង់',
+    specDrive: 'ប្រព័ន្ធបើកបរ',
+    specShaftConst: 'សំណង់អណ្តូង',
+    specTravel: 'ចម្ងាយដំណើរ (mm)',
+    specHeadroom: 'កម្ពស់ក្បាលអណ្តូង (mm)',
+    specPit: 'ជម្រៅរណ្តៅ (mm)',
+    specShaftSize: 'ទំហំអណ្តូង (W x D mm)',
+    specMachineRoom: 'ទំហំបន្ទប់ម៉ាស៊ីន (W x D x H mm)',
+    specCopPlate: 'ផ្ទាំង COP',
+    specCarDim: 'ទំហំខាងក្នុងកាប៊ីន',
+    specCeiling: 'ពិដានកាប៊ីន',
+    specCarFloor: 'កម្រាលកាប៊ីន',
+    specHandrail: 'ដៃចាប់',
+    specWallLeft: 'ការតុបតែងជញ្ជាំងឆ្វេង',
+    specWallRight: 'ការតុបតែងជញ្ជាំងស្តាំ',
+    specWallRear: 'ការតុបតែងជញ្ជាំងក្រោយ',
+    specDoorType: 'ប្រភេទបើកទ្វារ',
+    specDoorSize: 'ទំហំបើកទ្វារ (W x H mm)',
+    specDoorHeader: 'ប្រភេទក្បាលទ្វារ',
+    specDoor1st: 'ការតុបតែងទ្វារជាន់ទី 1',
+    specDoorOther: 'ការតុបតែងទ្វារជាន់ផ្សេងៗ',
+    specCopLop: 'COP/LOP',
+    specIncluded: 'បានរួមបញ្ចូល',
+
+    // Cabin effect
+    decorationTitle: 'បែបផែនតុបតែង',
+    decorationNote: '(រូបភាពសម្រាប់យោងប៉ុណ្ណោះ សូមយោងតាមវត្ថុពិត)',
+    cabin: 'កាប៊ីន',
+    cop: 'COP',
+    lop: 'LOP',
+    cellCeiling: 'ពិដាន',
+    cellButton: 'ប៊ូតុង',
+    cellFloor: 'កម្រាល',
+    landingDoor: 'ទ្វារជាន់',
+    handrail: 'ដៃចាប់',
+    copLogo: 'ឡូហ្គោ COP',
+
+    // Part list
+    partListTitle: 'បញ្ជីគ្រឿងបន្លាស់',
+    partListColPart: 'គ្រឿងបន្លាស់',
+    partListColBrand: 'ម៉ាក',
+    partListColOrigin: 'ប្រភព',
+    partListNote: 'ចំណាំ៖ ដើម្បីបន្តលើកកម្ពស់គុណភាពផលិតផល និងការច្នៃប្រឌិតបច្ចេកវិទ្យា ហើយបំពេញតម្រូវការអតិថិជនឱ្យកាន់តែប្រសើរ យើងរក្សាសិទ្ធិក្នុងការផ្លាស់ប្តូរម៉ូដែល និងប្រភពនៃគ្រឿងបន្លាស់មួយចំនួនខាងលើ ប៉ុន្តែយើងធានាថាគុណភាព និងសមត្ថភាពរបស់គ្រឿងបន្លាស់ថ្មីមិនទាបជាងគ្រឿងបន្លាស់ដើមទេ។',
+    standardFeaturesTitle: 'មុខងារ',
+
+    // Footer
+    quotationDate: 'កាលបរិច្ឆេទសម្រង់តម្លៃ',
   },
 
   ru: {

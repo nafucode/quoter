@@ -236,6 +236,51 @@ export const escalatorTranslations: Record<Lang, EscalatorLabels> = {
     finalNote:
       'Ghi chú: Nhằm nâng cao chất lượng sản phẩm, thúc đẩy đổi mới công nghệ và đáp ứng tốt hơn nhu cầu khách hàng, chúng tôi có quyền điều chỉnh cấu hình và thương hiệu của một số linh kiện nêu trên. Tuy nhiên, chúng tôi cam kết chất lượng của linh kiện thay thế không thấp hơn linh kiện ban đầu.',
   },
+  km: {
+    ...en,
+    quotation: 'សម្រង់តម្លៃ',
+    intro:
+      'សូមអរគុណចំពោះការសាកសួររបស់លោកអ្នក។ ប្រសិនបើមានសំណួរ សូមកុំស្ទាក់ស្ទើរក្នុងការទាក់ទងមកយើងខ្ញុំ។ សម្រាប់គម្រោងខាងលើ យើងខ្ញុំសូមដាក់ស្នើតម្លៃដូចខាងក្រោម។',
+    customer: 'អតិថិជន',
+    term: 'លក្ខខណ្ឌ',
+    quotationNo: 'លេខសម្រង់តម្លៃ',
+    project: 'គម្រោង',
+    date: 'កាលបរិច្ឆេទ',
+    productPrice: 'I. ផលិតផល និងតម្លៃ',
+    liftNo: 'លេខជណ្តើរ',
+    description: 'ការពិពណ៌នា',
+    speed: 'ល្បឿន / (m/s)',
+    inclination: 'មុំលំអៀង / (°)',
+    quantity: 'ចំនួន (ឯកតា)',
+    unitPrice: 'តម្លៃឯកតា ($)',
+    totalPrice: 'តម្លៃសរុប ($)',
+    freight: (dest) => `ថ្លៃដឹកជញ្ជូនក្នុងស្រុកពីរោងចក្រ ទៅ ${dest} :`,
+    total: (term, dest) => `សរុប ${term}${dest ? ` ${dest}` : ''}`,
+    exchangeNote: (rate) =>
+      `ចំណាំ៖ (1) តម្លៃយោងតាមអត្រា 1 USD=${rate} RMB ប្រសិនបើនៅពេលចុះកិច្ចសន្យា អត្រាប្តូរប្រាក់ប្រែប្រួលលើស ±2% តម្លៃនឹងកែតម្រូវតាមនោះ។`,
+    installNote: '(2) មិនរាប់បញ្ចូលថ្លៃដំឡើង សាកល្បង និងវិញ្ញាបនបត្រ។',
+    validityNote: (days) => `(3) សុពលភាពសម្រង់តម្លៃ៖ ${days} ថ្ងៃ`,
+    containersNote: (containers) => `(4) ប៉ាន់ស្មានត្រូវការ ${containers} កុងតឺន័រ។`,
+    paymentTerm: 'II. លក្ខខណ្ឌបង់ប្រាក់',
+    deliveryDate: 'III. រយៈពេលដឹកជញ្ជូន',
+    deliveryText: (days) =>
+      `${days} ថ្ងៃ បន្ទាប់ពីភាគីទាំងពីរបញ្ជាក់គំនូរសំណង់លម្អិត ចុះកិច្ចសន្យា និងទទួលប្រាក់កក់។`,
+    warrantyPeriod: 'IV. រយៈពេលធានា',
+    warrantyText: (months) => `${months} ខែ បន្ទាប់ពីថ្ងៃដឹកជញ្ជូន។ (គ្រឿងសំខាន់ៗ)`,
+    specification: 'លក្ខណៈបច្ចេកទេស',
+    specificationHeader: 'ប៉ារ៉ាម៉ែត្រ Specification',
+    configuration: 'តារាងការកំណត់រចនាសម្ព័ន្ធសំខាន់',
+    configNo: 'លេខរៀង',
+    configName: 'ឈ្មោះ',
+    configBrand: 'ម៉ាក',
+    configRemarks: 'ចំណាំ',
+    functionDescription: 'ការពិពណ៌នាមុខងារសំខាន់',
+    functionNo: 'លេខរៀង',
+    functionName: 'ឈ្មោះមុខងារ',
+    functionText: 'ការពិពណ៌នាមុខងារ',
+    finalNote:
+      'ចំណាំ៖ ដើម្បីបន្តលើកកម្ពស់គុណភាពផលិតផល និងជំរុញការច្នៃប្រឌិតបច្ចេកវិទ្យា ហើយបំពេញតម្រូវការអតិថិជនឱ្យកាន់តែប្រសើរ ក្រុមហ៊ុនយើងរក្សាសិទ្ធិក្នុងការកែប្រែការកំណត់រចនាសម្ព័ន្ធ និងម៉ាកនៃគ្រឿងបន្លាស់មួយចំនួនខាងលើ។ ទោះជាយ៉ាងណា យើងធានាថាគុណភាពនៃគ្រឿងបន្លាស់ដែលបានកែប្រែ មិនទាបជាងគ្រឿងដើមឡើយ។',
+  },
   ru: {
     ...en,
     quotation: 'Коммерческое предложение',
@@ -300,6 +345,45 @@ const ES_SPEC_LABELS: Record<keyof EscalatorSpecGroup, string> = {
   voltageDifference: 'Variación de tensión',
 };
 
+const KM_SPEC_LABELS: Record<keyof EscalatorSpecGroup, string> = {
+  id: 'ID',
+  no: 'លេខ',
+  type: 'ប្រភេទ',
+  qty: 'ចំនួន',
+  drawingNo: 'លេខគំនូរសំណង់',
+  inclination: 'មុំលំអៀង (°)',
+  stepWidth: 'ទទឹងជំហាន (mm)',
+  layoutMode: 'របៀបរៀបចំ',
+  horizontalSteps: 'ចំនួនជំហានផ្ដេក',
+  runningSpeed: 'ល្បឿនដំណើរការ (m/s)',
+  travelingHeight: 'កម្ពស់ដំណើរ',
+  horizontalSpan: 'ចម្ងាយផ្ដេក',
+  motorPower: 'ថាមពលម៉ូទ័រ',
+  frequencyConversion: 'ប្រើបំលែងប្រេកង់',
+  handrailColor: 'ពណ៌ខ្សែដៃចាប់',
+  handrailSpec: 'លក្ខណៈខ្សែដៃចាប់',
+  railingHeight: 'កម្ពស់របាំងដៃចាប់',
+  railingMaterial: 'សម្ភារៈ/ពណ៌របាំង',
+  supportMaterial: 'សម្ភារៈជើងទ្រដៃចាប់',
+  coverPlateMaterial: 'សម្ភារៈបន្ទះគម្រប',
+  apronPlateMaterial: 'សម្ភារៈបន្ទះចំហៀង',
+  stepType: 'ប្រភេទជំហាន',
+  stepColor: 'ពណ៌ជំហាន',
+  combColor: 'ពណ៌បន្ទះសិត',
+  combStructure: 'រចនាសម្ព័ន្ធបន្ទះសិត',
+  movableCoverPlate: 'ប្រភេទបន្ទះគម្របចល័ត',
+  machineRoomStandard: 'ប្រវែងស្តង់ដារបន្ទប់ម៉ាស៊ីន',
+  upperMachineRoomLengthening: 'បន្ថែមប្រវែងបន្ទប់ម៉ាស៊ីនខាងលើ',
+  lowerMachineRoomLengthening: 'បន្ថែមប្រវែងបន្ទប់ម៉ាស៊ីនខាងក្រោម',
+  lowerMachineRoomShortening: 'កាត់បន្ថយប្រវែងបន្ទប់ម៉ាស៊ីនខាងក្រោម',
+  intermediateSupports: 'ចំនួនជើងទ្រកណ្តាល',
+  transportation: 'របៀបដឹកជញ្ជូន និងប្រគល់',
+  installationEnvironment: 'បរិយាកាសដំឡើង',
+  mainPower: 'ថាមពលមេ',
+  lightingPower: 'ថាមពលបំភ្លឺ',
+  voltageDifference: 'ភាពខុសគ្នាតង់ស្យុង',
+};
+
 const ES_VALUE_MAP: [RegExp, string][] = [
   [/Escalators\s*\(H=(.*?)\)/gi, 'Escaleras mecánicas (H=$1)'],
   [/304 stainless steel exterior cladding material 1\.0mm ____ m²/gi, 'Revestimiento exterior de acero inoxidable 304 1.0mm ____ m²'],
@@ -324,19 +408,45 @@ const ES_VALUE_MAP: [RegExp, string][] = [
   [/single\s*phase/gi, 'monofásico'],
 ];
 
+const KM_VALUE_MAP: [RegExp, string][] = [
+  [/Escalators\s*\(H=(.*?)\)/gi, 'ជណ្តើរយន្តរំកិល (H=$1)'],
+  [/304 stainless steel exterior cladding material 1\.0mm ____ m²/gi, 'សម្ភារៈគ្របខាងក្រៅដែកអ៊ីណុក 304 កម្រាស់ 1.0mm ____ m²'],
+  [/\bEscalator\b/gi, 'ជណ្តើរយន្តរំកិល'],
+  [/\bParallel\b/gi, 'ស្របគ្នា'],
+  [/Specific accounting required/gi, 'ត្រូវការគណនាជាក់លាក់'],
+  [/\bYes\b/gi, 'បាទ/ចាស'],
+  [/\bNo\b/gi, 'ទេ'],
+  [/\bBlack\b/gi, 'ខ្មៅ'],
+  [/Width\s*100\s*mm/gi, 'ទទឹង 100 mm'],
+  [/Glass\s*\/\s*Transparent/gi, 'កញ្ចក់/ថ្លា'],
+  [/St\.St\.?\s*304/gi, 'ដែកអ៊ីណុក 304'],
+  [/St\.St\.?\s*430/gi, 'ដែកអ៊ីណុក 430'],
+  [/Stainless steel color/gi, 'ពណ៌ដែកអ៊ីណុក'],
+  [/Aluminum alloy/gi, 'អាលុយមីញ៉ូមអាលុយ'],
+  [/\bNone\b/gi, 'គ្មាន'],
+  [/\bContainer\b/gi, 'កុងតឺន័រ'],
+  [/\bIndoor\b/gi, 'ក្នុងអាគារ'],
+  [/AC\s*380V,\s*3\s*phase,\s*50\s*Hz/gi, 'AC 380V, 3 ហ្វេស, 50 Hz'],
+  [/AC\s*220V,\s*single\s*phase,\s*50Hz/gi, 'AC 220V, 1 ហ្វេស, 50 Hz'],
+  [/\b3\s*phase\b/gi, '3 ហ្វេស'],
+  [/single\s*phase/gi, '1 ហ្វេស'],
+];
+
 export function translateEscalatorSpecLabel(
   label: string,
   key: keyof EscalatorSpecGroup,
   lang: Lang,
 ) {
   if (lang === 'es') return ES_SPEC_LABELS[key] || label;
+  if (lang === 'km') return KM_SPEC_LABELS[key] || label;
   return label;
 }
 
 export function translateEscalatorValue(value: string | number, lang: Lang) {
   let result = String(value ?? '');
-  if (lang !== 'es') return result;
-  for (const [pattern, replacement] of ES_VALUE_MAP) {
+  const valueMap = lang === 'es' ? ES_VALUE_MAP : lang === 'km' ? KM_VALUE_MAP : null;
+  if (!valueMap) return result;
+  for (const [pattern, replacement] of valueMap) {
     result = result.replace(pattern, replacement);
   }
   return result;
