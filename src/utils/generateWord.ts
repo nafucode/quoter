@@ -11,6 +11,7 @@ import { translateValueToEs } from '@/data/esValueMap';
 import { translateValueToFr } from '@/data/frValueMap';
 import { translateValueToVi } from '@/data/viValueMap';
 import { translateValueToKm } from '@/data/kmValueMap';
+import { translateValueToAr } from '@/data/arValueMap';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -25,6 +26,7 @@ const translateValueForLang = (value: string, lang: Lang) => {
   if (lang === 'fr') return translateValueToFr(value);
   if (lang === 'vi') return translateValueToVi(value);
   if (lang === 'km') return translateValueToKm(value);
+  if (lang === 'ar') return translateValueToAr(value);
   return value;
 };
 

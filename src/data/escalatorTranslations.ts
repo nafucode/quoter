@@ -281,6 +281,51 @@ export const escalatorTranslations: Record<Lang, EscalatorLabels> = {
     finalNote:
       'ចំណាំ៖ ដើម្បីបន្តលើកកម្ពស់គុណភាពផលិតផល និងជំរុញការច្នៃប្រឌិតបច្ចេកវិទ្យា ហើយបំពេញតម្រូវការអតិថិជនឱ្យកាន់តែប្រសើរ ក្រុមហ៊ុនយើងរក្សាសិទ្ធិក្នុងការកែប្រែការកំណត់រចនាសម្ព័ន្ធ និងម៉ាកនៃគ្រឿងបន្លាស់មួយចំនួនខាងលើ។ ទោះជាយ៉ាងណា យើងធានាថាគុណភាពនៃគ្រឿងបន្លាស់ដែលបានកែប្រែ មិនទាបជាងគ្រឿងដើមឡើយ។',
   },
+  ar: {
+    ...en,
+    quotation: 'عرض سعر',
+    intro:
+      'نشكركم جزيل الشكر على استفساركم. إذا كانت لديكم أي أسئلة، فلا تترددوا في التواصل معنا. وبخصوص المشروع المذكور أعلاه، نود تقديم عرض السعر التالي.',
+    customer: 'العميل',
+    term: 'الشروط',
+    quotationNo: 'رقم عرض السعر',
+    project: 'المشروع',
+    date: 'التاريخ',
+    productPrice: 'I. المنتج والسعر',
+    liftNo: 'رقم السلم',
+    description: 'الوصف',
+    speed: 'السرعة / (م/ث)',
+    inclination: 'زاوية الميل / (°)',
+    quantity: 'الكمية (وحدة)',
+    unitPrice: 'سعر الوحدة ($)',
+    totalPrice: 'السعر الإجمالي ($)',
+    freight: (dest) => `شحن الحاوية المحلي من المصنع إلى ${dest} :`,
+    total: (term, dest) => `الإجمالي ${term}${dest ? ` ${dest}` : ''}`,
+    exchangeNote: (rate) =>
+      `ملاحظة: (1) السعر يعتمد على سعر صرف 1 USD=${rate} RMB، وفي حال تغير سعر الصرف بأكثر من ±2% عند توقيع العقد، يتم تعديل السعر وفقا لذلك.`,
+    installNote: '(2) لا يشمل التركيب والتشغيل التجريبي وتكلفة الشهادة.',
+    validityNote: (days) => `(3) مدة صلاحية العرض: ${days} يوما`,
+    containersNote: (containers) => `(4) إجمالي الحاويات المطلوبة تقديريا: ${containers}.`,
+    paymentTerm: 'II. شروط الدفع',
+    deliveryDate: 'III. مدة التسليم',
+    deliveryText: (days) =>
+      `${days} يوما بعد اعتماد الطرفين لرسومات الأعمال المدنية التفصيلية وتوقيع العقد واستلام الدفعة المقدمة.`,
+    warrantyPeriod: 'IV. مدة الضمان',
+    warrantyText: (months) => `${months} شهرا بعد تاريخ الشحن. (المكونات الأساسية)`,
+    specification: 'المواصفات',
+    specificationHeader: 'المعلمات Specification',
+    configuration: 'جدول التكوين الرئيسي',
+    configNo: 'الرقم',
+    configName: 'الاسم',
+    configBrand: 'العلامة التجارية',
+    configRemarks: 'ملاحظات',
+    functionDescription: 'وصف الوظائف الرئيسية',
+    functionNo: 'الرقم',
+    functionName: 'اسم الوظيفة',
+    functionText: 'وصف الوظيفة',
+    finalNote:
+      'ملاحظة: من أجل تحسين جودة المنتج وتعزيز الابتكار التقني وتلبية احتياجات العملاء بشكل أفضل، تحتفظ شركتنا بالحق في تعديل تكوين وعلامة بعض المكونات المذكورة أعلاه. ومع ذلك، نضمن أن جودة أي مكونات محدثة لن تكون أقل من جودة المكونات الأصلية.',
+  },
   ru: {
     ...en,
     quotation: 'Коммерческое предложение',
@@ -384,6 +429,45 @@ const KM_SPEC_LABELS: Record<keyof EscalatorSpecGroup, string> = {
   voltageDifference: 'ភាពខុសគ្នាតង់ស្យុង',
 };
 
+const AR_SPEC_LABELS: Record<keyof EscalatorSpecGroup, string> = {
+  id: 'ID',
+  no: 'الرقم',
+  type: 'النوع',
+  qty: 'الكمية',
+  drawingNo: 'رقم الرسم المدني',
+  inclination: 'زاوية الميل (°)',
+  stepWidth: 'عرض الدرجة (مم)',
+  layoutMode: 'طريقة الترتيب',
+  horizontalSteps: 'عدد الدرجات الأفقية',
+  runningSpeed: 'سرعة التشغيل (م/ث)',
+  travelingHeight: 'ارتفاع الرفع',
+  horizontalSpan: 'الامتداد الأفقي',
+  motorPower: 'قدرة المحرك',
+  frequencyConversion: 'تحويل التردد',
+  handrailColor: 'لون سير الدرابزين',
+  handrailSpec: 'مواصفة سير الدرابزين',
+  railingHeight: 'ارتفاع الدرابزين',
+  railingMaterial: 'المادة/اللون',
+  supportMaterial: 'مادة دعامة الدرابزين',
+  coverPlateMaterial: 'مادة ألواح الغطاء',
+  apronPlateMaterial: 'مادة لوحة التنورة',
+  stepType: 'نوع الدرجة',
+  stepColor: 'لون الدرجة',
+  combColor: 'لون المشط',
+  combStructure: 'هيكل المشط',
+  movableCoverPlate: 'نوع لوحة الغطاء المتحركة',
+  machineRoomStandard: 'طول غرفة الماكينة القياسي',
+  upperMachineRoomLengthening: 'تمديد غرفة الماكينة العلوية',
+  lowerMachineRoomLengthening: 'تمديد غرفة الماكينة السفلية',
+  lowerMachineRoomShortening: 'تقليل غرفة الماكينة السفلية',
+  intermediateSupports: 'عدد الدعامات الوسطية',
+  transportation: 'طريقة النقل والتسليم',
+  installationEnvironment: 'بيئة التركيب',
+  mainPower: 'الطاقة الرئيسية',
+  lightingPower: 'طاقة الإضاءة',
+  voltageDifference: 'فرق الجهد',
+};
+
 const ES_VALUE_MAP: [RegExp, string][] = [
   [/Escalators\s*\(H=(.*?)\)/gi, 'Escaleras mecánicas (H=$1)'],
   [/304 stainless steel exterior cladding material 1\.0mm ____ m²/gi, 'Revestimiento exterior de acero inoxidable 304 1.0mm ____ m²'],
@@ -432,6 +516,30 @@ const KM_VALUE_MAP: [RegExp, string][] = [
   [/single\s*phase/gi, '1 ហ្វេស'],
 ];
 
+const AR_VALUE_MAP: [RegExp, string][] = [
+  [/Escalators\s*\(H=(.*?)\)/gi, 'سلالم متحركة (H=$1)'],
+  [/304 stainless steel exterior cladding material 1\.0mm ____ m²/gi, 'مادة تكسية خارجية من ستانلس ستيل 304 بسماكة 1.0mm ____ m²'],
+  [/\bEscalator\b/gi, 'سلم متحرك'],
+  [/\bParallel\b/gi, 'متوازي'],
+  [/Specific accounting required/gi, 'يتطلب حسابا خاصا'],
+  [/\bYes\b/gi, 'نعم'],
+  [/\bNo\b/gi, 'لا'],
+  [/\bBlack\b/gi, 'أسود'],
+  [/Width\s*100\s*mm/gi, 'عرض 100 مم'],
+  [/Glass\s*\/\s*Transparent/gi, 'زجاج/شفاف'],
+  [/St\.St\.?\s*304/gi, 'ستانلس ستيل 304'],
+  [/St\.St\.?\s*430/gi, 'ستانلس ستيل 430'],
+  [/Stainless steel color/gi, 'لون ستانلس ستيل'],
+  [/Aluminum alloy/gi, 'سبائك الألومنيوم'],
+  [/\bNone\b/gi, 'لا يوجد'],
+  [/\bContainer\b/gi, 'حاوية'],
+  [/\bIndoor\b/gi, 'داخلي'],
+  [/AC\s*380V,\s*3\s*phase,\s*50\s*Hz/gi, 'AC 380V، ثلاثي الطور، 50 Hz'],
+  [/AC\s*220V,\s*single\s*phase,\s*50Hz/gi, 'AC 220V، أحادي الطور، 50 Hz'],
+  [/\b3\s*phase\b/gi, 'ثلاثي الطور'],
+  [/single\s*phase/gi, 'أحادي الطور'],
+];
+
 export function translateEscalatorSpecLabel(
   label: string,
   key: keyof EscalatorSpecGroup,
@@ -439,12 +547,13 @@ export function translateEscalatorSpecLabel(
 ) {
   if (lang === 'es') return ES_SPEC_LABELS[key] || label;
   if (lang === 'km') return KM_SPEC_LABELS[key] || label;
+  if (lang === 'ar') return AR_SPEC_LABELS[key] || label;
   return label;
 }
 
 export function translateEscalatorValue(value: string | number, lang: Lang) {
   let result = String(value ?? '');
-  const valueMap = lang === 'es' ? ES_VALUE_MAP : lang === 'km' ? KM_VALUE_MAP : null;
+  const valueMap = lang === 'es' ? ES_VALUE_MAP : lang === 'km' ? KM_VALUE_MAP : lang === 'ar' ? AR_VALUE_MAP : null;
   if (!valueMap) return result;
   for (const [pattern, replacement] of valueMap) {
     result = result.replace(pattern, replacement);

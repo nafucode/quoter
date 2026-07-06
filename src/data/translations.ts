@@ -1,4 +1,4 @@
-export type Lang = 'en' | 'zh' | 'es' | 'pt' | 'fr' | 'vi' | 'km' | 'ru';
+export type Lang = 'en' | 'zh' | 'es' | 'pt' | 'fr' | 'vi' | 'km' | 'ar' | 'ru';
 
 export const translations = {
   en: {
@@ -684,6 +684,104 @@ export const translations = {
 
     // Footer
     quotationDate: 'កាលបរិច្ឆេទសម្រង់តម្លៃ',
+  },
+
+  ar: {
+    // Header
+    quotation: 'عرض سعر',
+    company: 'الشركة',
+    quotationNo: 'رقم عرض السعر',
+    projectName: 'اسم المشروع',
+    quotationType: 'نوع العرض',
+
+    // Price table
+    priceTitle: 'السعر - العملة: USD',
+    colDescription: 'الوصف',
+    colSpecs: 'المواصفات',
+    colQty: 'الكمية - مجموعات',
+    colUnitPrice: 'سعر الوحدة',
+    colTotalPrice: 'السعر الإجمالي',
+    freight: (dest: string) => `الرسوم المحلية والشحن من المصنع إلى ${dest} :`,
+    totalAmount: 'المبلغ الإجمالي :',
+
+    // Terms
+    delivery: 'I. مدة التسليم:',
+    deliverySuffix: 'يوما بعد استلام الدفعة المقدمة واعتماد الرسومات.',
+    paymentTerm: 'II. شروط الدفع:',
+    warranty: 'III. الضمان:',
+    warrantySuffix: 'شهرا من تاريخ وصول البضاعة إلى ميناء الوجهة.',
+    priceValidity: 'IV. صلاحية السعر:',
+    complianceStandard: 'V. معيار المطابقة:',
+    days: 'يوما',
+    until: 'حتى',
+
+    // Specifications
+    specificationsTitle: 'المواصفات',
+    elevatorHeader: (id: number) => `مواصفات المصعد #L${id}`,
+    secBasic: 'I. المواصفات الأساسية',
+    secHoistway: 'II. مواصفات البئر',
+    secCar: 'III. مواصفات الكابينة',
+    secDoor: 'IV. مواصفات الباب',
+    secFunction: 'V. الوظائف',
+
+    // Spec labels
+    specDescription: 'الوصف',
+    specType: 'النوع',
+    specCapacity: 'الحمولة (كجم)',
+    specSpeed: 'السرعة (م/ث)',
+    specFloors: 'الطوابق/التوقفات',
+    specControl: 'نظام التحكم',
+    specServing: 'الطوابق المخدومة (عرض COP)',
+    specEntrances: 'المداخل',
+    specPower: 'جهد الطاقة',
+    specLighting: 'جهد الإضاءة',
+    specFrequency: 'التردد',
+    specDrive: 'نظام التشغيل',
+    specShaftConst: 'إنشاء البئر',
+    specTravel: 'مسافة الحركة (مم)',
+    specHeadroom: 'ارتفاع الرأس (مم)',
+    specPit: 'عمق الحفرة (مم)',
+    specShaftSize: 'حجم البئر (العرض × العمق مم)',
+    specMachineRoom: 'حجم غرفة الماكينة (العرض × العمق × الارتفاع مم)',
+    specCopPlate: 'لوحة COP',
+    specCarDim: 'الأبعاد الصافية للكابينة',
+    specCeiling: 'سقف الكابينة',
+    specCarFloor: 'أرضية الكابينة',
+    specHandrail: 'الدرابزين',
+    specWallLeft: 'تشطيب الجدار الأيسر',
+    specWallRight: 'تشطيب الجدار الأيمن',
+    specWallRear: 'تشطيب الجدار الخلفي',
+    specDoorType: 'نوع فتح الباب',
+    specDoorSize: 'مقاس فتحة الباب (العرض × الارتفاع مم)',
+    specDoorHeader: 'نوع رأس الباب',
+    specDoor1st: 'تشطيب باب الطابق الأول',
+    specDoorOther: 'تشطيب أبواب الطوابق الأخرى',
+    specCopLop: 'COP/LOP',
+    specIncluded: 'مشمول',
+
+    // Cabin effect
+    decorationTitle: 'تأثير التشطيب',
+    decorationNote: '(الصور للمرجع فقط، ويعتمد المنتج الفعلي)',
+    cabin: 'الكابينة',
+    cop: 'COP',
+    lop: 'LOP',
+    cellCeiling: 'السقف',
+    cellButton: 'الأزرار',
+    cellFloor: 'الأرضية',
+    landingDoor: 'باب الطابق',
+    handrail: 'الدرابزين',
+    copLogo: 'شعار COP',
+
+    // Part list
+    partListTitle: 'قائمة المكونات',
+    partListColPart: 'المكون',
+    partListColBrand: 'العلامة التجارية',
+    partListColOrigin: 'المنشأ',
+    partListNote: 'ملاحظة: من أجل تحسين جودة المنتج والابتكار التقني وتلبية احتياجات العملاء بشكل أفضل، نحتفظ بالحق في تغيير طراز ومنشأ بعض المكونات المذكورة أعلاه، مع ضمان أن جودة وأداء المكونات الجديدة لا تقل عن المكونات الأصلية.',
+    standardFeaturesTitle: 'الوظائف',
+
+    // Footer
+    quotationDate: 'تاريخ عرض السعر',
   },
 
   ru: {

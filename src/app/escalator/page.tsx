@@ -302,6 +302,7 @@ export default function EscalatorQuotePage() {
                 <option value="fr">🇫🇷 FR</option>
                 <option value="vi">🇻🇳 VI</option>
                 <option value="km">🇰🇭 KM</option>
+                <option value="ar">🇸🇦 AR</option>
                 <option value="ru">🇷🇺 RU</option>
               </select>
             </div>

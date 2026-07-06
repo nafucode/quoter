@@ -12,6 +12,7 @@ import { translateValueToEs } from '@/data/esValueMap';
 import { translateValueToFr } from '@/data/frValueMap';
 import { translateValueToVi } from '@/data/viValueMap';
 import { translateValueToKm } from '@/data/kmValueMap';
+import { translateValueToAr } from '@/data/arValueMap';
 import { standardFeatures } from '@/data/standardFeatures';
 
 const Quote = () => {
@@ -342,6 +343,7 @@ const Quote = () => {
     if (language === 'fr') return translateValueToFr(v);
     if (language === 'vi') return translateValueToVi(v);
     if (language === 'km') return translateValueToKm(v);
+    if (language === 'ar') return translateValueToAr(v);
     return v;
   };
 
@@ -459,6 +461,7 @@ const Quote = () => {
                 <option value="fr">🇫🇷 FR</option>
                 <option value="vi">🇻🇳 VI</option>
                 <option value="km">🇰🇭 KM</option>
+                <option value="ar">🇸🇦 AR</option>
                 <option value="ru">🇷🇺 RU</option>
               </select>
             </div>
