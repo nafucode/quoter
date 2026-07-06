@@ -75,6 +75,21 @@ const initialState: EscalatorQuoteState = {
 const STORAGE_KEY = 'xinfuji-escalator-quote';
 const HISTORY_KEY = 'xinfuji-escalator-history';
 
+const normalizeEscalatorState = (source: Partial<EscalatorQuoteState>): EscalatorQuoteState => ({
+  ...initialState,
+  ...source,
+  specGroups: (source.specGroups || initialState.specGroups).map((group) => ({
+    ...group,
+    horizontalSpan:
+      group.horizontalSpan === '114720 mm'
+        ? '11472 mm'
+        : group.horizontalSpan === '98090 mm'
+          ? '9809 mm'
+          : group.horizontalSpan,
+    railingHeight: group.railingHeight === '1000 mm' ? '900 mm' : group.railingHeight,
+  })),
+});
+
 const money = (value: number) =>
   Number(value || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
@@ -94,7 +109,7 @@ export default function EscalatorQuotePage() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
-        setState({ ...initialState, ...JSON.parse(raw) });
+        setState(normalizeEscalatorState(JSON.parse(raw)));
       } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
@@ -202,7 +217,7 @@ export default function EscalatorQuotePage() {
 
   const loadFromHistory = (entry: any) => {
     if (!window.confirm(`载入扶梯报价 ${entry.quotationNo || ''}？当前草稿将被替换。`)) return;
-    const nextState = { ...initialState, ...entry.state };
+    const nextState = normalizeEscalatorState(entry.state);
     setState(nextState);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
   };
