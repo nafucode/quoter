@@ -34,9 +34,9 @@ export const elevatorTemplate = {
   carFloor: 'PVC',
   carHandrail: '1 PCS, Round type Stainless Steel',
   carWall: {
-    left: 'Hairline Stainless Steel',
-    right: 'Hairline Stainless Steel',
-    rear: 'Hairline Stainless Steel',
+    left: 'Hairline Stainless Steel 304 1.2mm',
+    right: 'Hairline Stainless Steel 304 1.2mm',
+    rear: 'Hairline Stainless Steel 304 1.2mm',
   },
 
   // Door Spec

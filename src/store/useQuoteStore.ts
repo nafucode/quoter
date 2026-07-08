@@ -6,6 +6,11 @@ import { Lang } from '@/data/translations';
 
 const LEGACY_BUTTON_TEXT = 'Round standard';
 const DEFAULT_BUTTON_TEXT = 'Round buttons with Braille';
+const DEFAULT_CAR_WALL_TEXT = 'Hairline Stainless Steel 304 1.2mm';
+const LEGACY_CAR_WALL_TEXTS = new Set([
+  'Hairline Stainless Steel',
+  'Hairline Stainless Steel 304 1',
+]);
 
 const normalizeCabinEffect = (cabinEffect: any) => {
   const nextCabinEffect = JSON.parse(JSON.stringify(cabinEffect ?? elevatorTemplate.cabinEffect));
@@ -18,6 +23,18 @@ const normalizeCabinEffect = (cabinEffect: any) => {
 const normalizeElevator = (elevator: any) => ({
   ...elevator,
   cabinEffect: normalizeCabinEffect(elevator?.cabinEffect),
+  carWall: {
+    ...(elevator?.carWall ?? elevatorTemplate.carWall),
+    left: LEGACY_CAR_WALL_TEXTS.has(elevator?.carWall?.left)
+      ? DEFAULT_CAR_WALL_TEXT
+      : (elevator?.carWall?.left ?? elevatorTemplate.carWall.left),
+    right: LEGACY_CAR_WALL_TEXTS.has(elevator?.carWall?.right)
+      ? DEFAULT_CAR_WALL_TEXT
+      : (elevator?.carWall?.right ?? elevatorTemplate.carWall.right),
+    rear: LEGACY_CAR_WALL_TEXTS.has(elevator?.carWall?.rear)
+      ? DEFAULT_CAR_WALL_TEXT
+      : (elevator?.carWall?.rear ?? elevatorTemplate.carWall.rear),
+  },
 });
 
 const normalizeQuoteState = (state: any) => {
@@ -128,7 +145,7 @@ export const useQuoteStore = create<QuoteState>()(
           title: `Elevator #L${state.nextId}`,
           isCollapsed: false,
           cabinEffect: normalizeCabinEffect(last?.cabinEffect ?? elevatorTemplate.cabinEffect),
-          carWall: { ...(last?.carWall ?? elevatorTemplate.carWall) },
+          carWall: normalizeElevator(last ?? elevatorTemplate).carWall,
           otherFunctions: (last?.otherFunctions ?? elevatorTemplate.otherFunctions).map((f: any) => ({ ...f })),
         };
         return {
