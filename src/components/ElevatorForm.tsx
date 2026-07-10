@@ -9,6 +9,15 @@ import { landingDoorStyles } from '@/data/landingDoorStyles';
 import { handrailStyles } from '@/data/handrailStyles';
 import { logoStyles } from '@/data/logoStyles';
 
+const DOOR_OPENING_TYPE_OPTIONS = [
+  { value: 'Center Opening', label: 'Center Opening' },
+  { value: 'Side Opening', label: 'Side Opening' },
+  { value: 'Center Opening 4 Panels', label: 'Center Opening 4 Panels' },
+  { value: 'Swing Door', label: 'Swing Door（平开门）' },
+  { value: 'Manual Door', label: 'Manual Door（手拉门）' },
+  { value: 'Single Swing Door', label: 'Single Swing Door（单扇平开门）' },
+];
+
 const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFocus: (section: string) => void }) => {
   const { updateElevator, removeElevator, toggleElevatorCollapse } = useQuoteStore();
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
@@ -318,7 +327,18 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Door Opening Type<span className="block text-xs text-gray-500">开门方式</span></label>
-                  <input name="doorOpeningType" value={elevator.doorOpeningType} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                  <input
+                    name="doorOpeningType"
+                    list={`door-opening-type-options-${elevator.id}`}
+                    value={elevator.doorOpeningType}
+                    onChange={handleChange}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  />
+                  <datalist id={`door-opening-type-options-${elevator.id}`}>
+                    {DOOR_OPENING_TYPE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value} label={option.label} />
+                    ))}
+                  </datalist>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Door Opening Size (W x H mm)<span className="block text-xs text-gray-500">开门尺寸 (宽 x 高 mm)</span></label>
