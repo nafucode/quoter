@@ -185,6 +185,7 @@ export async function generateWordBlob(state: {
   deliveryDays: number;
   paymentTerm: string;
   warrantyMonths: number;
+  warrantyText?: string;
   priceValidityDays: number;
   certificationStandard?: string;
   showCertificationStandard?: boolean;
@@ -436,7 +437,7 @@ export async function generateWordBlob(state: {
   children.push(para([bold(t.delivery), plain(` ${state.deliveryDays} ${t.deliverySuffix}`)], {}));
   children.push(para([bold(t.paymentTerm), plain(` ${state.paymentTerm}`)], {}));
   children.push(
-    para([bold(t.warranty), plain(` ${state.warrantyMonths} ${t.warrantySuffix}`)], {}),
+    para([bold(t.warranty), plain(` ${state.warrantyText || `${state.warrantyMonths} ${t.warrantySuffix}`}`)], {}),
   );
   children.push(
     para(

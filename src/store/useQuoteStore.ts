@@ -7,6 +7,8 @@ import { Lang } from '@/data/translations';
 const LEGACY_BUTTON_TEXT = 'Round standard';
 const DEFAULT_BUTTON_TEXT = 'Round buttons with Braille';
 const DEFAULT_CAR_WALL_TEXT = 'Hairline Stainless Steel 304 1.2mm';
+const buildDefaultWarrantyText = (months: number | string = 12) =>
+  `${months || 12} months from the date the goods depart from the port of shipment.`;
 const LEGACY_CAR_WALL_TEXTS = new Set([
   'Hairline Stainless Steel',
   'Hairline Stainless Steel 304 1',
@@ -41,6 +43,7 @@ const normalizeQuoteState = (state: any) => {
   if (!state || typeof state !== 'object') return state;
   return {
     ...state,
+    warrantyText: state.warrantyText || buildDefaultWarrantyText(state.warrantyMonths),
     elevators: Array.isArray(state.elevators)
       ? state.elevators.map(normalizeElevator)
       : state.elevators,
@@ -75,6 +78,7 @@ interface QuoteState {
   deliveryDays: number;
   paymentTerm: string;
   warrantyMonths: number;
+  warrantyText: string;
   priceValidityDays: number;
   certificationStandard: string;
   showCertificationStandard: boolean;
@@ -113,6 +117,7 @@ const initialState = {
   deliveryDays: 35,
   paymentTerm: 'Pay a 30% deposit within 3 days of signing to activate the contract; the 70% balance is due 7 working days before delivery.',
   warrantyMonths: 12,
+  warrantyText: buildDefaultWarrantyText(12),
   priceValidityDays: 30,
   certificationStandard: 'CE Certification',
   showCertificationStandard: false,
@@ -133,7 +138,17 @@ export const useQuoteStore = create<QuoteState>()(
       ...initialState,
       
       // Actions
-      setField: (field, value) => set({ [field]: value }),
+      setField: (field, value) => set((state) => {
+        if (field === 'warrantyMonths') {
+          const shouldSyncWarrantyText =
+            !state.warrantyText || state.warrantyText === buildDefaultWarrantyText(state.warrantyMonths);
+          return {
+            warrantyMonths: value,
+            ...(shouldSyncWarrantyText ? { warrantyText: buildDefaultWarrantyText(value) } : {}),
+          };
+        }
+        return { [field]: value };
+      }),
 
       addElevator: () => set((state) => {
         const last = state.elevators[state.elevators.length - 1];
@@ -205,7 +220,7 @@ export const useQuoteStore = create<QuoteState>()(
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
-      version: 2,
+      version: 3,
       migrate: (persistedState: any, version) => {
         let nextState = persistedState;
         if (version < 1 && nextState && typeof nextState === 'object') {
@@ -215,6 +230,9 @@ export const useQuoteStore = create<QuoteState>()(
           };
         }
         if (version < 2) {
+          nextState = normalizeQuoteState(nextState);
+        }
+        if (version < 3) {
           nextState = normalizeQuoteState(nextState);
         }
         return nextState;

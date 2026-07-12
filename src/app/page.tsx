@@ -30,6 +30,7 @@ const Quote = () => {
     deliveryDays,
     paymentTerm,
     warrantyMonths,
+    warrantyText,
     priceValidityDays,
     certificationStandard,
     showCertificationStandard,
@@ -157,7 +158,7 @@ const Quote = () => {
       elevators: safeElevators, freightDestination: s.freightDestination,
       freightCost: s.freightCost, exchangeRate: s.exchangeRate, targetCurrency: s.targetCurrency,
       nextId: s.nextId, deliveryDays: s.deliveryDays, paymentTerm: s.paymentTerm,
-      warrantyMonths: s.warrantyMonths, priceValidityDays: s.priceValidityDays,
+      warrantyMonths: s.warrantyMonths, warrantyText: s.warrantyText, priceValidityDays: s.priceValidityDays,
       certificationStandard: s.certificationStandard || 'CE Certification',
       showCertificationStandard: s.showCertificationStandard ?? false,
       showPartList: s.showPartList, showFunctionList: s.showFunctionList,
@@ -270,6 +271,7 @@ const Quote = () => {
         deliveryDays: s.deliveryDays,
         paymentTerm: s.paymentTerm,
         warrantyMonths: s.warrantyMonths,
+        warrantyText: s.warrantyText,
         priceValidityDays: s.priceValidityDays,
         certificationStandard: s.certificationStandard || 'CE Certification',
         showCertificationStandard: s.showCertificationStandard ?? false,
@@ -639,6 +641,14 @@ const Quote = () => {
                 />
               </div>
               <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Warranty Text<span className="block text-xs text-gray-500">质保条款文字</span></label>
+                <input
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={warrantyText}
+                  onChange={(e) => setField('warrantyText', e.target.value)}
+                />
+              </div>
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Payment Term<span className="block text-xs text-gray-500">付款方式</span></label>
                 <input
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -971,7 +981,7 @@ const Quote = () => {
                 <div className="mt-4 pt-4 border-t text-sm space-y-1">
                   <p><span className="font-semibold">{t.delivery}</span> {deliveryDays} {t.deliverySuffix}</p>
                   <p><span className="font-semibold">{t.paymentTerm}</span> {paymentTerm}</p>
-                  <p><span className="font-semibold">{t.warranty}</span> {warrantyMonths} {t.warrantySuffix}</p>
+                  <p><span className="font-semibold">{t.warranty}</span> {warrantyText || `${warrantyMonths} ${t.warrantySuffix}`}</p>
                   <p><span className="font-semibold">{t.priceValidity}</span> {priceValidityDays} {t.days} {validityUntilDate && `(${t.until} ${validityUntilDate})`}, based on 1 USD = {exchangeRateBasis} RMB.</p>
                   {shouldShowCertificationStandard && (
                     <p><span className="font-semibold">{t.complianceStandard}</span> {selectedCertificationStandard}</p>
