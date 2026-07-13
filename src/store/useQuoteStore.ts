@@ -39,11 +39,19 @@ const normalizeElevator = (elevator: any) => ({
   },
 });
 
+const normalizeOptionalItem = (item: any, fallback: OptionalItem) => ({
+  ...fallback,
+  ...(item ?? {}),
+  qty: Number(item?.qty) || fallback.qty,
+});
+
 const normalizeQuoteState = (state: any) => {
   if (!state || typeof state !== 'object') return state;
   return {
     ...state,
     warrantyText: state.warrantyText || buildDefaultWarrantyText(state.warrantyMonths),
+    shaftFrame: normalizeOptionalItem(state.shaftFrame, initialState.shaftFrame),
+    temperedGlass: normalizeOptionalItem(state.temperedGlass, initialState.temperedGlass),
     elevators: Array.isArray(state.elevators)
       ? state.elevators.map(normalizeElevator)
       : state.elevators,
@@ -61,6 +69,7 @@ interface Elevator {
 interface OptionalItem {
   enabled: boolean;
   text: string;
+  qty: number;
   price: number;
 }
 
@@ -122,8 +131,8 @@ const initialState = {
   certificationStandard: 'CE Certification',
   showCertificationStandard: false,
   exchangeRateBasis: 6.8,
-  shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', price: 0 },
-  temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', price: 0 },
+  shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', qty: 1, price: 0 },
+  temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', qty: 1, price: 0 },
   showPartList: true,
   showFunctionList: true,
   partListTemplate: 'standard' as PartListTemplate,
@@ -220,7 +229,7 @@ export const useQuoteStore = create<QuoteState>()(
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
-      version: 3,
+      version: 4,
       migrate: (persistedState: any, version) => {
         let nextState = persistedState;
         if (version < 1 && nextState && typeof nextState === 'object') {
@@ -233,6 +242,9 @@ export const useQuoteStore = create<QuoteState>()(
           nextState = normalizeQuoteState(nextState);
         }
         if (version < 3) {
+          nextState = normalizeQuoteState(nextState);
+        }
+        if (version < 4) {
           nextState = normalizeQuoteState(nextState);
         }
         return nextState;

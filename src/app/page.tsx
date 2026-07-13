@@ -378,8 +378,8 @@ const Quote = () => {
       const quantity = Number(elevator.qty) || 0;
       return total + (price * quantity);
     }, 0);
-    const shaftFrameTotal = shaftFrame.enabled ? Number(shaftFrame.price) : 0;
-    const temperedGlassTotal = temperedGlass.enabled ? Number(temperedGlass.price) : 0;
+    const shaftFrameTotal = shaftFrame.enabled ? (Number(shaftFrame.price) || 0) * (Number(shaftFrame.qty) || 0) : 0;
+    const temperedGlassTotal = temperedGlass.enabled ? (Number(temperedGlass.price) || 0) * (Number(temperedGlass.qty) || 0) : 0;
     return elevatorsTotal + Number(freightCost) + shaftFrameTotal + temperedGlassTotal;
   }, [elevators, freightCost, shaftFrame, temperedGlass]);
 
@@ -717,12 +717,21 @@ const Quote = () => {
                 </label>
               </div>
               {shaftFrame.enabled && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-gray-600">Description<span className="ml-1 text-gray-400">描述</span></label>
                     <input
                       value={shaftFrame.text}
                       onChange={(e) => setField('shaftFrame', { ...shaftFrame, text: e.target.value })}
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600">Qty<span className="ml-1 text-gray-400">数量</span></label>
+                    <input
+                      type="number"
+                      value={shaftFrame.qty ?? 1}
+                      onChange={(e) => setField('shaftFrame', { ...shaftFrame, qty: Number(e.target.value) })}
                       className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"
                     />
                   </div>
@@ -754,12 +763,21 @@ const Quote = () => {
                 </label>
               </div>
               {temperedGlass.enabled && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-gray-600">Description<span className="ml-1 text-gray-400">描述</span></label>
                     <input
                       value={temperedGlass.text}
                       onChange={(e) => setField('temperedGlass', { ...temperedGlass, text: e.target.value })}
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600">Qty<span className="ml-1 text-gray-400">数量</span></label>
+                    <input
+                      type="number"
+                      value={temperedGlass.qty ?? 1}
+                      onChange={(e) => setField('temperedGlass', { ...temperedGlass, qty: Number(e.target.value) })}
                       className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"
                     />
                   </div>
@@ -940,23 +958,25 @@ const Quote = () => {
                       ))}
                       {shaftFrame.enabled && (
                         <tr>
-                          <td colSpan={3} className="p-2 border border-gray-400">{shaftFrame.text}</td>
+                          <td colSpan={2} className="p-2 border border-gray-400">{shaftFrame.text}</td>
+                          <td className="p-2 border border-gray-400 text-center">{shaftFrame.qty ?? 1}</td>
                           <td className="p-2 border border-gray-400 text-right">
                             {shaftFrame.price > 0 ? shaftFrame.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '-'}
                           </td>
                           <td className="p-2 border border-gray-400 text-right">
-                            {shaftFrame.price > 0 ? shaftFrame.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '-'}
+                            {shaftFrame.price > 0 ? ((Number(shaftFrame.price) || 0) * (Number(shaftFrame.qty) || 0)).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '-'}
                           </td>
                         </tr>
                       )}
                       {temperedGlass.enabled && (
                         <tr>
-                          <td colSpan={3} className="p-2 border border-gray-400">{temperedGlass.text}</td>
+                          <td colSpan={2} className="p-2 border border-gray-400">{temperedGlass.text}</td>
+                          <td className="p-2 border border-gray-400 text-center">{temperedGlass.qty ?? 1}</td>
                           <td className="p-2 border border-gray-400 text-right">
                             {temperedGlass.price > 0 ? temperedGlass.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '-'}
                           </td>
                           <td className="p-2 border border-gray-400 text-right">
-                            {temperedGlass.price > 0 ? temperedGlass.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '-'}
+                            {temperedGlass.price > 0 ? ((Number(temperedGlass.price) || 0) * (Number(temperedGlass.qty) || 0)).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '-'}
                           </td>
                         </tr>
                       )}

@@ -189,8 +189,8 @@ export async function generateWordBlob(state: {
   priceValidityDays: number;
   certificationStandard?: string;
   showCertificationStandard?: boolean;
-  shaftFrame: { enabled: boolean; text: string; price: number };
-  temperedGlass: { enabled: boolean; text: string; price: number };
+  shaftFrame: { enabled: boolean; text: string; qty?: number; price: number };
+  temperedGlass: { enabled: boolean; text: string; qty?: number; price: number };
   showPartList?: boolean;
   showFunctionList?: boolean;
   partListTemplate?: string;
@@ -231,8 +231,8 @@ export async function generateWordBlob(state: {
     0,
   );
   const optionals =
-    (state.shaftFrame.enabled ? Number(state.shaftFrame.price) : 0) +
-    (state.temperedGlass.enabled ? Number(state.temperedGlass.price) : 0);
+    (state.shaftFrame.enabled ? (Number(state.shaftFrame.price) || 0) * (Number(state.shaftFrame.qty) || 0) : 0) +
+    (state.temperedGlass.enabled ? (Number(state.temperedGlass.price) || 0) * (Number(state.temperedGlass.qty) || 0) : 0);
   const grandTotal = elevatorsTotal + Number(state.freightCost) + optionals;
   const validUntil = (() => {
     try {
@@ -351,16 +351,18 @@ export async function generateWordBlob(state: {
 
   // Optional rows
   if (state.shaftFrame.enabled) {
+    const shaftFrameQty = Number(state.shaftFrame.qty) || 1;
+    const shaftFrameUnitPrice = Number(state.shaftFrame.price) || 0;
     priceRows.push(
       new TableRow({
         children: [
           cell(state.shaftFrame.text, { width: priceCols[0] + priceCols[1], colSpan: 2 }),
-          cell('1', { width: priceCols[2], align: AlignmentType.CENTER }),
-          cell(`USD ${Number(state.shaftFrame.price).toLocaleString()}`, {
+          cell(String(shaftFrameQty), { width: priceCols[2], align: AlignmentType.CENTER }),
+          cell(`USD ${shaftFrameUnitPrice.toLocaleString()}`, {
             width: priceCols[3],
             align: AlignmentType.RIGHT,
           }),
-          cell(`USD ${Number(state.shaftFrame.price).toLocaleString()}`, {
+          cell(`USD ${(shaftFrameUnitPrice * shaftFrameQty).toLocaleString()}`, {
             width: priceCols[4],
             align: AlignmentType.RIGHT,
           }),
@@ -369,16 +371,18 @@ export async function generateWordBlob(state: {
     );
   }
   if (state.temperedGlass.enabled) {
+    const temperedGlassQty = Number(state.temperedGlass.qty) || 1;
+    const temperedGlassUnitPrice = Number(state.temperedGlass.price) || 0;
     priceRows.push(
       new TableRow({
         children: [
           cell(state.temperedGlass.text, { width: priceCols[0] + priceCols[1], colSpan: 2 }),
-          cell('1', { width: priceCols[2], align: AlignmentType.CENTER }),
-          cell(`USD ${Number(state.temperedGlass.price).toLocaleString()}`, {
+          cell(String(temperedGlassQty), { width: priceCols[2], align: AlignmentType.CENTER }),
+          cell(`USD ${temperedGlassUnitPrice.toLocaleString()}`, {
             width: priceCols[3],
             align: AlignmentType.RIGHT,
           }),
-          cell(`USD ${Number(state.temperedGlass.price).toLocaleString()}`, {
+          cell(`USD ${(temperedGlassUnitPrice * temperedGlassQty).toLocaleString()}`, {
             width: priceCols[4],
             align: AlignmentType.RIGHT,
           }),
