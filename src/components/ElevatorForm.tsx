@@ -21,6 +21,7 @@ const DOOR_OPENING_TYPE_OPTIONS = [
 const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFocus: (section: string) => void }) => {
   const { updateElevator, removeElevator, toggleElevatorCollapse } = useQuoteStore();
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
+  const [isDoorOpeningMenuOpen, setIsDoorOpeningMenuOpen] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -81,6 +82,11 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const selectDoorOpeningType = (value: string) => {
+    updateElevator(elevator.id, 'doorOpeningType', value);
+    setIsDoorOpeningMenuOpen(false);
   };
 
   const addFunction = () => {
@@ -327,18 +333,44 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Door Opening Type<span className="block text-xs text-gray-500">开门方式</span></label>
-                  <input
-                    name="doorOpeningType"
-                    list={`door-opening-type-options-${elevator.id}`}
-                    value={elevator.doorOpeningType}
-                    onChange={handleChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-                  />
-                  <datalist id={`door-opening-type-options-${elevator.id}`}>
-                    {DOOR_OPENING_TYPE_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value} label={option.label} />
-                    ))}
-                  </datalist>
+                  <div
+                    className="relative mt-1"
+                    onBlur={() => window.setTimeout(() => setIsDoorOpeningMenuOpen(false), 120)}
+                  >
+                    <input
+                      name="doorOpeningType"
+                      value={elevator.doorOpeningType}
+                      onChange={handleChange}
+                      onFocus={() => setIsDoorOpeningMenuOpen(true)}
+                      className="block w-full rounded-md border border-gray-300 p-2 pr-10 shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      aria-label="Show door opening type options"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => setIsDoorOpeningMenuOpen((isOpen) => !isOpen)}
+                      className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-r-md text-gray-700 hover:bg-gray-100"
+                    >
+                      <span className="text-lg leading-none">▾</span>
+                    </button>
+                    {isDoorOpeningMenuOpen && (
+                      <div className="absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+                        {DOOR_OPENING_TYPE_OPTIONS.map((option) => (
+                          <button
+                            type="button"
+                            key={option.value}
+                            onMouseDown={(event) => {
+                              event.preventDefault();
+                              selectDoorOpeningType(option.value);
+                            }}
+                            className="block w-full px-3 py-2 text-left text-sm text-gray-900 hover:bg-blue-50"
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Door Opening Size (W x H mm)<span className="block text-xs text-gray-500">开门尺寸 (宽 x 高 mm)</span></label>
