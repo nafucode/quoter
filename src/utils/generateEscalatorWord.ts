@@ -18,7 +18,8 @@ import {
   EscalatorSpecGroup,
 } from '@/data/escalatorDefaults';
 import {
-  escalatorTranslations,
+  englishOnlyEscalatorText,
+  getEscalatorLabels,
   translateEscalatorSpecLabel,
   translateEscalatorValue,
 } from '@/data/escalatorTranslations';
@@ -43,6 +44,7 @@ export type EscalatorQuoteWordState = {
   configRows: EscalatorConfigRow[];
   functionRows: EscalatorFunctionRow[];
   language: Lang;
+  englishOnly?: boolean;
 };
 
 const BORDER = { style: BorderStyle.SINGLE, size: 1, color: '888888' } as const;
@@ -109,7 +111,8 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
   );
   const isExw = state.quotationType === 'EXW';
   const grandTotal = priceTotal + (isExw ? 0 : Number(state.freightCost || 0));
-  const et = escalatorTranslations[state.language] || escalatorTranslations.en;
+  const et = getEscalatorLabels(state.language, state.englishOnly);
+  const outputText = (value: string | number) => translateEscalatorValue(value, state.language, state.englishOnly);
 
   const children: (Paragraph | Table)[] = [
     para(et.quotation, { bold: true, size: 32, align: AlignmentType.CENTER }),
@@ -134,7 +137,7 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
             ? new TableRow({
               children: [
                 cell(row.liftNo),
-                cell(translateEscalatorValue(row.description, state.language), { colSpan: 3, align: AlignmentType.LEFT }),
+                cell(outputText(row.description), { colSpan: 3, align: AlignmentType.LEFT }),
                 cell(row.quantity),
                 cell(money(row.unitPrice)),
                 cell(money(Number(row.quantity || 0) * Number(row.unitPrice || 0))),
@@ -143,7 +146,7 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
             : new TableRow({
               children: [
                 cell(row.liftNo),
-                cell(translateEscalatorValue(row.description, state.language), { align: AlignmentType.LEFT }),
+                cell(outputText(row.description), { align: AlignmentType.LEFT }),
                 cell(row.speed),
                 cell(row.inclination),
                 cell(row.quantity),
@@ -211,8 +214,8 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
           (row) =>
             new TableRow({
               children: [
-                cell(translateEscalatorSpecLabel(row.label, row.key, state.language), { align: AlignmentType.LEFT }),
-                ...state.specGroups.map((group) => cell(translateEscalatorValue(String(group[row.key] ?? ''), state.language))),
+                cell(translateEscalatorSpecLabel(row.label, row.key, state.language, state.englishOnly), { align: AlignmentType.LEFT }),
+                ...state.specGroups.map((group) => cell(outputText(String(group[row.key] ?? '')))),
               ],
             }),
         ),
@@ -235,10 +238,10 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
           (row) =>
             new TableRow({
               children: [
-                cell(row.no, { bold: row.section, bg: row.section ? 'F5F5F5' : undefined }),
-                cell(row.name, { bold: row.section, bg: row.section ? 'F5F5F5' : undefined, align: AlignmentType.LEFT }),
-                cell(row.brand, { bold: row.section, bg: row.section ? 'F5F5F5' : undefined }),
-                cell(row.remarks, { bold: row.section, bg: row.section ? 'F5F5F5' : undefined, align: AlignmentType.LEFT }),
+                cell(state.englishOnly ? englishOnlyEscalatorText(row.no) : row.no, { bold: row.section, bg: row.section ? 'F5F5F5' : undefined }),
+                cell(state.englishOnly ? englishOnlyEscalatorText(row.name) : row.name, { bold: row.section, bg: row.section ? 'F5F5F5' : undefined, align: AlignmentType.LEFT }),
+                cell(state.englishOnly ? englishOnlyEscalatorText(row.brand) : row.brand, { bold: row.section, bg: row.section ? 'F5F5F5' : undefined }),
+                cell(state.englishOnly ? englishOnlyEscalatorText(row.remarks) : row.remarks, { bold: row.section, bg: row.section ? 'F5F5F5' : undefined, align: AlignmentType.LEFT }),
               ],
             }),
         ),
@@ -262,8 +265,8 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
             new TableRow({
               children: [
                 cell(row.no),
-                cell(row.name, { align: AlignmentType.LEFT }),
-                cell(row.description, { align: AlignmentType.LEFT }),
+                cell(state.englishOnly ? englishOnlyEscalatorText(row.name) : row.name, { align: AlignmentType.LEFT }),
+                cell(state.englishOnly ? englishOnlyEscalatorText(row.description) : row.description, { align: AlignmentType.LEFT }),
               ],
             }),
         ),

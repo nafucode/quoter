@@ -15,7 +15,8 @@ import {
   EscalatorSpecGroup,
 } from '@/data/escalatorDefaults';
 import {
-  escalatorTranslations,
+  englishOnlyEscalatorText,
+  getEscalatorLabels,
   translateEscalatorSpecLabel,
   translateEscalatorValue,
 } from '@/data/escalatorTranslations';
@@ -41,6 +42,7 @@ type EscalatorQuoteState = {
   configRows: EscalatorConfigRow[];
   functionRows: EscalatorFunctionRow[];
   language: Lang;
+  englishOnly: boolean;
 };
 
 const todayQuotationNo = () => {
@@ -70,6 +72,7 @@ const initialState: EscalatorQuoteState = {
   configRows: defaultEscalatorConfigRows,
   functionRows: defaultEscalatorFunctionRows,
   language: 'en',
+  englishOnly: false,
 };
 
 const STORAGE_KEY = 'xinfuji-escalator-quote';
@@ -127,7 +130,8 @@ export default function EscalatorQuotePage() {
   );
   const isExw = state.quotationType === 'EXW';
   const grandTotal = priceSubtotal + (isExw ? 0 : Number(state.freightCost || 0));
-  const et = escalatorTranslations[state.language] || escalatorTranslations.en;
+  const et = getEscalatorLabels(state.language, state.englishOnly);
+  const outputText = (value: string | number) => translateEscalatorValue(value, state.language, state.englishOnly);
 
   const setField = <K extends keyof EscalatorQuoteState>(field: K, value: EscalatorQuoteState[K]) => {
     setState((prev) => ({ ...prev, [field]: value }));
@@ -297,7 +301,7 @@ export default function EscalatorQuotePage() {
                 {saved ? '已保存' : '保存到报价库'}
               </button>
             </div>
-            <div className="grid grid-cols-[1fr_auto_auto] gap-2 xl:min-w-[480px] xl:justify-end">
+            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 xl:min-w-[580px] xl:justify-end">
               <button onClick={handleGeneratePDF} className="p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 font-semibold">
                 {isClient && window !== window.top ? '新窗口打开并生成 PDF' : '生成 PDF'}
               </button>
@@ -320,6 +324,14 @@ export default function EscalatorQuotePage() {
                 <option value="ar">🇸🇦 AR</option>
                 <option value="ru">🇷🇺 RU</option>
               </select>
+              <button
+                type="button"
+                onClick={() => setField('englishOnly', !state.englishOnly)}
+                className={`px-3 py-2 rounded-lg shadow-md font-semibold text-sm ${state.englishOnly ? 'bg-black text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
+                title="English only output"
+              >
+                EN Only
+              </button>
             </div>
           </div>
         </div>
@@ -563,7 +575,7 @@ export default function EscalatorQuotePage() {
                   isPriceExtraRow(row) ? (
                     <tr key={row.id}>
                       <td className={`${tdClass} text-center`}>{row.liftNo}</td>
-                      <td className={tdClass} colSpan={3}>{translateEscalatorValue(row.description, state.language)}</td>
+                      <td className={tdClass} colSpan={3}>{outputText(row.description)}</td>
                       <td className={`${tdClass} text-center`}>{row.quantity}</td>
                       <td className={`${tdClass} text-right`}>{money(row.unitPrice)}</td>
                       <td className={`${tdClass} text-right`}>{money(Number(row.quantity || 0) * Number(row.unitPrice || 0))}</td>
@@ -571,7 +583,7 @@ export default function EscalatorQuotePage() {
                   ) : (
                     <tr key={row.id}>
                       <td className={`${tdClass} text-center`}>{row.liftNo}</td>
-                      <td className={tdClass}>{translateEscalatorValue(row.description, state.language)}</td>
+                      <td className={tdClass}>{outputText(row.description)}</td>
                       <td className={`${tdClass} text-center`}>{row.speed}</td>
                       <td className={`${tdClass} text-center`}>{row.inclination}</td>
                       <td className={`${tdClass} text-center`}>{row.quantity}</td>
@@ -617,10 +629,10 @@ export default function EscalatorQuotePage() {
               <tbody>
                 {escalatorSpecRows.map((row) => (
                   <tr key={row.key}>
-                    <td className={`${tdClass} font-medium`}>{translateEscalatorSpecLabel(row.label, row.key, state.language)}</td>
+                    <td className={`${tdClass} font-medium`}>{translateEscalatorSpecLabel(row.label, row.key, state.language, state.englishOnly)}</td>
                     {state.specGroups.map((group) => (
                       <td key={`${group.id}-${row.key}`} className={`${tdClass} text-center`}>
-                        {translateEscalatorValue(String(group[row.key] ?? ''), state.language)}
+                        {outputText(String(group[row.key] ?? ''))}
                       </td>
                     ))}
                   </tr>
@@ -638,10 +650,10 @@ export default function EscalatorQuotePage() {
               <tbody>
                 {state.configRows.map((row) => (
                   <tr key={row.id} className={row.section ? 'bg-gray-100 font-bold' : ''}>
-                    <td className={`${tdClass} text-center`}>{row.no}</td>
-                    <td className={tdClass}>{row.name}</td>
-                    <td className={`${tdClass} text-center`}>{row.brand}</td>
-                    <td className={tdClass}>{row.remarks}</td>
+                    <td className={`${tdClass} text-center`}>{state.englishOnly ? englishOnlyEscalatorText(row.no) : row.no}</td>
+                    <td className={tdClass}>{state.englishOnly ? englishOnlyEscalatorText(row.name) : row.name}</td>
+                    <td className={`${tdClass} text-center`}>{state.englishOnly ? englishOnlyEscalatorText(row.brand) : row.brand}</td>
+                    <td className={tdClass}>{state.englishOnly ? englishOnlyEscalatorText(row.remarks) : row.remarks}</td>
                   </tr>
                 ))}
               </tbody>
@@ -658,8 +670,8 @@ export default function EscalatorQuotePage() {
                 {state.functionRows.map((row) => (
                   <tr key={row.id}>
                     <td className={`${tdClass} text-center`}>{row.no}</td>
-                    <td className={tdClass}>{row.name}</td>
-                    <td className={tdClass}>{row.description}</td>
+                    <td className={tdClass}>{state.englishOnly ? englishOnlyEscalatorText(row.name) : row.name}</td>
+                    <td className={tdClass}>{state.englishOnly ? englishOnlyEscalatorText(row.description) : row.description}</td>
                   </tr>
                 ))}
               </tbody>

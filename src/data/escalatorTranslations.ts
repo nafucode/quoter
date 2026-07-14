@@ -87,6 +87,19 @@ const en: EscalatorLabels = {
     'Note: In order to further improve product quality and promote technological innovation, and to better meet customer needs, our company reserves the right to modify the configuration and brand of certain components mentioned above. However, we guarantee that the quality of any updated components will be no lower than that of the original ones.',
 };
 
+const enOnly: EscalatorLabels = {
+  ...en,
+  specificationHeader: 'Specification',
+  configuration: 'Main Configuration',
+  configNo: 'No.',
+  configName: 'Name',
+  configBrand: 'Brand',
+  configRemarks: 'Remarks',
+  functionNo: 'No.',
+  functionName: 'Function Name',
+  functionText: 'Function Description',
+};
+
 export const escalatorTranslations: Record<Lang, EscalatorLabels> = {
   en,
   zh: {
@@ -351,6 +364,45 @@ export const escalatorTranslations: Record<Lang, EscalatorLabels> = {
   },
 };
 
+const EN_SPEC_LABELS: Record<keyof EscalatorSpecGroup, string> = {
+  id: 'ID',
+  no: 'No.',
+  type: 'Type',
+  qty: 'Qty',
+  drawingNo: 'Drawing No.',
+  inclination: 'Inclination (°)',
+  stepWidth: 'Step width (mm)',
+  layoutMode: 'Layout mode',
+  horizontalSteps: 'Number of horizontal steps',
+  runningSpeed: 'Running speed (m/s)',
+  travelingHeight: 'Traveling height',
+  horizontalSpan: 'Horizontal span',
+  motorPower: 'Motor power',
+  frequencyConversion: 'Frequency conversion or not',
+  handrailColor: 'Handrail band color',
+  handrailSpec: 'Handrail band SPEC',
+  railingHeight: 'Handrail railing height',
+  railingMaterial: 'Material/Color',
+  supportMaterial: 'Handrail support material',
+  coverPlateMaterial: 'Material of inner and outer cover plates',
+  apronPlateMaterial: 'Apron plate material',
+  stepType: 'Step type',
+  stepColor: 'Step color',
+  combColor: 'Comb color',
+  combStructure: 'Comb structure',
+  movableCoverPlate: 'Type of movable cover plate',
+  machineRoomStandard: 'Machine room length standard',
+  upperMachineRoomLengthening: 'Upper machine room lengthening',
+  lowerMachineRoomLengthening: 'Lower machine room lengthening',
+  lowerMachineRoomShortening: 'Lower machine room shortening',
+  intermediateSupports: 'Number of intermediate supports',
+  transportation: 'Transportation mode and delivery form',
+  installationEnvironment: 'Installation environment',
+  mainPower: 'Main power supply',
+  lightingPower: 'Lighting power supply',
+  voltageDifference: 'Voltage difference',
+};
+
 const ES_SPEC_LABELS: Record<keyof EscalatorSpecGroup, string> = {
   id: 'ID',
   no: 'N°',
@@ -544,14 +596,66 @@ export function translateEscalatorSpecLabel(
   label: string,
   key: keyof EscalatorSpecGroup,
   lang: Lang,
+  englishOnly = false,
 ) {
+  if (englishOnly) return EN_SPEC_LABELS[key] || englishOnlyEscalatorText(label);
   if (lang === 'es') return ES_SPEC_LABELS[key] || label;
   if (lang === 'km') return KM_SPEC_LABELS[key] || label;
   if (lang === 'ar') return AR_SPEC_LABELS[key] || label;
   return label;
 }
 
-export function translateEscalatorValue(value: string | number, lang: Lang) {
+export function englishOnlyEscalatorText(value: string | number) {
+  const raw = String(value ?? '');
+  if (!raw) return '';
+
+  const chineseNumerals: Record<string, string> = {
+    一: 'I',
+    二: 'II',
+    三: 'III',
+    四: 'IV',
+    五: 'V',
+    六: 'VI',
+    七: 'VII',
+    八: 'VIII',
+    九: 'IX',
+    十: 'X',
+  };
+  const trimmed = raw.trim();
+  if (chineseNumerals[trimmed]) return chineseNumerals[trimmed];
+
+  const spacedSlashParts = raw.split(/\s+\/\s+/);
+  if (
+    spacedSlashParts.length > 1 &&
+    /[\u3400-\u9FFF\uF900-\uFAFF]/.test(spacedSlashParts[0]) &&
+    !/[A-Za-z]/.test(spacedSlashParts[0])
+  ) {
+    return englishOnlyEscalatorText(spacedSlashParts.slice(1).join(' / '));
+  }
+
+  return raw
+    .replace(/[＞]/g, '>')
+    .replace(/[＜]/g, '<')
+    .replace(/[、]/g, '')
+    .replace(/[，]/g, ', ')
+    .replace(/[；]/g, '; ')
+    .replace(/[：]/g, ': ')
+    .replace(/[。]/g, '. ')
+    .replace(/[\u3400-\u9FFF\uF900-\uFAFF]/g, '')
+    .replace(/[（）]/g, '')
+    .replace(/[()]/g, ' ')
+    .replace(/^\s*\/\s*/, '')
+    .replace(/\s*\/\s*$/, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+export function getEscalatorLabels(lang: Lang, englishOnly = false) {
+  return englishOnly ? enOnly : escalatorTranslations[lang] || en;
+}
+
+export function translateEscalatorValue(value: string | number, lang: Lang, englishOnly = false) {
+  if (englishOnly) return englishOnlyEscalatorText(value);
   let result = String(value ?? '');
   const valueMap = lang === 'es' ? ES_VALUE_MAP : lang === 'km' ? KM_VALUE_MAP : lang === 'ar' ? AR_VALUE_MAP : null;
   if (!valueMap) return result;
