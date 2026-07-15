@@ -32,6 +32,7 @@ const Quote = () => {
     warrantyMonths,
     warrantyText,
     priceValidityDays,
+    quoteRemarks,
     certificationStandard,
     showCertificationStandard,
     exchangeRateBasis,
@@ -159,6 +160,7 @@ const Quote = () => {
       freightCost: s.freightCost, exchangeRate: s.exchangeRate, targetCurrency: s.targetCurrency,
       nextId: s.nextId, deliveryDays: s.deliveryDays, paymentTerm: s.paymentTerm,
       warrantyMonths: s.warrantyMonths, warrantyText: s.warrantyText, priceValidityDays: s.priceValidityDays,
+      quoteRemarks: s.quoteRemarks,
       certificationStandard: s.certificationStandard || 'CE Certification',
       showCertificationStandard: s.showCertificationStandard ?? false,
       showPartList: s.showPartList, showFunctionList: s.showFunctionList,
@@ -273,6 +275,7 @@ const Quote = () => {
         warrantyMonths: s.warrantyMonths,
         warrantyText: s.warrantyText,
         priceValidityDays: s.priceValidityDays,
+        quoteRemarks: s.quoteRemarks,
         certificationStandard: s.certificationStandard || 'CE Certification',
         showCertificationStandard: s.showCertificationStandard ?? false,
         shaftFrame: s.shaftFrame,
@@ -675,6 +678,16 @@ const Quote = () => {
                 />
               </div>
               <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Remarks<span className="block text-xs text-gray-500">备注（项目特殊要求）</span></label>
+                <textarea
+                  rows={3}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm resize-y"
+                  value={quoteRemarks}
+                  onChange={(e) => setField('quoteRemarks', e.target.value)}
+                  placeholder="Special project requirements or notes..."
+                />
+              </div>
+              <div className="sm:col-span-2">
                 <div className="flex items-center justify-between gap-3">
                   <label className="block text-sm font-medium text-gray-700">Compliance Standard<span className="block text-xs text-gray-500">符合标准</span></label>
                   <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
@@ -1003,6 +1016,9 @@ const Quote = () => {
                   <p><span className="font-semibold">{t.paymentTerm}</span> {paymentTerm}</p>
                   <p><span className="font-semibold">{t.warranty}</span> {warrantyText || `${warrantyMonths} ${t.warrantySuffix}`}</p>
                   <p><span className="font-semibold">{t.priceValidity}</span> {priceValidityDays} {t.days} {validityUntilDate && `(${t.until} ${validityUntilDate})`}, based on 1 USD = {exchangeRateBasis} RMB.</p>
+                  {quoteRemarks?.trim() && (
+                    <p className="whitespace-pre-wrap"><span className="font-semibold">{t.remarks}</span> {quoteRemarks}</p>
+                  )}
                   {shouldShowCertificationStandard && (
                     <p><span className="font-semibold">{t.complianceStandard}</span> {selectedCertificationStandard}</p>
                   )}

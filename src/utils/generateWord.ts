@@ -187,6 +187,7 @@ export async function generateWordBlob(state: {
   warrantyMonths: number;
   warrantyText?: string;
   priceValidityDays: number;
+  quoteRemarks?: string;
   certificationStandard?: string;
   showCertificationStandard?: boolean;
   shaftFrame: { enabled: boolean; text: string; qty?: number; price: number };
@@ -454,6 +455,11 @@ export async function generateWordBlob(state: {
       {},
     ),
   );
+  if (state.quoteRemarks?.trim()) {
+    children.push(
+      para([bold(t.remarks), plain(` ${state.quoteRemarks}`)], {}),
+    );
+  }
   if (state.showCertificationStandard ?? false) {
     children.push(
       para([bold(t.complianceStandard), plain(` ${state.certificationStandard || 'CE Certification'}`)], {}),

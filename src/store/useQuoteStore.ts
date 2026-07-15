@@ -50,6 +50,7 @@ const normalizeQuoteState = (state: any) => {
   return {
     ...state,
     warrantyText: state.warrantyText || buildDefaultWarrantyText(state.warrantyMonths),
+    quoteRemarks: state.quoteRemarks ?? '',
     shaftFrame: normalizeOptionalItem(state.shaftFrame, initialState.shaftFrame),
     temperedGlass: normalizeOptionalItem(state.temperedGlass, initialState.temperedGlass),
     elevators: Array.isArray(state.elevators)
@@ -89,6 +90,7 @@ interface QuoteState {
   warrantyMonths: number;
   warrantyText: string;
   priceValidityDays: number;
+  quoteRemarks: string;
   certificationStandard: string;
   showCertificationStandard: boolean;
   exchangeRateBasis: number | string;
@@ -128,6 +130,7 @@ const initialState = {
   warrantyMonths: 12,
   warrantyText: buildDefaultWarrantyText(12),
   priceValidityDays: 30,
+  quoteRemarks: '',
   certificationStandard: 'CE Certification',
   showCertificationStandard: false,
   exchangeRateBasis: 6.8,
@@ -229,7 +232,7 @@ export const useQuoteStore = create<QuoteState>()(
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
-      version: 4,
+      version: 5,
       migrate: (persistedState: any, version) => {
         let nextState = persistedState;
         if (version < 1 && nextState && typeof nextState === 'object') {
@@ -245,6 +248,9 @@ export const useQuoteStore = create<QuoteState>()(
           nextState = normalizeQuoteState(nextState);
         }
         if (version < 4) {
+          nextState = normalizeQuoteState(nextState);
+        }
+        if (version < 5) {
           nextState = normalizeQuoteState(nextState);
         }
         return nextState;
