@@ -45,6 +45,8 @@ export const elevatorTemplate = {
   doorHeaderType: 'Standard',
   firstFloorDoor: 'Hairline Stainless Steel 304 1.2mm',
   otherFloorsDoor: 'Hairline Stainless Steel 304 1.2mm',
+  baseFloorJamb: 'Standard Narrow Jamb',
+  otherFloorsJamb: 'Standard Narrow Jamb',
 
   // Function
   copLop: 'Standard',

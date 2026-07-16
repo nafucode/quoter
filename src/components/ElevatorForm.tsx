@@ -381,12 +381,20 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                   <input name="doorHeaderType" value={elevator.doorHeaderType} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">1st Floor Door Decoration<span className="block text-xs text-gray-500">首层门装饰</span></label>
+                  <label className="block text-sm font-medium text-gray-700">Base Floor Door Decoration<span className="block text-xs text-gray-500">基站层门装饰</span></label>
                   <input name="firstFloorDoor" value={elevator.firstFloorDoor} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
-                <div className="sm:col-span-2">
+                <div>
                   <label className="block text-sm font-medium text-gray-700">Other Floors Door Decoration<span className="block text-xs text-gray-500">其它楼层门装饰</span></label>
                   <input name="otherFloorsDoor" value={elevator.otherFloorsDoor} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Base Floor Door Jamb<span className="block text-xs text-gray-500">基站层门套</span></label>
+                  <input name="baseFloorJamb" value={elevator.baseFloorJamb ?? 'Standard Narrow Jamb'} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Other Floors Door Jamb<span className="block text-xs text-gray-500">其它楼层门套</span></label>
+                  <input name="otherFloorsJamb" value={elevator.otherFloorsJamb ?? 'Standard Narrow Jamb'} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
               </div>
             </div>

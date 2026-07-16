@@ -561,6 +561,8 @@ export async function generateWordBlob(state: {
       [t.specDoorHeader, elev.doorHeaderType ?? ''],
       [t.specDoor1st, elev.firstFloorDoor ?? ''],
       [t.specDoorOther, elev.otherFloorsDoor ?? ''],
+      [t.specDoorJambBase, elev.baseFloorJamb ?? 'Standard Narrow Jamb'],
+      [t.specDoorJambOther, elev.otherFloorsJamb ?? 'Standard Narrow Jamb'],
     ]);
 
     // V. Function

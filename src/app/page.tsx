@@ -1074,6 +1074,8 @@ const Quote = () => {
                             {renderSpec(t.specDoorHeader, elevator.doorHeaderType)}
                             {renderSpec(t.specDoor1st, elevator.firstFloorDoor)}
                             {renderSpec(t.specDoorOther, elevator.otherFloorsDoor)}
+                            {renderSpec(t.specDoorJambBase, elevator.baseFloorJamb ?? 'Standard Narrow Jamb')}
+                            {renderSpec(t.specDoorJambOther, elevator.otherFloorsJamb ?? 'Standard Narrow Jamb')}
                           </div>
                           <div className="break-inside-avoid">
                             <h4 id={`preview-function-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `function-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>{t.secFunction}</h4>
