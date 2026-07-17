@@ -62,6 +62,12 @@ const Quote = () => {
   const [isClient, setIsClient] = useState(false);
   const [libSaved, setLibSaved] = useState(false);
   const [quoteHistory, setQuoteHistory] = useState<any[]>([]);
+  const [shaftFrameCalc, setShaftFrameCalc] = useState({
+    widthMm: 2000,
+    depthMm: 2200,
+    heightM: 12,
+    frameType: 'aluminum' as 'aluminum' | 'steel',
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const HISTORY_KEY = 'quoter_history';
@@ -389,6 +395,32 @@ const Quote = () => {
   const convertedTotal = useMemo(() => {
     return grandTotal * Number(exchangeRate);
   }, [grandTotal, exchangeRate]);
+
+  const shaftFrameEstimate = useMemo(() => {
+    const widthM = (Number(shaftFrameCalc.widthMm) || 0) / 1000;
+    const depthM = (Number(shaftFrameCalc.depthMm) || 0) / 1000;
+    const heightM = Number(shaftFrameCalc.heightM) || 0;
+    const chargeHeight = heightM + 1;
+    const glassArea = (widthM * 1.5 + depthM * 2) * chargeHeight;
+    const glassCostRmb = glassArea * 250;
+    const frameRateRmb = shaftFrameCalc.frameType === 'steel' ? 1300 : 1800;
+    const frameCostRmb = frameRateRmb * chargeHeight;
+    const totalRmb = glassCostRmb + frameCostRmb;
+    const usdRate = Number(exchangeRateBasis) || 6.8;
+    const totalUsd = Math.round(totalRmb / usdRate);
+    const frameLabel = shaftFrameCalc.frameType === 'steel' ? 'Steel shaft frame' : 'Aluminum shaft frame';
+
+    return {
+      chargeHeight,
+      glassArea,
+      glassCostRmb,
+      frameRateRmb,
+      frameCostRmb,
+      totalRmb,
+      totalUsd,
+      description: `${frameLabel} as Height ${heightM || 0} m`,
+    };
+  }, [exchangeRateBasis, shaftFrameCalc]);
 
   const validityUntilDate = useMemo(() => {
     if (!quotationDate || !priceValidityDays || Number(priceValidityDays) <= 0) {
@@ -756,6 +788,68 @@ const Quote = () => {
                       onChange={(e) => setField('shaftFrame', { ...shaftFrame, price: Number(e.target.value) })}
                       className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"
                     />
+                  </div>
+                  <div className="sm:col-span-3 mt-2 rounded-md border border-blue-100 bg-blue-50/60 p-3">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-800">Shaft Frame Calculator<span className="ml-1 text-xs font-normal text-gray-500">井道框架计算器</span></h4>
+                        <p className="text-xs text-gray-500">Formula: glass area × ¥250/m² + frame height × rate, converted by USD = RMB basis.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setField('shaftFrame', { ...shaftFrame, text: shaftFrameEstimate.description, price: shaftFrameEstimate.totalUsd })}
+                        className="rounded-md bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+                      >
+                        Apply to Row 1
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
+                      <label className="text-xs font-medium text-gray-600">
+                        Width (mm)<span className="ml-1 text-gray-400">宽</span>
+                        <input
+                          type="number"
+                          value={shaftFrameCalc.widthMm}
+                          onChange={(e) => setShaftFrameCalc({ ...shaftFrameCalc, widthMm: Number(e.target.value) })}
+                          className="mt-1 block w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm"
+                        />
+                      </label>
+                      <label className="text-xs font-medium text-gray-600">
+                        Depth (mm)<span className="ml-1 text-gray-400">深</span>
+                        <input
+                          type="number"
+                          value={shaftFrameCalc.depthMm}
+                          onChange={(e) => setShaftFrameCalc({ ...shaftFrameCalc, depthMm: Number(e.target.value) })}
+                          className="mt-1 block w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm"
+                        />
+                      </label>
+                      <label className="text-xs font-medium text-gray-600">
+                        Height (m)<span className="ml-1 text-gray-400">高</span>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={shaftFrameCalc.heightM}
+                          onChange={(e) => setShaftFrameCalc({ ...shaftFrameCalc, heightM: Number(e.target.value) })}
+                          className="mt-1 block w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm"
+                        />
+                      </label>
+                      <label className="text-xs font-medium text-gray-600">
+                        Frame<span className="ml-1 text-gray-400">框架</span>
+                        <select
+                          value={shaftFrameCalc.frameType}
+                          onChange={(e) => setShaftFrameCalc({ ...shaftFrameCalc, frameType: e.target.value as 'aluminum' | 'steel' })}
+                          className="mt-1 block w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm"
+                        >
+                          <option value="aluminum">Aluminum ¥1800/m</option>
+                          <option value="steel">Steel ¥1300/m</option>
+                        </select>
+                      </label>
+                      <div className="rounded-md bg-white p-2 text-xs text-gray-700 shadow-sm">
+                        <div>Charge height: <b>{shaftFrameEstimate.chargeHeight.toFixed(1)} m</b></div>
+                        <div>Glass: <b>{shaftFrameEstimate.glassArea.toFixed(2)} m²</b></div>
+                        <div>Total: <b>¥{Math.round(shaftFrameEstimate.totalRmb).toLocaleString()}</b></div>
+                        <div>USD: <b>${shaftFrameEstimate.totalUsd.toLocaleString()}</b></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
