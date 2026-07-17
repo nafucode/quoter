@@ -84,9 +84,13 @@ type QuoteSnapshot = {
   quotationType?: string;
   elevators?: QuoteElevator[];
   freightDestination?: string;
+  freightCost?: string | number;
   targetCurrency?: string;
   deliveryDays?: string | number;
   paymentTerm?: string;
+  grandTotal?: number;
+  shaftFrame?: { enabled?: boolean; qty?: string | number; price?: string | number };
+  temperedGlass?: { enabled?: boolean; qty?: string | number; price?: string | number };
 };
 
 type QuoteHistoryEntry = {
@@ -338,7 +342,7 @@ function piNoFromContract(contractNo: string) {
 }
 
 function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
-  const quoteItems = (source.elevators || []).map((elevator, index) => ({
+  const baseQuoteItems = (source.elevators || []).map((elevator, index) => ({
     id: Number(elevator.id) || index + 1,
     name: elevator.description || "Elevator",
     capacity: withUnit(elevator.capacity, "KG"),
@@ -348,6 +352,36 @@ function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
     unit: "UNIT",
     unitPrice: Number(elevator.unitPrice || 0),
   }));
+  const quoteGrandTotal = Number(source.grandTotal || 0);
+  const productTotal = baseQuoteItems.reduce(
+    (sum, item) => sum + Number(item.quantity || 0) * Number(item.unitPrice || 0),
+    0,
+  );
+  const optionalTotal =
+    (source.shaftFrame?.enabled
+      ? Number(source.shaftFrame.price || 0) * (Number(source.shaftFrame.qty || 0) || 1)
+      : 0) +
+    (source.temperedGlass?.enabled
+      ? Number(source.temperedGlass.price || 0) * (Number(source.temperedGlass.qty || 0) || 1)
+      : 0);
+  const calculatedGrandTotal = productTotal + Number(source.freightCost || 0) + optionalTotal;
+  const totalQuantity = baseQuoteItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const grandTotalForPi = quoteGrandTotal > 0 ? quoteGrandTotal : calculatedGrandTotal;
+  const quoteItems =
+    grandTotalForPi > 0 && baseQuoteItems.length > 0
+      ? baseQuoteItems.map((item) => {
+          const quantity = Number(item.quantity || 0) || 1;
+          const lineProductTotal = Number(item.unitPrice || 0) * quantity;
+          const lineTotal =
+            productTotal > 0
+              ? grandTotalForPi * (lineProductTotal / productTotal)
+              : grandTotalForPi * (quantity / (totalQuantity || quantity));
+          return {
+            ...item,
+            unitPrice: Math.round((lineTotal / quantity) * 100) / 100,
+          };
+        })
+      : baseQuoteItems;
 
   return {
     ...current,
@@ -476,7 +510,7 @@ export default function ProformaInvoicePage() {
     if (!entry.state) return;
     setActiveHistoryId(entry.id);
     setActivePiHistoryId(null);
-    setForm((current) => piFromQuote(entry.state || {}, current));
+    setForm((current) => piFromQuote({ ...(entry.state || {}), grandTotal: entry.state?.grandTotal || entry.grandTotal }, current));
   };
 
   const savePiToHistory = () => {
