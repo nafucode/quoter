@@ -233,6 +233,22 @@ const bankPresets: BankPreset[] = [
       "Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu 215236, China",
   },
   {
+    id: "boc-shenzhen-dongbu",
+    label: "Bank of China Shenzhen Dongbu",
+    bankName: "BANK OF CHINA SHENZHEN DONGBU BRANCH",
+    accountNo: "17870060775837651001",
+    swiftCode: "BKCHCNBJ45A",
+    bankAddress:
+      "NO.74 JINRONG ROAD, SHATOUJIAO, YANTIAN DISTRICT, SHENZHEN, CHINA",
+    intermediaryBank: "",
+    intermediarySwift: "",
+    beneficiary: "Suzhou Xinfuji Electromechanical Co., Ltd.",
+    beneficiaryAddress:
+      "Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China",
+    additionalRequirements:
+      "Country/Region: China\nPayment method: Only accept payments via SWIFT/CIPS.\nMemo/message: Please include the following memo/message to receiver when making a payment: [Buyer Name] [Invoice/Contract Number] [Product]",
+  },
+  {
     id: "first-bank-ghana-gip",
     label: "GHS GIP - First Bank Ghana",
     bankName: "FIRST BANK OF NIGERIA, GHANA",
