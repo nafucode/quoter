@@ -407,6 +407,8 @@ const Quote = () => {
     const frameCostRmb = frameRateRmb * chargeHeight;
     const totalRmb = glassCostRmb + frameCostRmb;
     const usdRate = Number(exchangeRateBasis) || 6.8;
+    const glassCostUsd = Math.round(glassCostRmb / usdRate);
+    const frameCostUsd = Math.round(frameCostRmb / usdRate);
     const totalUsd = Math.round(totalRmb / usdRate);
     const frameLabel = shaftFrameCalc.frameType === 'steel' ? 'Steel shaft frame' : 'Aluminum shaft frame';
 
@@ -414,8 +416,10 @@ const Quote = () => {
       chargeHeight,
       glassArea,
       glassCostRmb,
+      glassCostUsd,
       frameRateRmb,
       frameCostRmb,
+      frameCostUsd,
       totalRmb,
       totalUsd,
       description: `${frameLabel} as Height ${heightM || 0} m`,
@@ -846,8 +850,8 @@ const Quote = () => {
                       <div className="rounded-md bg-white p-2 text-xs text-gray-700 shadow-sm">
                         <div>Charge height: <b>{shaftFrameEstimate.chargeHeight.toFixed(1)} m</b></div>
                         <div>Glass: <b>{shaftFrameEstimate.glassArea.toFixed(2)} m²</b></div>
-                        <div>Glass Cost: <b>¥{Math.round(shaftFrameEstimate.glassCostRmb).toLocaleString()}</b></div>
-                        <div>Frame Cost: <b>¥{Math.round(shaftFrameEstimate.frameCostRmb).toLocaleString()}</b></div>
+                        <div>Glass Cost: <b>¥{Math.round(shaftFrameEstimate.glassCostRmb).toLocaleString()}</b> <span className="text-gray-500">/ ${shaftFrameEstimate.glassCostUsd.toLocaleString()}</span></div>
+                        <div>Frame Cost: <b>¥{Math.round(shaftFrameEstimate.frameCostRmb).toLocaleString()}</b> <span className="text-gray-500">/ ${shaftFrameEstimate.frameCostUsd.toLocaleString()}</span></div>
                         <div className="mt-1 border-t border-gray-200 pt-1">Total: <b>¥{Math.round(shaftFrameEstimate.totalRmb).toLocaleString()}</b></div>
                         <div>USD: <b>${shaftFrameEstimate.totalUsd.toLocaleString()}</b></div>
                       </div>
