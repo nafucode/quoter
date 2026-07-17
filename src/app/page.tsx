@@ -846,7 +846,9 @@ const Quote = () => {
                       <div className="rounded-md bg-white p-2 text-xs text-gray-700 shadow-sm">
                         <div>Charge height: <b>{shaftFrameEstimate.chargeHeight.toFixed(1)} m</b></div>
                         <div>Glass: <b>{shaftFrameEstimate.glassArea.toFixed(2)} m²</b></div>
-                        <div>Total: <b>¥{Math.round(shaftFrameEstimate.totalRmb).toLocaleString()}</b></div>
+                        <div>Glass Cost: <b>¥{Math.round(shaftFrameEstimate.glassCostRmb).toLocaleString()}</b></div>
+                        <div>Frame Cost: <b>¥{Math.round(shaftFrameEstimate.frameCostRmb).toLocaleString()}</b></div>
+                        <div className="mt-1 border-t border-gray-200 pt-1">Total: <b>¥{Math.round(shaftFrameEstimate.totalRmb).toLocaleString()}</b></div>
                         <div>USD: <b>${shaftFrameEstimate.totalUsd.toLocaleString()}</b></div>
                       </div>
                     </div>
