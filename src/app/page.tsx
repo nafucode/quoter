@@ -15,6 +15,14 @@ import { translateValueToKm } from '@/data/kmValueMap';
 import { translateValueToAr } from '@/data/arValueMap';
 import { standardFeatures } from '@/data/standardFeatures';
 
+const warrantyTextOptions = [
+  {
+    label: 'Core components 5 years / Complete elevator 2 years',
+    value:
+      'Core components (Motor, Controller, and Door Operator): 5-year warranty. Complete elevator: 2-year warranty, effective from the date of shipment.',
+  },
+];
+
 const Quote = () => {
   const {
     companyName,
@@ -399,6 +407,27 @@ const Quote = () => {
     return grandTotal * Number(exchangeRate);
   }, [grandTotal, exchangeRate]);
 
+  const targetRoundingUnit = targetCurrency === 'NGN' ? 1000 : 1;
+  const roundedConvertedTotal = useMemo(() => {
+    if (!convertedTotal || !Number.isFinite(convertedTotal)) return 0;
+    return Math.ceil(convertedTotal / targetRoundingUnit) * targetRoundingUnit;
+  }, [convertedTotal, targetRoundingUnit]);
+
+  const formatTargetCurrency = (amount: number) =>
+    amount.toLocaleString('en-US', {
+      style: 'currency',
+      currency: targetCurrency,
+      minimumFractionDigits: targetCurrency === 'NGN' ? 0 : 2,
+      maximumFractionDigits: targetCurrency === 'NGN' ? 0 : 2,
+    });
+
+  const roundTargetCurrencyTotal = () => {
+    if (!grandTotal || targetCurrency === '-' || targetCurrency === 'USD') return;
+    const nextConvertedTotal = roundedConvertedTotal || convertedTotal;
+    const nextRate = nextConvertedTotal / grandTotal;
+    setField('exchangeRate', Number(nextRate.toFixed(8)));
+  };
+
   const shaftFrameEstimate = useMemo(() => {
     const widthM = (Number(shaftFrameCalc.widthMm) || 0) / 1000;
     const depthM = (Number(shaftFrameCalc.depthMm) || 0) / 1000;
@@ -659,6 +688,15 @@ const Quote = () => {
                   value={exchangeRate}
                   onChange={(e) => setField('exchangeRate', Number(e.target.value))}
                 />
+                {targetCurrency !== 'USD' && targetCurrency !== '-' && (
+                  <button
+                    type="button"
+                    onClick={roundTargetCurrencyTotal}
+                    className="mt-2 inline-flex items-center justify-center rounded-md bg-slate-800 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-700"
+                  >
+                    取整目标货币
+                  </button>
+                )}
               </div>
             </div>
 
@@ -684,6 +722,20 @@ const Quote = () => {
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Warranty Text<span className="block text-xs text-gray-500">质保条款文字</span></label>
+                <select
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-white"
+                  defaultValue=""
+                  onChange={(e) => {
+                    if (e.target.value) setField('warrantyText', e.target.value);
+                  }}
+                >
+                  <option value="" disabled>选择质保模板</option>
+                  {warrantyTextOptions.map((option) => (
+                    <option key={option.label} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
                 <input
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={warrantyText}
@@ -1107,7 +1159,7 @@ const Quote = () => {
                       {targetCurrency !== 'USD' && targetCurrency !== '-' && (
                         <tr className="font-bold">
                           <td colSpan={4} className="p-2 text-right">=</td>
-                          <td className="p-2 text-right">{convertedTotal.toLocaleString('en-US', { style: 'currency', currency: targetCurrency })}</td>
+                          <td className="p-2 text-right">{formatTargetCurrency(convertedTotal)}</td>
                         </tr>
                       )}
                     </tbody>
