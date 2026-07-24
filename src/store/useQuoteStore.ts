@@ -47,6 +47,26 @@ const normalizeOptionalItem = (item: any, fallback: OptionalItem) => ({
   qty: Number(item?.qty) || fallback.qty,
 });
 
+const normalizePartList = (partList: any) =>
+  Array.isArray(partList)
+    ? partList.map((row) => ({
+        ...row,
+        brand:
+          row?.brand === 'Shenling/Ouling'
+            ? 'Ouling'
+            : row?.brand === 'XINFUJI'
+              ? 'FUJI'
+              : row?.brand,
+      }))
+      .map((row) => ({
+        ...row,
+        brand:
+          row?.label === '2、Contactor' && row?.brand === 'FUJI'
+            ? 'Fuji Electric'
+            : row?.brand,
+      }))
+    : partList;
+
 const normalizeQuoteState = (state: any) => {
   if (!state || typeof state !== 'object') return state;
   return {
@@ -58,6 +78,7 @@ const normalizeQuoteState = (state: any) => {
     elevators: Array.isArray(state.elevators)
       ? state.elevators.map(normalizeElevator)
       : state.elevators,
+    partList: normalizePartList(state.partList),
   };
 };
 
