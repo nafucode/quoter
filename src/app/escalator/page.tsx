@@ -165,14 +165,38 @@ export default function EscalatorQuotePage() {
     }));
   };
 
-  const addPriceRow = () => {
+  const getNextPriceRowMeta = (rows: EscalatorPriceRow[]) => ({
+    id: Math.max(0, ...rows.map((row) => row.id)) + 1,
+    liftNo: String(rows.length + 1),
+  });
+
+  const addEscalatorPriceRow = () => {
+    setState((prev) => {
+      const lastEscalatorRow = [...prev.priceRows].reverse().find((row) => !isPriceExtraRow(row));
+      return {
+        ...prev,
+        priceRows: [
+          ...prev.priceRows,
+          {
+            ...getNextPriceRowMeta(prev.priceRows),
+            description: 'Escalators(H=3000mm)',
+            speed: lastEscalatorRow?.speed || '0.5',
+            inclination: lastEscalatorRow?.inclination || '35°',
+            quantity: 1,
+            unitPrice: 0,
+          },
+        ],
+      };
+    });
+  };
+
+  const addExteriorCladdingRow = () => {
     setState((prev) => ({
       ...prev,
       priceRows: [
         ...prev.priceRows,
         {
-          id: Math.max(0, ...prev.priceRows.map((row) => row.id)) + 1,
-          liftNo: String(prev.priceRows.length + 1),
+          ...getNextPriceRowMeta(prev.priceRows),
           description: '304 stainless steel exterior cladding material 1.0mm ____ m²',
           speed: '',
           inclination: '',
@@ -412,7 +436,10 @@ export default function EscalatorQuotePage() {
           <div className={sectionClass}>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Product & Price</h2>
-              <button onClick={addPriceRow} className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700">添加行</button>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <button onClick={addEscalatorPriceRow} className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700">添加扶梯</button>
+                <button onClick={addExteriorCladdingRow} className="rounded-md bg-orange-600 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-700">添加外装潢</button>
+              </div>
             </div>
             <div className="overflow-auto">
               <table className="min-w-[860px] w-full border-collapse text-sm">
