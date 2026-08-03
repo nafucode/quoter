@@ -854,13 +854,32 @@ const Quote = () => {
                         <h4 className="text-sm font-semibold text-gray-800">Shaft Frame Calculator<span className="ml-1 text-xs font-normal text-gray-500">井道框架计算器</span></h4>
                         <p className="text-xs text-gray-500">Formula: glass area × ¥250/m² + frame height × rate, converted by USD = RMB basis.</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setField('shaftFrame', { ...shaftFrame, text: shaftFrameEstimate.description, price: shaftFrameEstimate.totalUsd })}
-                        className="rounded-md bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700"
-                      >
-                        Apply to Row 1
-                      </button>
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setField('shaftFrame', {
+                            ...shaftFrame,
+                            enabled: true,
+                            text: shaftFrameEstimate.description,
+                            price: shaftFrameEstimate.frameCostUsd,
+                          })}
+                          className="rounded-md bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+                        >
+                          Apply Frame to Row 1
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setField('temperedGlass', {
+                            ...temperedGlass,
+                            enabled: true,
+                            text: `10mm Tempered Glass ${shaftFrameEstimate.glassArea.toFixed(1)} m²`,
+                            price: shaftFrameEstimate.glassCostUsd,
+                          })}
+                          className="rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+                        >
+                          Apply Glass to Row 2
+                        </button>
+                      </div>
                     </div>
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
                       <label className="text-xs font-medium text-gray-600">
