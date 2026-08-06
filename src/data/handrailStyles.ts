@@ -14,4 +14,9 @@ export const handrailStyles = [
     name: 'round-type',
     previewImage: '/handrail-styles/round-type.png',
   },
+  {
+    id: 'HR-04',
+    name: '落地式(客梯观光专用)',
+    previewImage: '/handrail-styles/handrail-floor-mounted.png',
+  },
 ];
