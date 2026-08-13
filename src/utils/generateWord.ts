@@ -568,7 +568,7 @@ export async function generateWordBlob(state: {
     // V. Function
     const functionsList = (elev.otherFunctions ?? [])
       .filter((f: any) => f.checked)
-      .map((f: any) => f.name)
+      .map((f: any) => translateValueForLang(f.name, state.language))
       .join(', ');
     specSection(t.secFunction, [
       [t.specCopLop, elev.copLop ?? ''],
