@@ -25,6 +25,7 @@ export const standardFeatures: StandardFeatureGroup[] = [
       ['Start protection control', 'Upward over-speed protection device'],
       ['Inspection operation', 'Steel rope slipping self-detection'],
       ['Braking force self-detection functions', 'Balance system of self-learning'],
+      ['Door opening re-leveling', 'CWT safety gears'],
     ],
   },
   {
@@ -50,12 +51,11 @@ export const standardFeatures: StandardFeatureGroup[] = [
   {
     category: 'Optional Functions',
     rows: [
-      ['Leveling when power failure (ARD) included', 'CWT safety gears'],
-      ['Energy-regenerating device', 'Group control'],
-      ['Absolute location positioning system', '3D door protection'],
-      ['Clean anti-bacteria functions of car', 'The second operation COP'],
-      ['Voice announcer', 'Operation box for handicapped'],
-      ['Door opening re-leveling', 'IC card control access function'],
+      ['Leveling when power failure (ARD) included', 'Energy-regenerating device'],
+      ['Group control', 'Absolute location positioning system'],
+      ['3D door protection', 'Clean anti-bacteria functions of car'],
+      ['The second operation COP', 'Voice announcer'],
+      ['Operation box for handicapped', 'IC card control access function'],
       ['Remote monitor', 'Camera function in the car'],
     ],
   },
