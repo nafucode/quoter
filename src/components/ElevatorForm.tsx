@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuoteStore } from '@/store/useQuoteStore';
 import StylePicker from './StylePicker';
 import HybridInput from './HybridInput';
@@ -22,6 +22,33 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
   const { updateElevator, removeElevator, toggleElevatorCollapse } = useQuoteStore();
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
   const [isDoorOpeningMenuOpen, setIsDoorOpeningMenuOpen] = useState(false);
+
+  const buildElevatorType = (machineRoom: string, capacity: string | number, speed: string | number) => {
+    const modelPrefix = machineRoom === 'MRL' ? 'TKJW' : 'TKJ';
+    return `${modelPrefix}${capacity || ''}/${speed || ''}-VVVF`;
+  };
+
+  const generatedType = buildElevatorType(elevator.machineRoom, elevator.capacity, elevator.speed);
+
+  useEffect(() => {
+    if (elevator.type !== generatedType) {
+      updateElevator(elevator.id, 'type', generatedType);
+    }
+  }, [elevator.id, elevator.type, generatedType, updateElevator]);
+
+  const handleBasicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    updateElevator(elevator.id, name, value);
+    if (name === 'capacity' || name === 'speed') {
+      const nextElevator = { ...elevator, [name]: value };
+      updateElevator(elevator.id, 'type', buildElevatorType(nextElevator.machineRoom, nextElevator.capacity, nextElevator.speed));
+    }
+  };
+
+  const handleMachineRoomChange = (machineRoom: 'MR' | 'MRL') => {
+    updateElevator(elevator.id, 'machineRoom', machineRoom);
+    updateElevator(elevator.id, 'type', buildElevatorType(machineRoom, elevator.capacity, elevator.speed));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -162,35 +189,15 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                 <textarea name="description" value={elevator.description} onChange={handleChange} rows={2} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm resize-y" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Type<span className="block text-xs text-gray-500">类型</span></label>
-                <input name="type" value={elevator.type} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Capacity (kg)<span className="block text-xs text-gray-500">载重 (kg)</span></label>
-                <input name="capacity" value={elevator.capacity} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Speed (m/s)<span className="block text-xs text-gray-500">速度 (m/s)</span></label>
-                <input name="speed" value={elevator.speed} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Qty<span className="block text-xs text-gray-500">数量</span></label>
-                <input name="qty" value={elevator.qty} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Unit Price<span className="block text-xs text-gray-500">单价</span></label>
-                <input name="unitPrice" value={elevator.unitPrice} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
-              </div>
-              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Machine Room<span className="block text-xs text-gray-500">机房</span></label>
-                <div className="mt-2 flex gap-4">
+                <div className="mt-2 flex flex-wrap gap-4 rounded-md border border-gray-200 p-3">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
                       name={`machineRoom-${elevator.id}`}
                       value="MR"
                       checked={elevator.machineRoom === 'MR'}
-                      onChange={() => updateElevator(elevator.id, 'machineRoom', 'MR')}
+                      onChange={() => handleMachineRoomChange('MR')}
                       className="h-4 w-4 text-indigo-600"
                     />
                     <span className="text-sm">有机房 <span className="font-semibold text-gray-700">MR</span></span>
@@ -201,12 +208,32 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                       name={`machineRoom-${elevator.id}`}
                       value="MRL"
                       checked={elevator.machineRoom === 'MRL'}
-                      onChange={() => updateElevator(elevator.id, 'machineRoom', 'MRL')}
+                      onChange={() => handleMachineRoomChange('MRL')}
                       className="h-4 w-4 text-indigo-600"
                     />
                     <span className="text-sm">无机房 <span className="font-semibold text-gray-700">MRL</span></span>
                   </label>
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Capacity (kg)<span className="block text-xs text-gray-500">载重 (kg)</span></label>
+                <input name="capacity" value={elevator.capacity} onChange={handleBasicChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Speed (m/s)<span className="block text-xs text-gray-500">速度 (m/s)</span></label>
+                <input name="speed" value={elevator.speed} onChange={handleBasicChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Qty<span className="block text-xs text-gray-500">数量</span></label>
+                <input name="qty" value={elevator.qty} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Unit Price<span className="block text-xs text-gray-500">单价</span></label>
+                <input name="unitPrice" value={elevator.unitPrice} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700">Type<span className="block text-xs text-gray-500">类型（根据机房 / 载重 / 速度自动生成）</span></label>
+                <input name="type" value={generatedType} readOnly className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 shadow-sm" />
               </div>
             </div>
 
