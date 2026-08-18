@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Quoter",
+  title: "Quoter报价器",
   description: "Quotation Generation Tool",
 };
 
