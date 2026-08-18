@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "XINFUJI.com",
+  title: "Quoter",
   description: "Quotation Generation Tool",
 };
 
