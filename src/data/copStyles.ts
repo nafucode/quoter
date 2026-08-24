@@ -42,6 +42,7 @@ export const copStyleGroups = [
       { id: 'XFJ-COP-08', name: 'XFJ-COP-08', previewImage: '/cop-styles/XFJ-COP-08.png' },
       { id: 'XFJ-COP-09', name: 'XFJ-COP-09', previewImage: '/cop-styles/XFJ-COP-09.png' },
       { id: 'XFJ-COP-12', name: 'XFJ-COP-12 (Villa)', previewImage: '/cop-styles/XFJ-COP-12.png' },
+      { id: 'XFJ-COP-13', name: 'XFJ-COP-13', previewImage: '/cop-styles/XFJ-COP-13.png' },
     ],
   },
 ];
