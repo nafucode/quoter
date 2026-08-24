@@ -59,6 +59,7 @@ export const cabinStyleGroups = [
     styles: [
       { id: 'FJ-B01', name: 'FJ-B01', previewImage: '/cabin-styles/FJ-B01.png' },
       { id: 'FJ-B02', name: 'FJ-B02', previewImage: '/cabin-styles/FJ-B02.png' },
+      { id: 'FJ-B003', name: 'FJ-B003', previewImage: '/cabin-styles/FJ-B003 cabin.png' },
     ]
   },
   {
