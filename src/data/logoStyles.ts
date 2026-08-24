@@ -14,4 +14,9 @@ export const logoStyles = [
     name: 'Swift Lift Logo',
     previewImage: 'https://xinfuji.com/wp-content/uploads/logo-swift-lift.png',
   },
+  {
+    id: 'XFJ-LOGO-04',
+    name: 'Skodfuji Logo',
+    previewImage: '/logo-styles/Skodfuji logo.png',
+  },
 ];
