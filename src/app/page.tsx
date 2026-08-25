@@ -17,6 +17,10 @@ import { standardFeatures } from '@/data/standardFeatures';
 
 const warrantyTextOptions = [
   {
+    label: 'Default warranty text',
+    value: 'default',
+  },
+  {
     label: 'Core components 5 years / Complete elevator 2 years',
     value:
       'Core components (Motor, Controller, and Door Operator): 5-year warranty. Complete elevator: 2-year warranty, effective from the date of shipment.',
@@ -750,12 +754,19 @@ const Quote = () => {
                 <label className="block text-sm font-medium text-gray-700">Warranty Text<span className="block text-xs text-gray-500">质保条款文字</span></label>
                 <select
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-white"
-                  defaultValue=""
+                  value=""
                   onChange={(e) => {
-                    if (e.target.value) setField('warrantyText', e.target.value);
+                    const selectedValue = e.target.value;
+                    if (!selectedValue) return;
+                    setField(
+                      'warrantyText',
+                      selectedValue === 'default'
+                        ? `${warrantyMonths || 12} months from the date the goods depart from the port of shipment.`
+                        : selectedValue
+                    );
                   }}
                 >
-                  <option value="" disabled>选择质保模板</option>
+                  <option value="">选择质保模板</option>
                   {warrantyTextOptions.map((option) => (
                     <option key={option.label} value={option.value}>
                       {option.label}
