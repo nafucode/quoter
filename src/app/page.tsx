@@ -15,6 +15,7 @@ import { translateValueToKm } from '@/data/kmValueMap';
 import { translateValueToAr } from '@/data/arValueMap';
 import { standardFeatures } from '@/data/standardFeatures';
 import { countryGroups } from '@/data/countryOptions';
+import { countryPorts } from '@/data/countryPorts';
 
 const warrantyTextOptions = [
   {
@@ -47,6 +48,8 @@ const sortCompanyOptions = (names: string[]) =>
   [...names]
     .filter((name) => typeof name === 'string' && name.trim())
     .sort((a, b) => a.trim().localeCompare(b.trim(), undefined, { sensitivity: 'base', numeric: true }));
+
+const DEFAULT_FREIGHT_PLACEHOLDER = 'e.g., Port of Shanghai';
 
 const Quote = () => {
   const {
@@ -88,6 +91,7 @@ const Quote = () => {
   } = useQuoteStore();
 
   const isPlatformPartList = partListTemplate === 'platform';
+  const availableDestinationPorts = countryPorts[country] || [];
 
   const t = translations[language];
   const selectedCertificationStandard = certificationStandard || 'CE Certification';
@@ -169,10 +173,30 @@ const Quote = () => {
     setField('quotationType', value);
     const shouldUseDefaultDestination =
       !freightDestination ||
-      freightDestination === 'e.g., Port of Shanghai' ||
+      freightDestination === DEFAULT_FREIGHT_PLACEHOLDER ||
+      freightDestination === 'SHANGHAI PORT' ||
+      countryPorts[country]?.includes(freightDestination) ||
       quotationType === 'EXW';
     if (value === 'FOB' && shouldUseDefaultDestination) {
       setField('freightDestination', 'SHANGHAI PORT');
+    }
+    if (value === 'CIF' && shouldUseDefaultDestination && availableDestinationPorts[0]) {
+      setField('freightDestination', availableDestinationPorts[0]);
+    }
+  };
+
+  const handleCountryChange = (value: string) => {
+    setField('country', value);
+    const ports = countryPorts[value] || [];
+    const shouldUseDefaultDestination =
+      quotationType === 'CIF' &&
+      ports[0] &&
+      (!freightDestination ||
+        freightDestination === DEFAULT_FREIGHT_PLACEHOLDER ||
+        freightDestination === 'SHANGHAI PORT' ||
+        countryPorts[country]?.includes(freightDestination));
+    if (shouldUseDefaultDestination) {
+      setField('freightDestination', ports[0]);
     }
   };
 
@@ -600,7 +624,7 @@ const Quote = () => {
                   <select
                     className="mt-1 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
                     value={country}
-                    onChange={(e) => setField('country', e.target.value)}
+                    onChange={(e) => handleCountryChange(e.target.value)}
                   >
                     <option value="">选择国家</option>
                     {countryGroups.map((group) => (
@@ -736,6 +760,18 @@ const Quote = () => {
                       value={freightDestination}
                       onChange={(e) => setField('freightDestination', e.target.value)}
                     />
+                    {quotationType === 'CIF' && country && availableDestinationPorts.length > 0 && (
+                      <select
+                        className="mt-2 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
+                        value={availableDestinationPorts.includes(freightDestination) ? freightDestination : ''}
+                        onChange={(e) => e.target.value && setField('freightDestination', e.target.value)}
+                      >
+                        <option value="">选择{country}主要港口</option>
+                        {availableDestinationPorts.map((port) => (
+                          <option key={port} value={port}>{port}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-gray-700">Freight Cost<span className="block text-xs text-gray-500">运费</span></label>
