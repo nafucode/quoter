@@ -11,7 +11,7 @@ export const elevatorTemplate = {
   machineRoom: 'MR',
   controlSystem: 'Simplex',
   driveSystem: 'Gearless Motor - VVVF',
-  servingFloors: 'G-1F-2F-3F',
+  servingFloors: 'GF-1F-2F-3F',
   entrances: 'Single Entrance',
   powerVoltage: '380V-3 phase',
   lightingVoltage: '220V-1 phase',

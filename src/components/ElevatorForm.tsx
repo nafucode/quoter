@@ -18,6 +18,12 @@ const DOOR_OPENING_TYPE_OPTIONS = [
   { value: 'Single Swing Door', label: 'Single Swing Door（单扇平开门）' },
 ];
 
+const buildServingFloors = (floorsStops: string | number) => {
+  const floorCount = Number(String(floorsStops).match(/\d+/)?.[0] ?? 0);
+  if (!Number.isFinite(floorCount) || floorCount <= 0) return '';
+  return ['GF', ...Array.from({ length: Math.max(floorCount - 1, 0) }, (_, index) => `${index + 1}F`)].join('-');
+};
+
 const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFocus: (section: string) => void }) => {
   const { updateElevator, removeElevator, toggleElevatorCollapse } = useQuoteStore();
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
@@ -53,6 +59,15 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     updateElevator(elevator.id, name, value);
+    if (name === 'floorsStops') {
+      const previousServingFloors = buildServingFloors(elevator.floorsStops);
+      const nextServingFloors = buildServingFloors(value);
+      const shouldSyncServingFloors =
+        !elevator.servingFloors || elevator.servingFloors === previousServingFloors;
+      if (nextServingFloors && shouldSyncServingFloors) {
+        updateElevator(elevator.id, 'servingFloors', nextServingFloors);
+      }
+    }
   };
 
   const handleFunctionChange = (funcId: number, key: string, value: any) => {
@@ -250,6 +265,10 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                   </select>
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700">Floors/Stops/Doors<span className="block text-xs text-gray-500">楼层/站/门</span></label>
+                  <input name="floorsStops" value={elevator.floorsStops} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700">Serving floors (COP display)<span className="block text-xs text-gray-500">服务楼层</span></label>
                   <input name="servingFloors" value={elevator.servingFloors} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
@@ -268,10 +287,6 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Frequency<span className="block text-xs text-gray-500">频率</span></label>
                   <input name="frequency" value={elevator.frequency} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Floors/Stops<span className="block text-xs text-gray-500">楼层/站</span></label>
-                  <input name="floorsStops" value={elevator.floorsStops} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">Drive System<span className="block text-xs text-gray-500">驱动系统</span></label>
