@@ -14,6 +14,7 @@ import { translateValueToVi } from '@/data/viValueMap';
 import { translateValueToKm } from '@/data/kmValueMap';
 import { translateValueToAr } from '@/data/arValueMap';
 import { standardFeatures } from '@/data/standardFeatures';
+import { translateStandardFeature } from '@/data/standardFeatureTranslations';
 import { countryGroups } from '@/data/countryOptions';
 import { countryPorts } from '@/data/countryPorts';
 
@@ -1600,11 +1601,11 @@ const Quote = () => {
                                       rowSpan={group.rows.length}
                                       className="w-[23%] p-2 border border-gray-400 align-middle"
                                     >
-                                      {group.category}
+                                      {translateStandardFeature(group.category, language)}
                                     </td>
                                   )}
-                                  <td className="w-[38.5%] p-2 border border-gray-400">{featureRow[0]}</td>
-                                  <td className="w-[38.5%] p-2 border border-gray-400">{featureRow[1]}</td>
+                                  <td className="w-[38.5%] p-2 border border-gray-400">{translateStandardFeature(featureRow[0], language)}</td>
+                                  <td className="w-[38.5%] p-2 border border-gray-400">{translateStandardFeature(featureRow[1], language)}</td>
                                 </tr>
                               ))
                             )}

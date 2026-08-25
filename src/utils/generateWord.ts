@@ -6,6 +6,7 @@ import {
 import { translations, Lang } from '@/data/translations';
 import { PartListRow } from '@/data/partListDefaults';
 import { standardFeatures } from '@/data/standardFeatures';
+import { translateStandardFeature } from '@/data/standardFeatureTranslations';
 import { translateValueToZh } from '@/data/zhValueMap';
 import { translateValueToEs } from '@/data/esValueMap';
 import { translateValueToFr } from '@/data/frValueMap';
@@ -806,15 +807,15 @@ export async function generateWordBlob(state: {
         const rowCells = [
           ...(rowIndex === 0
             ? [
-                cell(group.category, {
+                cell(translateStandardFeature(group.category, state.language), {
                   width: featureCols[0],
                   rowSpan: group.rows.length,
                   verticalAlign: VerticalAlignTable.CENTER,
                 }),
               ]
             : []),
-          cell(featureRow[0], { width: featureCols[1] }),
-          cell(featureRow[1], { width: featureCols[2] }),
+          cell(translateStandardFeature(featureRow[0], state.language), { width: featureCols[1] }),
+          cell(translateStandardFeature(featureRow[1], state.language), { width: featureCols[2] }),
         ];
 
         featureRows.push(
