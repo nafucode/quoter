@@ -173,6 +173,8 @@ const headerRow = (cells: { text: string; width: number }[]) =>
 
 export async function generateWordBlob(state: {
   companyName: string;
+  country?: string;
+  ruc?: string;
   quotationNo: string;
   projectName: string;
   quotationType: string;
@@ -276,6 +278,7 @@ export async function generateWordBlob(state: {
 
   // Info table (2-col)
   const infoColW = Math.floor(CONTENT_W / 2);
+  const shouldShowRuc = state.country === 'Peru' && Boolean(state.ruc?.trim());
   children.push(
     new Table({
       width: { size: CONTENT_W, type: WidthType.DXA },
@@ -292,6 +295,20 @@ export async function generateWordBlob(state: {
             }),
           ],
         }),
+        ...(shouldShowRuc
+          ? [
+              new TableRow({
+                children: [
+                  cell([bold('RUC: ', 20), plain(state.ruc || '', 20)], {
+                    width: infoColW,
+                  }),
+                  cell('', {
+                    width: CONTENT_W - infoColW,
+                  }),
+                ],
+              }),
+            ]
+          : []),
         new TableRow({
           children: [
             cell([bold(`${t.projectName}: `, 20), plain(state.projectName, 20)], {

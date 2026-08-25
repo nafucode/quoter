@@ -92,6 +92,7 @@ const Quote = () => {
 
   const isPlatformPartList = partListTemplate === 'platform';
   const availableDestinationPorts = countryPorts[country] || [];
+  const shouldShowRuc = country === 'Peru' && ruc.trim();
 
   const t = translations[language];
   const selectedCertificationStandard = certificationStandard || 'CE Certification';
@@ -342,6 +343,8 @@ const Quote = () => {
       const s = useQuoteStore.getState();
       const blob = await generateWordBlob({
         companyName: s.companyName,
+        country: s.country,
+        ruc: s.ruc,
         quotationNo: s.quotationNo,
         projectName: s.projectName,
         quotationType: s.quotationType,
@@ -1249,6 +1252,7 @@ const Quote = () => {
                 <h2 className="text-2xl font-bold mb-4 border-b pb-2">{t.quotation}</h2>
                 <div className="space-y-2">
                   <p><span className="font-semibold">{t.company}:</span> {companyName}</p>
+                  {shouldShowRuc && <p><span className="font-semibold">RUC:</span> {ruc}</p>}
                   <p><span className="font-semibold">{t.quotationNo}:</span> {quotationNo}</p>
                   <p><span className="font-semibold">{t.projectName}:</span> {projectName}</p>
                   <p><span className="font-semibold">{t.quotationType}:</span> {quotationType}</p>
