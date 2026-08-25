@@ -9,6 +9,7 @@ const DEFAULT_BUTTON_TEXT = 'Round buttons with Braille';
 const DEFAULT_CAR_WALL_TEXT = 'Hairline Stainless Steel 304 1.2mm';
 const buildDefaultWarrantyText = (months: number | string = 12) =>
   `${months || 12} months from the date the goods depart from the port of shipment.`;
+const todayDate = () => new Date().toLocaleDateString('en-CA');
 const LEGACY_CAR_WALL_TEXTS = new Set([
   'Hairline Stainless Steel',
   'Hairline Stainless Steel 304 1',
@@ -142,7 +143,7 @@ const initialState = {
   quotationNo: (() => { const d = new Date(); const yy = String(d.getFullYear()).slice(2); const mm = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0'); return `XFJ${yy}${mm}${dd}01`; })(),
   projectName: 'Sample Project',
   quotationType: 'FOB',
-  quotationDate: new Date().toLocaleDateString('en-CA'),
+  quotationDate: todayDate(),
   elevators: [{...elevatorTemplate, id: 1}],
   freightDestination: 'e.g., Port of Shanghai',
   freightCost: 600,
@@ -231,7 +232,7 @@ export const useQuoteStore = create<QuoteState>()(
         partList: partListTemplates[template].map(row => ({ ...row })),
       }),
 
-      resetToDefaults: () => set({ ...initialState, quotationDate: new Date().toLocaleDateString('en-CA') }),
+      resetToDefaults: () => set({ ...initialState, quotationDate: todayDate() }),
 
       fetchExchangeRate: async () => {
         const { targetCurrency } = get();
@@ -255,7 +256,11 @@ export const useQuoteStore = create<QuoteState>()(
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
-      version: 5,
+      version: 6,
+      partialize: (state) => {
+        const { quotationDate, ...persistedState } = state;
+        return persistedState;
+      },
       migrate: (persistedState: any, version) => {
         let nextState = persistedState;
         if (version < 1 && nextState && typeof nextState === 'object') {
@@ -275,6 +280,10 @@ export const useQuoteStore = create<QuoteState>()(
         }
         if (version < 5) {
           nextState = normalizeQuoteState(nextState);
+        }
+        if (version < 6 && nextState && typeof nextState === 'object') {
+          const { quotationDate, ...rest } = nextState;
+          nextState = rest;
         }
         return nextState;
       },
