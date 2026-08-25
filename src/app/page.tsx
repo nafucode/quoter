@@ -23,6 +23,11 @@ const warrantyTextOptions = [
   },
 ];
 
+const sortCompanyOptions = (names: string[]) =>
+  [...names]
+    .filter((name) => typeof name === 'string' && name.trim())
+    .sort((a, b) => a.trim().localeCompare(b.trim(), undefined, { sensitivity: 'base', numeric: true }));
+
 const Quote = () => {
   const {
     companyName,
@@ -93,7 +98,7 @@ const Quote = () => {
     try {
       const savedCompanies = JSON.parse(localStorage.getItem(COMPANY_OPTIONS_KEY) || '[]');
       if (Array.isArray(savedCompanies)) {
-        setCompanyOptions(savedCompanies.filter((name) => typeof name === 'string' && name.trim()));
+        setCompanyOptions(sortCompanyOptions(savedCompanies));
       }
     } catch {}
   }, []);
@@ -132,7 +137,7 @@ const Quote = () => {
     const trimmedName = companyName.trim();
     if (!trimmedName) return;
     setCompanyOptions(prev => {
-      const updated = [trimmedName, ...prev.filter(name => name !== trimmedName)].slice(0, 100);
+      const updated = sortCompanyOptions([trimmedName, ...prev.filter(name => name !== trimmedName)]).slice(0, 100);
       localStorage.setItem(COMPANY_OPTIONS_KEY, JSON.stringify(updated));
       return updated;
     });
