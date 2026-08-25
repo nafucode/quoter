@@ -14,6 +14,7 @@ import { translateValueToVi } from '@/data/viValueMap';
 import { translateValueToKm } from '@/data/kmValueMap';
 import { translateValueToAr } from '@/data/arValueMap';
 import { standardFeatures } from '@/data/standardFeatures';
+import { countryGroups } from '@/data/countryOptions';
 
 const warrantyTextOptions = [
   {
@@ -50,6 +51,7 @@ const sortCompanyOptions = (names: string[]) =>
 const Quote = () => {
   const {
     companyName,
+    country,
     quotationNo,
     projectName,
     quotationType,
@@ -203,7 +205,7 @@ const Quote = () => {
       },
     }));
     const safeState = {
-      companyName: s.companyName, quotationNo: s.quotationNo, projectName: s.projectName,
+      companyName: s.companyName, country: s.country, quotationNo: s.quotationNo, projectName: s.projectName,
       quotationType: s.quotationType, quotationDate: s.quotationDate,
       elevators: safeElevators, freightDestination: s.freightDestination,
       freightCost: s.freightCost, exchangeRate: s.exchangeRate, targetCurrency: s.targetCurrency,
@@ -224,6 +226,7 @@ const Quote = () => {
       quotationNo: s.quotationNo || 'Current quotation',
       projectName: s.projectName,
       companyName: s.companyName,
+      country: s.country,
       quotationType: s.quotationType,
       quotationDate: s.quotationDate,
       grandTotal,
@@ -265,7 +268,7 @@ const Quote = () => {
       delete historyEntry.source;
       const quote = {
         quotationNo: s.quotationNo, projectName: s.projectName,
-        companyName: s.companyName, quotationType: s.quotationType,
+        companyName: s.companyName, country: s.country, quotationType: s.quotationType,
         quotationDate: s.quotationDate, grandTotal,
         targetCurrency: s.targetCurrency, elevatorCount: s.elevators.length,
         savedAt: new Date().toISOString(),
@@ -587,8 +590,27 @@ const Quote = () => {
         <div className="flex flex-col md:flex-row md:space-x-4">
           {/* Left Side - Inputs */}
           <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md no-print">
-            <div className="mb-4">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <h2 className="text-xl font-semibold">报价详情</h2>
+              <div className="w-full sm:w-64">
+                <label className="block text-sm font-medium text-gray-700">Country<span className="block text-xs text-gray-500">国家</span></label>
+                <select
+                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
+                  value={country}
+                  onChange={(e) => setField('country', e.target.value)}
+                >
+                  <option value="">选择国家</option>
+                  {countryGroups.map((group) => (
+                    <optgroup key={group.group} label={group.group}>
+                      {group.options.map((option) => (
+                        <option key={`${group.group}-${option.value}`} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
