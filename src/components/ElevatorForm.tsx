@@ -18,6 +18,14 @@ const DOOR_OPENING_TYPE_OPTIONS = [
   { value: 'Single Swing Door', label: 'Single Swing Door（单扇平开门）' },
 ];
 
+const ENTRANCE_OPTIONS = [
+  'Single Entrance',
+  'Double Entrance',
+  'Front & Rear Entrance (Through Loading)',
+  'Front & Left Side Entrance (90°)',
+  'Front & Right Side Entrance (90°)',
+];
+
 const buildServingFloors = (floorsStops: string | number) => {
   const floorCount = Number(String(floorsStops).match(/\d+/)?.[0] ?? 0);
   if (!Number.isFinite(floorCount) || floorCount <= 0) return '';
@@ -274,7 +282,11 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Entrances<span className="block text-xs text-gray-500">入口</span></label>
-                  <input name="entrances" value={elevator.entrances} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                  <select name="entrances" value={elevator.entrances} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    {ENTRANCE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Power voltage<span className="block text-xs text-gray-500">电源电压</span></label>
