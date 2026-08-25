@@ -64,7 +64,7 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
       const nextServingFloors = buildServingFloors(value);
       const shouldSyncServingFloors =
         !elevator.servingFloors || elevator.servingFloors === previousServingFloors;
-      if (nextServingFloors && shouldSyncServingFloors) {
+      if (shouldSyncServingFloors) {
         updateElevator(elevator.id, 'servingFloors', nextServingFloors);
       }
     }
