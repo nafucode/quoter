@@ -27,6 +27,21 @@ const warrantyTextOptions = [
   },
 ];
 
+const paymentTermOptions = [
+  {
+    label: '30% deposit / 70% before delivery',
+    value: 'Pay a 30% deposit within 3 days of signing to activate the contract; the 70% balance is due 7 working days before delivery.',
+  },
+  {
+    label: '100% irrevocable L/C at sight',
+    value: '100% payment by irrevocable Letter of Credit at sight.',
+  },
+  {
+    label: '50% deposit / 50% irrevocable L/C at sight',
+    value: '50% payment by T/T as deposit; the remaining 50% by irrevocable Letter of Credit at sight.',
+  },
+];
+
 const sortCompanyOptions = (names: string[]) =>
   [...names]
     .filter((name) => typeof name === 'string' && name.trim())
@@ -781,6 +796,20 @@ const Quote = () => {
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Payment Term<span className="block text-xs text-gray-500">付款方式</span></label>
+                <select
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-white"
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) setField('paymentTerm', e.target.value);
+                  }}
+                >
+                  <option value="">选择付款方式模板</option>
+                  {paymentTermOptions.map((option) => (
+                    <option key={option.label} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
                 <input
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={paymentTerm}
