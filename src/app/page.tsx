@@ -50,6 +50,13 @@ const sortCompanyOptions = (names: string[]) =>
     .sort((a, b) => a.trim().localeCompare(b.trim(), undefined, { sensitivity: 'base', numeric: true }));
 
 const DEFAULT_FREIGHT_PLACEHOLDER = 'e.g., Port of Shanghai';
+const EXW_PICKUP_DESTINATION = 'Pickup from factory arranged by the customer. 客户安排工厂自提。';
+const NIGERIA_YY_CARGO_DESTINATION = 'To YY cargo Yiwu Warehouse China';
+
+const formatFreightText = (dest: string, freight: (dest: string) => string) =>
+  dest.trim().toLowerCase().startsWith('to ')
+    ? `Local fee and Freight from factory ${dest} :`
+    : freight(dest);
 
 const Quote = () => {
   const {
@@ -93,6 +100,12 @@ const Quote = () => {
   const isPlatformPartList = partListTemplate === 'platform';
   const availableDestinationPorts = countryPorts[country] || [];
   const shouldShowRuc = country === 'Peru' && ruc.trim();
+  const exwDeliveryOptions = [
+    { value: EXW_PICKUP_DESTINATION, label: EXW_PICKUP_DESTINATION, freightCost: 0 },
+    ...(country === 'Nigeria'
+      ? [{ value: NIGERIA_YY_CARGO_DESTINATION, label: NIGERIA_YY_CARGO_DESTINATION, freightCost: 500 }]
+      : []),
+  ];
 
   const t = translations[language];
   const selectedCertificationStandard = certificationStandard || 'CE Certification';
@@ -184,6 +197,10 @@ const Quote = () => {
     if (value === 'CIF' && shouldUseDefaultDestination && availableDestinationPorts[0]) {
       setField('freightDestination', availableDestinationPorts[0]);
     }
+    if (value === 'EXW' && shouldUseDefaultDestination) {
+      setField('freightDestination', EXW_PICKUP_DESTINATION);
+      setField('freightCost', 0);
+    }
   };
 
   const handleCountryChange = (value: string) => {
@@ -199,6 +216,17 @@ const Quote = () => {
     if (shouldUseDefaultDestination) {
       setField('freightDestination', ports[0]);
     }
+    if (quotationType === 'EXW' && value !== 'Nigeria' && freightDestination === NIGERIA_YY_CARGO_DESTINATION) {
+      setField('freightDestination', EXW_PICKUP_DESTINATION);
+      setField('freightCost', 0);
+    }
+  };
+
+  const handleExwDeliveryOptionChange = (value: string) => {
+    const option = exwDeliveryOptions.find((item) => item.value === value);
+    if (!option) return;
+    setField('freightDestination', option.value);
+    setField('freightCost', option.freightCost);
   };
 
   const loadFromHistory = (entry: any) => {
@@ -460,6 +488,12 @@ const Quote = () => {
   }, [targetCurrency, fetchExchangeRate]);
 
   const isExw = quotationType === 'EXW';
+  const isDefaultExwNoChargeDestination =
+    !freightDestination ||
+    freightDestination === EXW_PICKUP_DESTINATION ||
+    freightDestination === DEFAULT_FREIGHT_PLACEHOLDER ||
+    freightDestination === 'SHANGHAI PORT';
+  const shouldChargeFreight = !isExw || (!isDefaultExwNoChargeDestination && Number(freightCost) > 0);
 
   const grandTotal = useMemo(() => {
     const elevatorsTotal = elevators.reduce((total, elevator) => {
@@ -469,8 +503,8 @@ const Quote = () => {
     }, 0);
     const shaftFrameTotal = shaftFrame.enabled ? (Number(shaftFrame.price) || 0) * (Number(shaftFrame.qty) || 0) : 0;
     const temperedGlassTotal = temperedGlass.enabled ? (Number(temperedGlass.price) || 0) * (Number(temperedGlass.qty) || 0) : 0;
-    return elevatorsTotal + (isExw ? 0 : Number(freightCost)) + shaftFrameTotal + temperedGlassTotal;
-  }, [elevators, freightCost, isExw, shaftFrame, temperedGlass]);
+    return elevatorsTotal + (shouldChargeFreight ? Number(freightCost) : 0) + shaftFrameTotal + temperedGlassTotal;
+  }, [elevators, freightCost, shaftFrame, shouldChargeFreight, temperedGlass]);
 
   const convertedTotal = useMemo(() => {
     return grandTotal * Number(exchangeRate);
@@ -751,9 +785,41 @@ const Quote = () => {
             <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Freight & Currency<span className="block text-sm font-normal text-gray-500">运费和货币</span></h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {isExw ? (
-                <div className="sm:col-span-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-medium text-amber-800">
-                  {t.exwPickup}
-                </div>
+                <>
+                  <div className="sm:col-span-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-medium text-amber-800">
+                    {t.exwPickup}
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">EXW Delivery Option<span className="block text-xs text-gray-500">EXW 交货选项</span></label>
+                    <select
+                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
+                      value={exwDeliveryOptions.some((option) => option.value === freightDestination) ? freightDestination : ''}
+                      onChange={(e) => e.target.value && handleExwDeliveryOptionChange(e.target.value)}
+                    >
+                      <option value="">自定义 / Custom</option>
+                      {exwDeliveryOptions.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Freight Destination<span className="block text-xs text-gray-500">目的地</span></label>
+                    <input
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                      value={freightDestination}
+                      onChange={(e) => setField('freightDestination', e.target.value)}
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Freight Cost<span className="block text-xs text-gray-500">运费</span></label>
+                    <input
+                      type="number"
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                      value={freightCost}
+                      onChange={(e) => setField('freightCost', Number(e.target.value))}
+                    />
+                  </div>
+                </>
               ) : (
                 <>
                   <div className="sm:col-span-2">
@@ -1310,13 +1376,13 @@ const Quote = () => {
                           </td>
                         </tr>
                       )}
-                      {isExw ? (
+                      {!shouldChargeFreight ? (
                         <tr>
                           <td colSpan={5} className="p-2 text-right font-semibold">{t.exwPickup}</td>
                         </tr>
                       ) : (
                         <tr>
-                          <td colSpan={4} className="p-2 text-right font-semibold">{t.freight(freightDestination)}</td>
+                          <td colSpan={4} className="p-2 text-right font-semibold">{formatFreightText(freightDestination, t.freight)}</td>
                           <td className="p-2 text-right">{freightCost.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                         </tr>
                       )}

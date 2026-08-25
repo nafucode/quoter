@@ -169,6 +169,12 @@ const headerRow = (cells: { text: string; width: number }[]) =>
     ),
   });
 
+const EXW_PICKUP_DESTINATION = 'Pickup from factory arranged by the customer. 客户安排工厂自提。';
+const formatFreightText = (dest: string, freight: (dest: string) => string) =>
+  dest.trim().toLowerCase().startsWith('to ')
+    ? `Local fee and Freight from factory ${dest} :`
+    : freight(dest);
+
 // ─── main export ────────────────────────────────────────────────────────────
 
 export async function generateWordBlob(state: {
@@ -237,7 +243,14 @@ export async function generateWordBlob(state: {
     (state.shaftFrame.enabled ? (Number(state.shaftFrame.price) || 0) * (Number(state.shaftFrame.qty) || 0) : 0) +
     (state.temperedGlass.enabled ? (Number(state.temperedGlass.price) || 0) * (Number(state.temperedGlass.qty) || 0) : 0);
   const isExw = state.quotationType === 'EXW';
-  const grandTotal = elevatorsTotal + (isExw ? 0 : Number(state.freightCost)) + optionals;
+  const isDefaultExwNoChargeDestination =
+    !state.freightDestination ||
+    state.freightDestination === EXW_PICKUP_DESTINATION ||
+    state.freightDestination === 'e.g., Port of Shanghai' ||
+    state.freightDestination === 'SHANGHAI PORT';
+  const shouldChargeFreight =
+    !isExw || (!isDefaultExwNoChargeDestination && Number(state.freightCost) > 0);
+  const grandTotal = elevatorsTotal + (shouldChargeFreight ? Number(state.freightCost) : 0) + optionals;
   const validUntil = (() => {
     try {
       const d = new Date(state.quotationDate);
@@ -413,7 +426,7 @@ export async function generateWordBlob(state: {
   // Freight / EXW pickup row
   priceRows.push(
     new TableRow({
-      children: isExw
+      children: !shouldChargeFreight
         ? [
             cell(t.exwPickup, {
               width: priceCols.reduce((sum, col) => sum + col, 0),
@@ -421,7 +434,7 @@ export async function generateWordBlob(state: {
             }),
           ]
         : [
-            cell(t.freight(state.freightDestination), {
+            cell(formatFreightText(state.freightDestination, t.freight), {
               width: priceCols[0] + priceCols[1] + priceCols[2] + priceCols[3],
               colSpan: 4,
             }),
