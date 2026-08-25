@@ -10,6 +10,7 @@ const DEFAULT_CAR_WALL_TEXT = 'Hairline Stainless Steel 304 1.2mm';
 const buildDefaultWarrantyText = (months: number | string = 12) =>
   `${months || 12} months from the date the goods depart from the port of shipment.`;
 const todayDate = () => new Date().toLocaleDateString('en-CA');
+const DEFAULT_FREIGHT_DESTINATION = 'SHANGHAI PORT';
 const LEGACY_CAR_WALL_TEXTS = new Set([
   'Hairline Stainless Steel',
   'Hairline Stainless Steel 304 1',
@@ -145,7 +146,7 @@ const initialState = {
   quotationType: 'FOB',
   quotationDate: todayDate(),
   elevators: [{...elevatorTemplate, id: 1}],
-  freightDestination: 'e.g., Port of Shanghai',
+  freightDestination: DEFAULT_FREIGHT_DESTINATION,
   freightCost: 600,
   exchangeRate: 1,
   targetCurrency: 'USD',
@@ -256,7 +257,7 @@ export const useQuoteStore = create<QuoteState>()(
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
-      version: 6,
+      version: 7,
       partialize: (state) => {
         const { quotationDate, ...persistedState } = state;
         return persistedState;
@@ -284,6 +285,15 @@ export const useQuoteStore = create<QuoteState>()(
         if (version < 6 && nextState && typeof nextState === 'object') {
           const { quotationDate, ...rest } = nextState;
           nextState = rest;
+        }
+        if (version < 7 && nextState && typeof nextState === 'object') {
+          nextState = {
+            ...nextState,
+            freightDestination:
+              nextState.freightDestination === 'e.g., Port of Shanghai'
+                ? DEFAULT_FREIGHT_DESTINATION
+                : nextState.freightDestination,
+          };
         }
         return nextState;
       },

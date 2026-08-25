@@ -234,7 +234,8 @@ export async function generateWordBlob(state: {
   const optionals =
     (state.shaftFrame.enabled ? (Number(state.shaftFrame.price) || 0) * (Number(state.shaftFrame.qty) || 0) : 0) +
     (state.temperedGlass.enabled ? (Number(state.temperedGlass.price) || 0) * (Number(state.temperedGlass.qty) || 0) : 0);
-  const grandTotal = elevatorsTotal + Number(state.freightCost) + optionals;
+  const isExw = state.quotationType === 'EXW';
+  const grandTotal = elevatorsTotal + (isExw ? 0 : Number(state.freightCost)) + optionals;
   const validUntil = (() => {
     try {
       const d = new Date(state.quotationDate);
@@ -392,19 +393,26 @@ export async function generateWordBlob(state: {
     );
   }
 
-  // Freight row
+  // Freight / EXW pickup row
   priceRows.push(
     new TableRow({
-      children: [
-        cell(t.freight(state.freightDestination), {
-          width: priceCols[0] + priceCols[1] + priceCols[2] + priceCols[3],
-          colSpan: 4,
-        }),
-        cell(`USD ${Number(state.freightCost).toLocaleString()}`, {
-          width: priceCols[4],
-          align: AlignmentType.RIGHT,
-        }),
-      ],
+      children: isExw
+        ? [
+            cell(t.exwPickup, {
+              width: priceCols.reduce((sum, col) => sum + col, 0),
+              colSpan: 5,
+            }),
+          ]
+        : [
+            cell(t.freight(state.freightDestination), {
+              width: priceCols[0] + priceCols[1] + priceCols[2] + priceCols[3],
+              colSpan: 4,
+            }),
+            cell(`USD ${Number(state.freightCost).toLocaleString()}`, {
+              width: priceCols[4],
+              align: AlignmentType.RIGHT,
+            }),
+          ],
     }),
   );
 

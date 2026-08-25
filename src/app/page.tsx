@@ -143,6 +143,17 @@ const Quote = () => {
     });
   };
 
+  const handleQuotationTypeChange = (value: string) => {
+    setField('quotationType', value);
+    const shouldUseDefaultDestination =
+      !freightDestination ||
+      freightDestination === 'e.g., Port of Shanghai' ||
+      quotationType === 'EXW';
+    if (value === 'FOB' && shouldUseDefaultDestination) {
+      setField('freightDestination', 'SHANGHAI PORT');
+    }
+  };
+
   const loadFromHistory = (entry: any) => {
     if (!window.confirm(`载入报价 ${entry.quotationNo}？当前草稿将被替换。`)) return;
     importState(entry.state);
@@ -397,6 +408,8 @@ const Quote = () => {
     fetchExchangeRate();
   }, [targetCurrency, fetchExchangeRate]);
 
+  const isExw = quotationType === 'EXW';
+
   const grandTotal = useMemo(() => {
     const elevatorsTotal = elevators.reduce((total, elevator) => {
       const price = Number(elevator.unitPrice) || 0;
@@ -405,8 +418,8 @@ const Quote = () => {
     }, 0);
     const shaftFrameTotal = shaftFrame.enabled ? (Number(shaftFrame.price) || 0) * (Number(shaftFrame.qty) || 0) : 0;
     const temperedGlassTotal = temperedGlass.enabled ? (Number(temperedGlass.price) || 0) * (Number(temperedGlass.qty) || 0) : 0;
-    return elevatorsTotal + Number(freightCost) + shaftFrameTotal + temperedGlassTotal;
-  }, [elevators, freightCost, shaftFrame, temperedGlass]);
+    return elevatorsTotal + (isExw ? 0 : Number(freightCost)) + shaftFrameTotal + temperedGlassTotal;
+  }, [elevators, freightCost, isExw, shaftFrame, temperedGlass]);
 
   const convertedTotal = useMemo(() => {
     return grandTotal * Number(exchangeRate);
@@ -633,7 +646,7 @@ const Quote = () => {
                 <select
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={quotationType}
-                  onChange={(e) => setField('quotationType', e.target.value)}
+                  onChange={(e) => handleQuotationTypeChange(e.target.value)}
                 >
                   <option>EXW</option>
                   <option>FOB</option>
@@ -654,23 +667,31 @@ const Quote = () => {
             
             <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Freight & Currency<span className="block text-sm font-normal text-gray-500">运费和货币</span></h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Freight Destination<span className="block text-xs text-gray-500">目的地</span></label>
-                <input
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-                  value={freightDestination}
-                  onChange={(e) => setField('freightDestination', e.target.value)}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Freight Cost<span className="block text-xs text-gray-500">运费</span></label>
-                <input
-                  type="number"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-                  value={freightCost}
-                  onChange={(e) => setField('freightCost', Number(e.target.value))}
-                />
-              </div>
+              {isExw ? (
+                <div className="sm:col-span-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-medium text-amber-800">
+                  {t.exwPickup}
+                </div>
+              ) : (
+                <>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Freight Destination<span className="block text-xs text-gray-500">目的地</span></label>
+                    <input
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                      value={freightDestination}
+                      onChange={(e) => setField('freightDestination', e.target.value)}
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Freight Cost<span className="block text-xs text-gray-500">运费</span></label>
+                    <input
+                      type="number"
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                      value={freightCost}
+                      onChange={(e) => setField('freightCost', Number(e.target.value))}
+                    />
+                  </div>
+                </>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Target Currency<span className="block text-xs text-gray-500">目标货币</span></label>
                 <select
@@ -1172,10 +1193,16 @@ const Quote = () => {
                           </td>
                         </tr>
                       )}
-                      <tr>
-                        <td colSpan={4} className="p-2 text-right font-semibold">{t.freight(freightDestination)}</td>
-                        <td className="p-2 text-right">{freightCost.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                      </tr>
+                      {isExw ? (
+                        <tr>
+                          <td colSpan={5} className="p-2 text-right font-semibold">{t.exwPickup}</td>
+                        </tr>
+                      ) : (
+                        <tr>
+                          <td colSpan={4} className="p-2 text-right font-semibold">{t.freight(freightDestination)}</td>
+                          <td className="p-2 text-right">{freightCost.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                        </tr>
+                      )}
                       <tr className="font-bold bg-gray-100">
                         <td colSpan={4} className="p-2 text-right">{t.totalAmount}</td>
                         <td className="p-2 text-right">{grandTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
