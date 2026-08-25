@@ -26,6 +26,12 @@ const ENTRANCE_OPTIONS = [
   'Front & Right Side Entrance (90°)',
 ];
 
+const CAR_FLOOR_OPTIONS = [
+  { label: 'Marble', value: 'Marble' },
+  { label: 'Sintered Slab 岩板', value: 'Sintered Slab' },
+  { label: 'Recess 30mm 预留 30mm，客户自理', value: 'Recess 30mm, provided by customer' },
+];
+
 const buildServingFloors = (floorsStops: string | number) => {
   const floorCount = Number(String(floorsStops).match(/\d+/)?.[0] ?? 0);
   if (!Number.isFinite(floorCount) || floorCount <= 0) return '';
@@ -89,6 +95,14 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
     const { name, value } = e.target;
     const wall = name.split('.')[1];
     updateElevator(elevator.id, 'carWall', { ...elevator.carWall, [wall]: value });
+  };
+
+  const syncCarFloor = (value: string) => {
+    updateElevator(elevator.id, 'carFloor', value);
+    updateElevator(elevator.id, 'cabinEffect', {
+      ...elevator.cabinEffect,
+      floor: { type: 'text', value },
+    });
   };
 
   const handleCabinEffectFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -356,7 +370,26 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Car Floor<span className="block text-xs text-gray-500">轿底</span></label>
-                  <input name="carFloor" value={elevator.carFloor} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                  <select
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-white"
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) syncCarFloor(e.target.value);
+                    }}
+                  >
+                    <option value="">选择轿底模板</option>
+                    {CAR_FLOOR_OPTIONS.map((option) => (
+                      <option key={option.label} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    name="carFloor"
+                    value={elevator.carFloor}
+                    onChange={(e) => syncCarFloor(e.target.value)}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Handrail<span className="block text-xs text-gray-500">扶手</span></label>
