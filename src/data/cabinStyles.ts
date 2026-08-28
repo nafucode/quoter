@@ -71,6 +71,7 @@ export const cabinStyleGroups = [
   {
     groupName: '观光梯样册 (FJ-OLV)',
     styles: [
+      { id: 'FJ-Panoramic Rose Gold', name: 'FJ-Panoramic Rose Gold 金色轿厢', previewImage: '/cabin-styles/FJ-Panoramic Rose Gold金色轿厢.png' },
       { id: 'FJ-Panoramic', name: 'FJ-Panoramic', previewImage: '/cabin-styles/FJ-Panoramic标准客梯观光效果Cabin.png' },
       { id: 'FJ-OLV01', name: 'FJ-OLV01', previewImage: '/cabin-styles/FJ-OLV01.png' },
       { id: 'FJ-OLV02', name: 'FJ-OLV02', previewImage: '/cabin-styles/FJ-OLV02.png' },
