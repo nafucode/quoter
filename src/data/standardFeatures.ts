@@ -25,7 +25,7 @@ export const standardFeatures: StandardFeatureGroup[] = [
       ['Start protection control', 'Upward over-speed protection device'],
       ['Inspection operation', 'Steel rope slipping self-detection'],
       ['Braking force self-detection functions', 'Balance system of self-learning'],
-      ['Door opening re-leveling', 'CWT safety gears'],
+      ['Door opening re-leveling', 'Cabin safety gear'],
     ],
   },
   {
