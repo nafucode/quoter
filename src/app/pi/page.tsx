@@ -738,11 +738,37 @@ export default function ProformaInvoicePage() {
     <main className="min-h-screen bg-slate-100 text-slate-950">
       <div className="no-print border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-[90vw] items-center justify-between gap-4 py-4">
-          <div>
-            <h1 className="text-xl font-semibold">PI 制作</h1>
-            <p className="text-sm text-slate-500">左侧填写，右侧实时生成 Proforma Invoice。</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="mr-2">
+              <h1 className="text-xl font-semibold">PI 制作</h1>
+              <p className="text-sm text-slate-500">左侧填写，右侧实时生成 Proforma Invoice。</p>
+            </div>
+            <button
+              onClick={savePiToHistory}
+              className={`rounded-md px-3 py-2 text-sm font-semibold text-white ${
+                piSaved ? "bg-green-600" : "bg-green-500 hover:bg-green-600"
+              }`}
+            >
+              {piSaved ? "已保存" : "保存 PI"}
+            </button>
+            <button
+              onClick={migrateFromQuote}
+              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              从报价迁移
+            </button>
+            <button
+              onClick={() => {
+                setForm(initialForm);
+                setActiveHistoryId(null);
+                setActivePiHistoryId(null);
+              }}
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"
+            >
+              恢复表一示例
+            </button>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
             <button
               onClick={makePackingListFromPi}
               className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"
@@ -775,32 +801,6 @@ export default function ProformaInvoicePage() {
         <section className="no-print max-h-[calc(100vh-120px)] overflow-auto rounded-lg bg-white p-4 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold">填写内容</h2>
-            <div className="flex gap-2">
-              <button
-                onClick={savePiToHistory}
-                className={`rounded-md px-3 py-1.5 text-sm font-semibold text-white ${
-                  piSaved ? "bg-green-600" : "bg-green-500 hover:bg-green-600"
-                }`}
-              >
-                {piSaved ? "已保存" : "保存 PI"}
-              </button>
-              <button
-                onClick={migrateFromQuote}
-                className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-700"
-              >
-                从报价迁移
-              </button>
-              <button
-                onClick={() => {
-                  setForm(initialForm);
-                  setActiveHistoryId(null);
-                  setActivePiHistoryId(null);
-                }}
-                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
-              >
-                恢复表一示例
-              </button>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-3">
