@@ -5,6 +5,11 @@ export const copStyles = [
     previewImage: '/cop-styles/一体式-黑底白字-标配.png',
   },
   {
+    id: 'COP-01-FLUSH',
+    name: '一体式前壁打孔-无凸出',
+    previewImage: '/cop-styles/一体式-黑底白字-标配.png',
+  },
+  {
     id: 'COP-02',
     name: '分体-黑底白字-标配',
     previewImage: '/cop-styles/分体-黑底白字-标配.png',
