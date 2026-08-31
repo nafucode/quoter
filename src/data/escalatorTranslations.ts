@@ -522,7 +522,7 @@ const AR_SPEC_LABELS: Record<keyof EscalatorSpecGroup, string> = {
 
 const ES_VALUE_MAP: [RegExp, string][] = [
   [/Escalators\s*\(H=(.*?)\)/gi, 'Escaleras mecánicas (H=$1)'],
-  [/304 stainless steel exterior cladding material 1\.0mm ____ m²/gi, 'Revestimiento exterior de acero inoxidable 304 1.0mm ____ m²'],
+  [/430 stainless steel exterior cladding material 1\.0mm ____ m²/gi, 'Revestimiento exterior de acero inoxidable 430 1.0mm ____ m²'],
   [/\bEscalator\b/gi, 'Escalera mecánica'],
   [/\bParallel\b/gi, 'Paralelo'],
   [/Specific accounting required/gi, 'Requiere cálculo específico'],
@@ -546,7 +546,7 @@ const ES_VALUE_MAP: [RegExp, string][] = [
 
 const KM_VALUE_MAP: [RegExp, string][] = [
   [/Escalators\s*\(H=(.*?)\)/gi, 'ជណ្តើរយន្តរំកិល (H=$1)'],
-  [/304 stainless steel exterior cladding material 1\.0mm ____ m²/gi, 'សម្ភារៈគ្របខាងក្រៅដែកអ៊ីណុក 304 កម្រាស់ 1.0mm ____ m²'],
+  [/430 stainless steel exterior cladding material 1\.0mm ____ m²/gi, 'សម្ភារៈគ្របខាងក្រៅដែកអ៊ីណុក 430 កម្រាស់ 1.0mm ____ m²'],
   [/\bEscalator\b/gi, 'ជណ្តើរយន្តរំកិល'],
   [/\bParallel\b/gi, 'ស្របគ្នា'],
   [/Specific accounting required/gi, 'ត្រូវការគណនាជាក់លាក់'],
@@ -570,7 +570,7 @@ const KM_VALUE_MAP: [RegExp, string][] = [
 
 const AR_VALUE_MAP: [RegExp, string][] = [
   [/Escalators\s*\(H=(.*?)\)/gi, 'سلالم متحركة (H=$1)'],
-  [/304 stainless steel exterior cladding material 1\.0mm ____ m²/gi, 'مادة تكسية خارجية من ستانلس ستيل 304 بسماكة 1.0mm ____ m²'],
+  [/430 stainless steel exterior cladding material 1\.0mm ____ m²/gi, 'مادة تكسية خارجية من ستانلس ستيل 430 بسماكة 1.0mm ____ m²'],
   [/\bEscalator\b/gi, 'سلم متحرك'],
   [/\bParallel\b/gi, 'متوازي'],
   [/Specific accounting required/gi, 'يتطلب حسابا خاصا'],

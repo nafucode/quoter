@@ -197,7 +197,7 @@ export default function EscalatorQuotePage() {
         ...prev.priceRows,
         {
           ...getNextPriceRowMeta(prev.priceRows),
-          description: '304 stainless steel exterior cladding material 1.0mm ____ m²',
+          description: '430 stainless steel exterior cladding material 1.0mm ____ m²',
           speed: '',
           inclination: '',
           quantity: 1,
