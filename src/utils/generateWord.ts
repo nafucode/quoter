@@ -117,6 +117,15 @@ const bold = (text: string, size = 20) =>
 const plain = (text: string, size = 20) =>
   new TextRun({ text, size, font: 'Arial' });
 
+const multilineRuns = (prefix: TextRun, text: string, size = 20) => {
+  const [firstLine = '', ...restLines] = text.split(/\r?\n/);
+  return [
+    prefix,
+    plain(` ${firstLine}`, size),
+    ...restLines.map((line) => new TextRun({ text: line, size, font: 'Arial', break: 1 })),
+  ];
+};
+
 const para = (
   children: TextRun[],
   opts: { align?: (typeof AlignmentType)[keyof typeof AlignmentType]; spacingAfter?: number } = {},
@@ -479,7 +488,7 @@ export async function generateWordBlob(state: {
 
   // === TERMS ===
   children.push(para([bold(t.delivery), plain(` ${state.deliveryDays} ${t.deliverySuffix}`)], {}));
-  children.push(para([bold(t.paymentTerm), plain(` ${state.paymentTerm}`)], {}));
+  children.push(para(multilineRuns(bold(t.paymentTerm), state.paymentTerm), {}));
   children.push(
     para([bold(t.warranty), plain(` ${state.warrantyText || `${state.warrantyMonths} ${t.warrantySuffix}`}`)], {}),
   );

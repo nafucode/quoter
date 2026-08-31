@@ -953,8 +953,9 @@ const Quote = () => {
                     </option>
                   ))}
                 </select>
-                <input
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                <textarea
+                  rows={3}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm resize-y"
                   value={paymentTerm}
                   onChange={(e) => setField('paymentTerm', e.target.value)}
                 />
@@ -1403,7 +1404,7 @@ const Quote = () => {
 
                 <div className="mt-4 pt-4 border-t text-sm space-y-1">
                   <p><span className="font-semibold">{t.delivery}</span> {deliveryDays} {t.deliverySuffix}</p>
-                  <p><span className="font-semibold">{t.paymentTerm}</span> {paymentTerm}</p>
+                  <p className="whitespace-pre-wrap"><span className="font-semibold">{t.paymentTerm}</span> {paymentTerm}</p>
                   <p><span className="font-semibold">{t.warranty}</span> {warrantyText || `${warrantyMonths} ${t.warrantySuffix}`}</p>
                   <p><span className="font-semibold">{t.priceValidity}</span> {priceValidityDays} {t.days} {validityUntilDate && `(${t.until} ${validityUntilDate})`}, based on 1 USD = {exchangeRateBasis} RMB.</p>
                   {quoteRemarks?.trim() && (
