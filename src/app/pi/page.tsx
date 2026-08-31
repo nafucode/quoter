@@ -17,6 +17,24 @@ type PiItem = {
   unitPrice: number;
 };
 
+type QuotePriceRow = {
+  id: string;
+  description: string;
+  specs: string;
+  quantity: number;
+  unitPrice: number;
+};
+
+type QuotePricing = {
+  currency: string;
+  rows: QuotePriceRow[];
+  freightText: string;
+  freightCost: number;
+  grandTotal: number;
+  targetCurrency: string;
+  targetTotal: number;
+};
+
 type PiForm = {
   sellerTel: string;
   projectName: string;
@@ -50,6 +68,7 @@ type PiForm = {
   beneficiaryAddress: string;
   additionalRequirements: string;
   items: PiItem[];
+  quotePricing: QuotePricing | null;
 };
 
 type BankPreset = {
@@ -69,9 +88,11 @@ type BankPreset = {
 type QuoteElevator = {
   id: number;
   description?: string;
+  type?: string;
   capacity?: string | number;
   speed?: string | number;
   floorsStops?: string;
+  machineRoom?: string;
   qty?: string | number;
   unitPrice?: string | number;
 };
@@ -85,12 +106,13 @@ type QuoteSnapshot = {
   elevators?: QuoteElevator[];
   freightDestination?: string;
   freightCost?: string | number;
+  exchangeRate?: string | number;
   targetCurrency?: string;
   deliveryDays?: string | number;
   paymentTerm?: string;
   grandTotal?: number;
-  shaftFrame?: { enabled?: boolean; qty?: string | number; price?: string | number };
-  temperedGlass?: { enabled?: boolean; qty?: string | number; price?: string | number };
+  shaftFrame?: { enabled?: boolean; text?: string; qty?: string | number; price?: string | number };
+  temperedGlass?: { enabled?: boolean; text?: string; qty?: string | number; price?: string | number };
 };
 
 type QuoteHistoryEntry = {
@@ -176,6 +198,7 @@ const initialForm: PiForm = {
       unitPrice: 10850,
     },
   ],
+  quotePricing: null,
 };
 
 const bankPresets: BankPreset[] = [
@@ -357,6 +380,79 @@ function piNoFromContract(contractNo: string) {
   return value.toUpperCase().endsWith("P") ? value : `${value}P`;
 }
 
+const EXW_PICKUP_DESTINATION = "Pickup from factory arranged by the customer. 客户安排工厂自提。";
+
+function quoteFreightText(destination: string) {
+  const dest = destination.trim();
+  if (!dest || dest === EXW_PICKUP_DESTINATION || dest === "e.g., Port of Shanghai") {
+    return EXW_PICKUP_DESTINATION;
+  }
+  if (dest.toLowerCase().startsWith("to ")) {
+    return `Local fee and Freight from factory ${dest} :`;
+  }
+  return `Local fee and Freight from factory to ${dest} :`;
+}
+
+function buildQuotePricing(source: QuoteSnapshot): QuotePricing | null {
+  const rows: QuotePriceRow[] = (source.elevators || []).map((elevator, index) => ({
+    id: `elevator-${elevator.id || index + 1}`,
+    description: elevator.description || "Elevator",
+    specs: [
+      elevator.type,
+      withUnit(elevator.capacity, "KG"),
+      withUnit(elevator.speed, "M/S"),
+      elevator.floorsStops,
+      elevator.machineRoom,
+    ].filter(Boolean).join("\n"),
+    quantity: Number(elevator.qty || 0),
+    unitPrice: Number(elevator.unitPrice || 0),
+  }));
+
+  if (source.shaftFrame?.enabled) {
+    rows.push({
+      id: "shaft-frame",
+      description: String(source.shaftFrame.text || "Shaft frame"),
+      specs: "",
+      quantity: Number(source.shaftFrame.qty || 1),
+      unitPrice: Number(source.shaftFrame.price || 0),
+    });
+  }
+
+  if (source.temperedGlass?.enabled) {
+    rows.push({
+      id: "tempered-glass",
+      description: String(source.temperedGlass.text || "Tempered Glass"),
+      specs: "",
+      quantity: Number(source.temperedGlass.qty || 1),
+      unitPrice: Number(source.temperedGlass.price || 0),
+    });
+  }
+
+  if (!rows.length) return null;
+
+  const rowsTotal = rows.reduce(
+    (sum, row) => sum + Number(row.quantity || 0) * Number(row.unitPrice || 0),
+    0,
+  );
+  const freightCost = Number(source.freightCost || 0);
+  const grandTotal = Number(source.grandTotal || 0) || rowsTotal + freightCost;
+  const exchangeRate = Number(source.exchangeRate || 0);
+  const targetCurrency =
+    source.targetCurrency && source.targetCurrency !== "USD" && source.targetCurrency !== "-"
+      ? source.targetCurrency
+      : "";
+
+  return {
+    currency: "USD",
+    rows,
+    freightText: quoteFreightText(String(source.freightDestination || "")),
+    freightCost,
+    grandTotal,
+    targetCurrency,
+    targetTotal: targetCurrency && exchangeRate > 0 ? grandTotal * exchangeRate : 0,
+  };
+}
+
 function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
   const baseQuoteItems = (source.elevators || []).map((elevator, index) => ({
     id: Number(elevator.id) || index + 1,
@@ -368,36 +464,8 @@ function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
     unit: "UNIT",
     unitPrice: Number(elevator.unitPrice || 0),
   }));
-  const quoteGrandTotal = Number(source.grandTotal || 0);
-  const productTotal = baseQuoteItems.reduce(
-    (sum, item) => sum + Number(item.quantity || 0) * Number(item.unitPrice || 0),
-    0,
-  );
-  const optionalTotal =
-    (source.shaftFrame?.enabled
-      ? Number(source.shaftFrame.price || 0) * (Number(source.shaftFrame.qty || 0) || 1)
-      : 0) +
-    (source.temperedGlass?.enabled
-      ? Number(source.temperedGlass.price || 0) * (Number(source.temperedGlass.qty || 0) || 1)
-      : 0);
-  const calculatedGrandTotal = productTotal + Number(source.freightCost || 0) + optionalTotal;
-  const totalQuantity = baseQuoteItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-  const grandTotalForPi = quoteGrandTotal > 0 ? quoteGrandTotal : calculatedGrandTotal;
-  const quoteItems =
-    grandTotalForPi > 0 && baseQuoteItems.length > 0
-      ? baseQuoteItems.map((item) => {
-          const quantity = Number(item.quantity || 0) || 1;
-          const lineProductTotal = Number(item.unitPrice || 0) * quantity;
-          const lineTotal =
-            productTotal > 0
-              ? grandTotalForPi * (lineProductTotal / productTotal)
-              : grandTotalForPi * (quantity / (totalQuantity || quantity));
-          return {
-            ...item,
-            unitPrice: Math.round((lineTotal / quantity) * 100) / 100,
-          };
-        })
-      : baseQuoteItems;
+  const quotePricing = buildQuotePricing(source);
+  const quoteItems = baseQuoteItems;
 
   return {
     ...current,
@@ -405,13 +473,10 @@ function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
     buyerName: source.companyName || current.buyerName,
     contractNo: source.quotationNo || current.contractNo,
     issueDate: dateForPi(source.quotationDate || "") || current.issueDate,
-    currency:
-      source.targetCurrency && source.targetCurrency !== "-"
-        ? source.targetCurrency
-        : current.currency,
-    showTargetCurrency: current.showTargetCurrency,
-    targetCurrency: current.targetCurrency,
-    targetExchangeRate: current.targetExchangeRate,
+    currency: "USD",
+    showTargetCurrency: Boolean(quotePricing?.targetCurrency) || current.showTargetCurrency,
+    targetCurrency: quotePricing?.targetCurrency || current.targetCurrency,
+    targetExchangeRate: Number(source.exchangeRate || current.targetExchangeRate),
     destination: source.freightDestination || current.destination,
     deliveryTerms:
       source.quotationType === "EXW"
@@ -428,11 +493,12 @@ function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
           ? `${quoteItems.length} Units of Elevator (HS CODE: 8428101090)`
           : current.goodsDescription,
     items: quoteItems.length ? quoteItems : current.items,
+    quotePricing,
   };
 }
 
 function normalizePiForm(value: PiForm): PiForm {
-  return { ...initialForm, ...value };
+  return { ...initialForm, ...value, quotePricing: value.quotePricing ?? null };
 }
 
 export default function ProformaInvoicePage() {
@@ -462,17 +528,19 @@ export default function ProformaInvoicePage() {
   }, []);
 
   const total = useMemo(
-    () =>
-      form.items.reduce(
+    () => {
+      if (form.quotePricing) return Number(form.quotePricing.grandTotal || 0);
+      return form.items.reduce(
         (sum, item) => sum + Number(item.quantity || 0) * Number(item.unitPrice || 0),
         0,
-      ),
-    [form.items],
+      );
+    },
+    [form.items, form.quotePricing],
   );
 
   const targetTotal = useMemo(
-    () => total * Number(form.targetExchangeRate || 0),
-    [form.targetExchangeRate, total],
+    () => form.quotePricing?.targetTotal || total * Number(form.targetExchangeRate || 0),
+    [form.quotePricing, form.targetExchangeRate, total],
   );
 
   const piNo = useMemo(() => piNoFromContract(form.contractNo), [form.contractNo]);
@@ -484,6 +552,7 @@ export default function ProformaInvoicePage() {
   const updateItem = (id: number, field: keyof PiItem, value: string | number) => {
     setForm((current) => ({
       ...current,
+      quotePricing: null,
       items: current.items.map((item) =>
         item.id === id ? { ...item, [field]: value } : item,
       ),
@@ -493,6 +562,7 @@ export default function ProformaInvoicePage() {
   const addItem = () => {
     setForm((current) => ({
       ...current,
+      quotePricing: null,
       items: [
         ...current.items,
         {
@@ -512,6 +582,7 @@ export default function ProformaInvoicePage() {
   const removeItem = (id: number) => {
     setForm((current) => ({
       ...current,
+      quotePricing: null,
       items: current.items.filter((item) => item.id !== id),
     }));
   };
@@ -1137,77 +1208,146 @@ export default function ProformaInvoicePage() {
               )}
             </div>
 
-            <table className="mt-6 w-full border-collapse text-center">
-              <thead>
-                <tr>
-                  <th className="border border-black px-2 py-2" rowSpan={2}>
-                    No.
-                  </th>
-                  <th className="border border-black px-2 py-2" colSpan={5}>
-                    Commodity Description
-                  </th>
-                  <th className="border border-black px-2 py-2">Quantity</th>
-                  <th className="border border-black px-2 py-2" colSpan={3}>
-                    Price ({form.currency})
-                  </th>
-                </tr>
-                <tr>
-                  <th className="border border-black px-2 py-2">NAME</th>
-                  <th className="border border-black px-2 py-2">Capacity</th>
-                  <th className="border border-black px-2 py-2">Speed</th>
-                  <th className="border border-black px-2 py-2">F/S</th>
-                  <th className="border border-black px-2 py-2">Quantity</th>
-                  <th className="border border-black px-2 py-2">Unit</th>
-                  <th className="border border-black px-2 py-2">Unit Price</th>
-                  <th className="border border-black px-2 py-2">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {form.items.map((item, index) => (
-                  <tr key={item.id}>
-                    <td className="border border-black px-2 py-2">{index + 1}</td>
-                    <td className="border border-black px-2 py-2">{item.name}</td>
-                    <td className="border border-black px-2 py-2">{item.capacity}</td>
-                    <td className="border border-black px-2 py-2">{item.speed}</td>
-                    <td className="border border-black px-2 py-2">{item.floorsStops}</td>
-                    <td className="border border-black px-2 py-2">{item.quantity}</td>
-                    <td className="border border-black px-2 py-2">{item.unit}</td>
-                    <td className="border border-black px-2 py-2 text-right">
-                      {formatMoney(Number(item.unitPrice || 0))}
-                    </td>
-                    <td className="border border-black px-2 py-2 text-right">
-                      {formatMoney(Number(item.quantity || 0) * Number(item.unitPrice || 0))}
-                    </td>
-                  </tr>
-                ))}
-                <tr>
-                  <td className="border border-black px-2 py-2 text-left font-bold" colSpan={2}>
-                    Total:
-                  </td>
-                  <td className="border border-black px-2 py-2 text-left font-bold" colSpan={5}>
-                    {moneyWords(total, form.currency)}
-                  </td>
-                  <td className="border border-black px-2 py-2 font-bold">{form.currency}</td>
-                  <td className="border border-black px-2 py-2 text-right font-bold">
-                    {formatMoney(total)}
-                  </td>
-                </tr>
-                {form.showTargetCurrency && (
-                  <tr>
-                    <td className="border border-black px-2 py-2" colSpan={2} />
-                    <td className="border border-black px-2 py-2 text-left font-bold" colSpan={5}>
-                      {moneyWords(targetTotal, form.targetCurrency)}
-                    </td>
-                    <td className="border border-black px-2 py-2 font-bold">
-                      {form.targetCurrency}
-                    </td>
-                    <td className="border border-black px-2 py-2 text-right font-bold">
-                      {formatMoney(targetTotal)}
-                    </td>
-                  </tr>
+            {form.quotePricing ? (
+              <div className="mt-6">
+                <h2 className="mb-4 text-[18px] font-bold">
+                  Price - Currency: {form.quotePricing.currency}
+                </h2>
+                <table className="w-full border-collapse text-left text-[13px]">
+                  <thead className="bg-slate-100">
+                    <tr>
+                      <th className="border border-slate-400 px-2 py-2">Description</th>
+                      <th className="border border-slate-400 px-2 py-2">Specs</th>
+                      <th className="border border-slate-400 px-2 py-2 text-center">QTY-sets</th>
+                      <th className="border border-slate-400 px-2 py-2 text-right">Unit Price</th>
+                      <th className="border border-slate-400 px-2 py-2 text-right">Total Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {form.quotePricing.rows.map((row) => (
+                      <tr key={row.id}>
+                        <td
+                          className="border border-slate-400 px-2 py-2 align-top whitespace-pre-wrap"
+                          colSpan={row.specs ? 1 : 2}
+                        >
+                          {row.description}
+                        </td>
+                        {row.specs && (
+                          <td className="border border-slate-400 px-2 py-2 align-top whitespace-pre-wrap">
+                            {row.specs}
+                          </td>
+                        )}
+                        <td className="border border-slate-400 px-2 py-2 align-top text-center">
+                          {row.quantity}
+                        </td>
+                        <td className="border border-slate-400 px-2 py-2 align-top text-right">
+                          ${formatMoney(row.unitPrice)}
+                        </td>
+                        <td className="border border-slate-400 px-2 py-2 align-top text-right">
+                          ${formatMoney(Number(row.quantity || 0) * Number(row.unitPrice || 0))}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {form.quotePricing.freightCost > 0 ? (
+                  <div className="mt-3 grid grid-cols-[1fr_150px] gap-4 text-[13px]">
+                    <div className="text-right font-bold whitespace-pre-wrap">
+                      {form.quotePricing.freightText}
+                    </div>
+                    <div className="text-right">${formatMoney(form.quotePricing.freightCost)}</div>
+                  </div>
+                ) : (
+                  <div className="mt-3 text-right font-bold text-[13px] whitespace-pre-wrap">
+                    {form.quotePricing.freightText}
+                  </div>
                 )}
-              </tbody>
-            </table>
+                <div className="mt-3 grid grid-cols-[1fr_150px] gap-4 bg-slate-100 px-2 py-2 text-[13px] font-bold">
+                  <div className="text-right">Total amount :</div>
+                  <div className="text-right">${formatMoney(form.quotePricing.grandTotal)}</div>
+                </div>
+                {form.quotePricing.targetCurrency && form.quotePricing.targetTotal > 0 && (
+                  <div className="mt-3 grid grid-cols-[1fr_190px] gap-4 px-2 py-1 text-[13px] font-bold">
+                    <div className="text-right">=</div>
+                    <div className="text-right">
+                      {form.quotePricing.targetCurrency} {formatMoney(form.quotePricing.targetTotal)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <table className="mt-6 w-full border-collapse text-center">
+                <thead>
+                  <tr>
+                    <th className="border border-black px-2 py-2" rowSpan={2}>
+                      No.
+                    </th>
+                    <th className="border border-black px-2 py-2" colSpan={5}>
+                      Commodity Description
+                    </th>
+                    <th className="border border-black px-2 py-2">Quantity</th>
+                    <th className="border border-black px-2 py-2" colSpan={3}>
+                      Price ({form.currency})
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="border border-black px-2 py-2">NAME</th>
+                    <th className="border border-black px-2 py-2">Capacity</th>
+                    <th className="border border-black px-2 py-2">Speed</th>
+                    <th className="border border-black px-2 py-2">F/S</th>
+                    <th className="border border-black px-2 py-2">Quantity</th>
+                    <th className="border border-black px-2 py-2">Unit</th>
+                    <th className="border border-black px-2 py-2">Unit Price</th>
+                    <th className="border border-black px-2 py-2">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {form.items.map((item, index) => (
+                    <tr key={item.id}>
+                      <td className="border border-black px-2 py-2">{index + 1}</td>
+                      <td className="border border-black px-2 py-2">{item.name}</td>
+                      <td className="border border-black px-2 py-2">{item.capacity}</td>
+                      <td className="border border-black px-2 py-2">{item.speed}</td>
+                      <td className="border border-black px-2 py-2">{item.floorsStops}</td>
+                      <td className="border border-black px-2 py-2">{item.quantity}</td>
+                      <td className="border border-black px-2 py-2">{item.unit}</td>
+                      <td className="border border-black px-2 py-2 text-right">
+                        {formatMoney(Number(item.unitPrice || 0))}
+                      </td>
+                      <td className="border border-black px-2 py-2 text-right">
+                        {formatMoney(Number(item.quantity || 0) * Number(item.unitPrice || 0))}
+                      </td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <td className="border border-black px-2 py-2 text-left font-bold" colSpan={2}>
+                      Total:
+                    </td>
+                    <td className="border border-black px-2 py-2 text-left font-bold" colSpan={5}>
+                      {moneyWords(total, form.currency)}
+                    </td>
+                    <td className="border border-black px-2 py-2 font-bold">{form.currency}</td>
+                    <td className="border border-black px-2 py-2 text-right font-bold">
+                      {formatMoney(total)}
+                    </td>
+                  </tr>
+                  {form.showTargetCurrency && (
+                    <tr>
+                      <td className="border border-black px-2 py-2" colSpan={2} />
+                      <td className="border border-black px-2 py-2 text-left font-bold" colSpan={5}>
+                        {moneyWords(targetTotal, form.targetCurrency)}
+                      </td>
+                      <td className="border border-black px-2 py-2 font-bold">
+                        {form.targetCurrency}
+                      </td>
+                      <td className="border border-black px-2 py-2 text-right font-bold">
+                        {formatMoney(targetTotal)}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
 
             <div className="mt-4 space-y-1">
               <PreviewLine label="Description Of Goods:" value={form.goodsDescription} />
