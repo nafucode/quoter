@@ -435,7 +435,7 @@ function buildQuotePricing(source: QuoteSnapshot): QuotePricing | null {
     0,
   );
   const freightCost = Number(source.freightCost || 0);
-  const grandTotal = Number(source.grandTotal || 0) || rowsTotal + freightCost;
+  const grandTotal = rowsTotal + freightCost;
   const exchangeRate = Number(source.exchangeRate || 0);
   const targetCurrency =
     source.targetCurrency && source.targetCurrency !== "USD" && source.targetCurrency !== "-"
@@ -497,8 +497,32 @@ function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
   };
 }
 
+function normalizeQuotePricing(
+  quotePricing: QuotePricing | null | undefined,
+  targetExchangeRate: number,
+) {
+  if (!quotePricing) return null;
+  const rowsTotal = quotePricing.rows.reduce(
+    (sum, row) => sum + Number(row.quantity || 0) * Number(row.unitPrice || 0),
+    0,
+  );
+  const grandTotal = rowsTotal + Number(quotePricing.freightCost || 0);
+  return {
+    ...quotePricing,
+    grandTotal,
+    targetTotal:
+      quotePricing.targetCurrency && Number(targetExchangeRate || 0) > 0
+        ? grandTotal * Number(targetExchangeRate || 0)
+        : 0,
+  };
+}
+
 function normalizePiForm(value: PiForm): PiForm {
-  return { ...initialForm, ...value, quotePricing: value.quotePricing ?? null };
+  const merged = { ...initialForm, ...value };
+  return {
+    ...merged,
+    quotePricing: normalizeQuotePricing(merged.quotePricing, Number(merged.targetExchangeRate || 0)),
+  };
 }
 
 export default function ProformaInvoicePage() {
@@ -597,7 +621,7 @@ export default function ProformaInvoicePage() {
     if (!entry.state) return;
     setActiveHistoryId(entry.id);
     setActivePiHistoryId(null);
-    setForm((current) => piFromQuote({ ...(entry.state || {}), grandTotal: entry.state?.grandTotal || entry.grandTotal }, current));
+    setForm((current) => piFromQuote(entry.state || {}, current));
   };
 
   const savePiToHistory = () => {
