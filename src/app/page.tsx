@@ -160,7 +160,7 @@ const Quote = () => {
 
   const saveToHistory = (entry: any) => {
     setQuoteHistory(prev => {
-      const updated = [entry, ...prev].slice(0, 200); // 最多保留200条
+      const updated = [entry, ...prev].slice(0, 300); // 最多保留300条
       localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
       return updated;
     });
