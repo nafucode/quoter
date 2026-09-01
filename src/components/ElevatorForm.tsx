@@ -8,6 +8,7 @@ import { lopStyles } from '@/data/lopStyles';
 import { landingDoorStyles } from '@/data/landingDoorStyles';
 import { handrailStyles } from '@/data/handrailStyles';
 import { logoStyles } from '@/data/logoStyles';
+import { floorStyleGroups } from '@/data/floorStyles';
 
 const DOOR_OPENING_TYPE_OPTIONS = [
   { value: 'Center Opening', label: 'Center Opening' },
@@ -30,6 +31,7 @@ const CAR_FLOOR_OPTIONS = [
   { label: 'Marble', value: 'Marble' },
   { label: 'Sintered Slab 岩板', value: 'Sintered Slab' },
   { label: 'Recess 30mm 预留 30mm，客户自理', value: 'Recess 30mm, provided by customer' },
+  { label: 'Checkered Steel Plate 花纹钢板', value: 'Checkered Steel Plate' },
 ];
 
 const buildServingFloors = (floorsStops: string | number) => {
@@ -174,6 +176,10 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
       case 'landingDoor':
         newCabinEffect = { ...elevator.cabinEffect, landingDoor: { type: 'image', value: style.previewImage } };
         break;
+      case 'floor':
+        newCabinEffect = { ...elevator.cabinEffect, floor: { type: 'image', value: style.previewImage } };
+        updateElevator(elevator.id, 'carFloor', style.id);
+        break;
       case 'handrail':
         newCabinEffect = { ...elevator.cabinEffect, handrail: { type: 'image', value: style.previewImage } };
         break;
@@ -194,6 +200,7 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
       case 'cop': return { styleGroups: copStyleGroups, title: 'Choose a COP Style' };
       case 'lop': return { styleGroups: [{ groupName: 'LOP Styles', styles: lopStyles }], title: 'Choose a LOP Style' };
       case 'landingDoor': return { styleGroups: [{ groupName: 'Landing Door Styles', styles: landingDoorStyles }], title: 'Choose a Landing Door Style' };
+      case 'floor': return { styleGroups: floorStyleGroups, title: 'Choose a Floor Style' };
       case 'handrail': return { styleGroups: [{ groupName: 'Handrail Styles', styles: handrailStyles }], title: 'Choose a Handrail Style' };
       case 'copLogo': return { styleGroups: [{ groupName: 'Logo Styles', styles: logoStyles }], title: 'Choose a Logo' };
       default: return { styleGroups: [], title: '' };
@@ -560,6 +567,7 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                   onTypeChange={handleHybridTypeChange}
                   onValueChange={handleHybridValueChange}
                   onFileChange={handleHybridFileChange}
+                  onChooseFromLibrary={() => openPicker('floor')}
                 />
                 <HybridInput 
                   label="Handrail" 

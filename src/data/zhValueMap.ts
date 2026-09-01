@@ -103,6 +103,7 @@ export const ZH_VALUE_MAP: [RegExp, string][] = [
   // ── Floor materials ────────────────────────────────────────────────────────
   [/\bpvc\b/gi,                  'PVC地板'],
   [/marble/gi,                   '大理石'],
+  [/checkered\s*steel\s*plate/gi, '花纹钢板'],
   [/granite/gi,                  '花岗岩'],
   [/laminate/gi,                 '防火板'],
   [/wooden/gi,                   '木纹地板'],

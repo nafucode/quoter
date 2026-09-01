@@ -104,6 +104,7 @@ export const VI_VALUE_MAP: [RegExp, string][] = [
   // Floor materials
   [/\bpvc\b/gi, 'Sàn PVC'],
   [/marble/gi, 'Đá marble'],
+  [/checkered\s*steel\s*plate/gi, 'Tấm thép gân chống trượt'],
   [/granite/gi, 'Đá granite'],
   [/laminate/gi, 'Laminate'],
   [/wooden/gi, 'Gỗ'],

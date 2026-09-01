@@ -59,6 +59,7 @@ export const AR_VALUE_MAP: [RegExp, string][] = [
   [/acrylic\s*light\s*decoration/gi, 'ديكور إضاءة أكريليك'],
   [/\bpvc\b/gi, 'PVC'],
   [/marble/gi, 'رخام'],
+  [/checkered\s*steel\s*plate/gi, 'صفيحة فولاذية منقوشة مانعة للانزلاق'],
   [/granite/gi, 'جرانيت'],
   [/round\s*buttons?\s*with\s*braille/gi, 'أزرار دائرية مع برايل'],
   [/round\s*standard/gi, 'أزرار دائرية قياسية'],

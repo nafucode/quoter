@@ -103,6 +103,7 @@ export const ES_VALUE_MAP: [RegExp, string][] = [
   // ── Floor materials ────────────────────────────────────────────────────────
   [/\bpvc\b/gi,                  'Suelo PVC'],
   [/marble/gi,                   'Mármol'],
+  [/checkered\s*steel\s*plate/gi, 'Placa de acero estriada'],
   [/granite/gi,                  'Granito'],
   [/laminate/gi,                 'Laminado'],
   [/wooden/gi,                   'Madera'],

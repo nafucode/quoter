@@ -50,6 +50,7 @@ export const KM_VALUE_MAP: [RegExp, string][] = [
   [/led\s*light/gi, 'ភ្លើង LED'],
   [/\bpvc\b/gi, 'PVC'],
   [/marble/gi, 'ថ្មម៉ាប'],
+  [/checkered\s*steel\s*plate/gi, 'បន្ទះដែកមានលំនាំប្រឆាំងរអិល'],
   [/round\s*buttons?\s*with\s*braille/gi, 'ប៊ូតុងមូលមានអក្សរ Braille'],
   [/round\s*standard/gi, 'ប៊ូតុងមូលស្តង់ដារ'],
   [/automatic\s*rescue\s*device\s*\(?ard\)?/gi, 'ឧបករណ៍សង្គ្រោះស្វ័យប្រវត្តិ (ARD)'],

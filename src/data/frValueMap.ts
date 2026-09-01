@@ -104,6 +104,7 @@ export const FR_VALUE_MAP: [RegExp, string][] = [
   // Floor materials
   [/\bpvc\b/gi, 'Sol PVC'],
   [/marble/gi, 'Marbre'],
+  [/checkered\s*steel\s*plate/gi, 'Plaque acier antiderapante'],
   [/granite/gi, 'Granit'],
   [/laminate/gi, 'Stratifie'],
   [/wooden/gi, 'Bois'],
