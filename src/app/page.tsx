@@ -119,6 +119,17 @@ const Quote = () => {
   const [isClient, setIsClient] = useState(false);
   const [libSaved, setLibSaved] = useState(false);
   const [quoteHistory, setQuoteHistory] = useState<any[]>([]);
+  const [versionStatus, setVersionStatus] = useState<{
+    currentSha: string;
+    latestSha: string;
+    isChecking: boolean;
+    canUpdate: boolean;
+  }>({
+    currentSha: '',
+    latestSha: '',
+    isChecking: true,
+    canUpdate: true,
+  });
   const [shaftFrameCalc, setShaftFrameCalc] = useState({
     widthMm: 2000,
     depthMm: 2200,
@@ -145,6 +156,36 @@ const Quote = () => {
         setCompanyOptions(sortCompanyOptions(savedCompanies));
       }
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const checkVersion = async () => {
+      try {
+        const [currentRes, latestRes] = await Promise.all([
+          fetch('/api/version', { cache: 'no-store' }),
+          fetch('https://api.github.com/repos/nafucode/quoter/commits/main', { cache: 'no-store' }),
+        ]);
+        const current = await currentRes.json();
+        const latest = await latestRes.json();
+        const currentSha = String(current.commitSha || '');
+        const latestSha = String(latest.sha || '');
+        if (cancelled) return;
+        setVersionStatus({
+          currentSha,
+          latestSha,
+          isChecking: false,
+          canUpdate: !currentSha || !latestSha || currentSha !== latestSha,
+        });
+      } catch {
+        if (cancelled) return;
+        setVersionStatus((prev) => ({ ...prev, isChecking: false, canUpdate: true }));
+      }
+    };
+    checkVersion();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const historySequenceById = useMemo(() => {
@@ -590,6 +631,12 @@ const Quote = () => {
   }, [quotationDate, priceValidityDays]);
   const zhEnDeliveryText = `${deliveryDays} days after receive down payment and confirmed drawing. / ${deliveryDays} 个工作日（收到定金及确认图纸后起算）。`;
   const zhEnPriceValidityText = `${priceValidityDays} days / ${priceValidityDays} 天${validityUntilDate ? ` (until / 至 ${validityUntilDate})` : ''}`;
+  const currentVersionLabel = versionStatus.currentSha ? `v${versionStatus.currentSha.slice(0, 7)}` : '版本未知';
+  const updateButtonText = versionStatus.isChecking
+    ? `检查更新 · ${currentVersionLabel}`
+    : versionStatus.canUpdate
+      ? `更新 · ${currentVersionLabel}`
+      : `已最新 · ${currentVersionLabel}`;
 
   if (!isClient) {
     return null; // Or a loading spinner
@@ -629,10 +676,15 @@ const Quote = () => {
             <div className="grid grid-cols-[auto_1fr_auto_auto] gap-2 xl:min-w-[560px] xl:justify-end">
               <button
                 onClick={() => window.location.reload()}
-                className="px-3 py-2 bg-slate-600 text-white rounded-lg shadow-md hover:bg-slate-700 font-semibold text-sm"
-                title="刷新页面，同步最新版本"
+                disabled={versionStatus.isChecking || !versionStatus.canUpdate}
+                className={`px-3 py-2 rounded-lg shadow-md font-semibold text-sm ${
+                  versionStatus.isChecking || !versionStatus.canUpdate
+                    ? 'cursor-not-allowed bg-slate-300 text-slate-600'
+                    : 'bg-slate-600 text-white hover:bg-slate-700'
+                }`}
+                title={versionStatus.canUpdate ? '刷新页面，同步最新版本' : '当前已经是最新版本'}
               >
-                刷新更新
+                {updateButtonText}
               </button>
               <button onClick={handleGeneratePDF} className="p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 font-semibold">
                 {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
