@@ -54,12 +54,15 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
   const [isDoorOpeningMenuOpen, setIsDoorOpeningMenuOpen] = useState(false);
 
-  const buildElevatorType = (machineRoom: string, capacity: string | number, speed: string | number) => {
-    const modelPrefix = machineRoom === 'MRL' ? 'TKJW' : 'TKJ';
+  const buildElevatorType = (machineRoom: string, capacity: string | number, speed: string | number, description: string) => {
+    const isCargoLift = /freight|cargo/i.test(description);
+    const modelPrefix = isCargoLift
+      ? (machineRoom === 'MRL' ? 'THJW' : 'THJ')
+      : (machineRoom === 'MRL' ? 'TKJW' : 'TKJ');
     return `${modelPrefix}${capacity || ''}/${speed || ''}-VVVF`;
   };
 
-  const generatedType = buildElevatorType(elevator.machineRoom, elevator.capacity, elevator.speed);
+  const generatedType = buildElevatorType(elevator.machineRoom, elevator.capacity, elevator.speed, elevator.description);
 
   useEffect(() => {
     if (elevator.type !== generatedType) {
@@ -72,18 +75,21 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
     updateElevator(elevator.id, name, value);
     if (name === 'capacity' || name === 'speed') {
       const nextElevator = { ...elevator, [name]: value };
-      updateElevator(elevator.id, 'type', buildElevatorType(nextElevator.machineRoom, nextElevator.capacity, nextElevator.speed));
+      updateElevator(elevator.id, 'type', buildElevatorType(nextElevator.machineRoom, nextElevator.capacity, nextElevator.speed, nextElevator.description));
     }
   };
 
   const handleMachineRoomChange = (machineRoom: 'MR' | 'MRL') => {
     updateElevator(elevator.id, 'machineRoom', machineRoom);
-    updateElevator(elevator.id, 'type', buildElevatorType(machineRoom, elevator.capacity, elevator.speed));
+    updateElevator(elevator.id, 'type', buildElevatorType(machineRoom, elevator.capacity, elevator.speed, elevator.description));
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     updateElevator(elevator.id, name, value);
+    if (name === 'description') {
+      updateElevator(elevator.id, 'type', buildElevatorType(elevator.machineRoom, elevator.capacity, elevator.speed, value));
+    }
     if (name === 'floorsStops') {
       const previousServingFloors = buildServingFloors(elevator.floorsStops);
       const nextServingFloors = buildServingFloors(value);
@@ -243,7 +249,11 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                 <select
                   aria-label="Description preset"
                   value={DESCRIPTION_OPTIONS.includes(elevator.description) ? elevator.description : ''}
-                  onChange={(e) => updateElevator(elevator.id, 'description', e.target.value)}
+                  onChange={(e) => {
+                    const description = e.target.value;
+                    updateElevator(elevator.id, 'description', description);
+                    updateElevator(elevator.id, 'type', buildElevatorType(elevator.machineRoom, elevator.capacity, elevator.speed, description));
+                  }}
                   className="mt-2 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
                 >
                   <option value="">选择常用类型 / Select preset</option>
