@@ -34,6 +34,15 @@ const CAR_FLOOR_OPTIONS = [
   { label: 'Checkered Steel Plate 花纹钢板', value: 'Checkered Steel Plate' },
 ];
 
+const DESCRIPTION_OPTIONS = [
+  'Passenger Lift',
+  'Home Lift',
+  'Freight/Cargo Lift',
+  'Service Lift',
+  'Dumbwaiter Lift',
+  'Platform Lift',
+];
+
 const buildServingFloors = (floorsStops: string | number) => {
   const floorCount = Number(String(floorsStops).match(/\d+/)?.[0] ?? 0);
   if (!Number.isFinite(floorCount) || floorCount <= 0) return '';
@@ -231,6 +240,17 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
               <div>
                 <label className="block text-sm font-medium text-gray-700">Description<span className="block text-xs text-gray-500">描述</span></label>
                 <textarea name="description" value={elevator.description} onChange={handleChange} rows={2} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm resize-y" />
+                <select
+                  aria-label="Description preset"
+                  value={DESCRIPTION_OPTIONS.includes(elevator.description) ? elevator.description : ''}
+                  onChange={(e) => updateElevator(elevator.id, 'description', e.target.value)}
+                  className="mt-2 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
+                >
+                  <option value="">选择常用类型 / Select preset</option>
+                  {DESCRIPTION_OPTIONS.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Machine Room<span className="block text-xs text-gray-500">机房</span></label>
