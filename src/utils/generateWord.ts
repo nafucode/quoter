@@ -133,11 +133,12 @@ const multilineRuns = (prefix: TextRun, text: string, size = 20) => {
 
 const para = (
   children: TextRun[],
-  opts: { align?: (typeof AlignmentType)[keyof typeof AlignmentType]; spacingAfter?: number } = {},
+  opts: { align?: (typeof AlignmentType)[keyof typeof AlignmentType]; spacingAfter?: number; indentLeft?: number } = {},
 ) =>
   new Paragraph({
     children,
     alignment: opts.align,
+    indent: opts.indentLeft ? { left: opts.indentLeft } : undefined,
     spacing: { after: opts.spacingAfter ?? 80 },
   });
 
@@ -495,31 +496,51 @@ export async function generateWordBlob(state: {
   children.push(para([], { spacingAfter: 200 }));
 
   // === TERMS ===
-  children.push(para([bold(t.delivery), plain(` ${state.deliveryDays} ${t.deliverySuffix}`)], {}));
-  children.push(para(multilineRuns(bold(t.paymentTerm), state.paymentTerm), {}));
-  children.push(
-    para([bold(t.warranty), plain(` ${state.warrantyText || `${state.warrantyMonths} ${t.warrantySuffix}`}`)], {}),
-  );
-  children.push(
-    para(
-      [
-        bold(t.priceValidity),
-        plain(
-          ` ${state.priceValidityDays} ${t.days}${validUntil ? ` (${t.until} ${validUntil})` : ''}`,
-        ),
-      ],
-      {},
-    ),
-  );
-  if (state.quoteRemarks?.trim()) {
+  if (state.language === 'zh-en') {
+    const zhEnDeliveryText = `${state.deliveryDays} days after receive down payment and confirmed drawing. / ${state.deliveryDays} 个工作日（收到定金及确认图纸后起算）。`;
+    const zhEnPriceValidityText = `${state.priceValidityDays} days / ${state.priceValidityDays} 天${validUntil ? ` (until / 至 ${validUntil})` : ''}`;
+    children.push(para([bold('I. Delivery/交货期:')], {}));
+    children.push(para([plain(zhEnDeliveryText)], { indentLeft: 420 }));
+    children.push(para([bold('II. Payment term / 付款方式:')], {}));
+    children.push(para([plain(state.paymentTerm)], { indentLeft: 420 }));
+    children.push(para([bold('III. Warranty/质保:')], {}));
+    children.push(para([plain(state.warrantyText || `${state.warrantyMonths} months from the date the goods depart from the port of shipment.`)], { indentLeft: 420 }));
+    children.push(para([bold('IV. Price validity / 报价有效期:')], {}));
+    children.push(para([plain(zhEnPriceValidityText)], { indentLeft: 420 }));
+    if (state.quoteRemarks?.trim()) {
+      children.push(para([bold('Remarks / 备注:')], {}));
+      children.push(para([plain(state.quoteRemarks)], { indentLeft: 420 }));
+    }
+    if (state.showCertificationStandard ?? false) {
+      children.push(para([bold('V. Compliance standard / 符合标准:'), plain(` ${state.certificationStandard || 'CE Certification'}`)], {}));
+    }
+  } else {
+    children.push(para([bold(t.delivery), plain(` ${state.deliveryDays} ${t.deliverySuffix}`)], {}));
+    children.push(para(multilineRuns(bold(t.paymentTerm), state.paymentTerm), {}));
     children.push(
-      para([bold(t.remarks), plain(` ${state.quoteRemarks}`)], {}),
+      para([bold(t.warranty), plain(` ${state.warrantyText || `${state.warrantyMonths} ${t.warrantySuffix}`}`)], {}),
     );
-  }
-  if (state.showCertificationStandard ?? false) {
     children.push(
-      para([bold(t.complianceStandard), plain(` ${state.certificationStandard || 'CE Certification'}`)], {}),
+      para(
+        [
+          bold(t.priceValidity),
+          plain(
+            ` ${state.priceValidityDays} ${t.days}${validUntil ? ` (${t.until} ${validUntil})` : ''}`,
+          ),
+        ],
+        {},
+      ),
     );
+    if (state.quoteRemarks?.trim()) {
+      children.push(
+        para([bold(t.remarks), plain(` ${state.quoteRemarks}`)], {}),
+      );
+    }
+    if (state.showCertificationStandard ?? false) {
+      children.push(
+        para([bold(t.complianceStandard), plain(` ${state.certificationStandard || 'CE Certification'}`)], {}),
+      );
+    }
   }
   children.push(para([], { spacingAfter: 200 }));
 

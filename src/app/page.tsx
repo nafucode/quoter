@@ -585,6 +585,8 @@ const Quote = () => {
       return ''; // Return empty string if date is invalid
     }
   }, [quotationDate, priceValidityDays]);
+  const zhEnDeliveryText = `${deliveryDays} days after receive down payment and confirmed drawing. / ${deliveryDays} 个工作日（收到定金及确认图纸后起算）。`;
+  const zhEnPriceValidityText = `${priceValidityDays} days / ${priceValidityDays} 天${validityUntilDate ? ` (until / 至 ${validityUntilDate})` : ''}`;
 
   if (!isClient) {
     return null; // Or a loading spinner
@@ -1410,18 +1412,48 @@ const Quote = () => {
                   </table>
                 </div>
 
-                <div className="mt-4 pt-4 border-t text-sm space-y-1">
-                  <p><span className="font-semibold">{t.delivery}</span> {deliveryDays} {t.deliverySuffix}</p>
-                  <p className="whitespace-pre-wrap"><span className="font-semibold">{t.paymentTerm}</span> {paymentTerm}</p>
-                  <p><span className="font-semibold">{t.warranty}</span> {warrantyText || `${warrantyMonths} ${t.warrantySuffix}`}</p>
-                  <p><span className="font-semibold">{t.priceValidity}</span> {priceValidityDays} {t.days} {validityUntilDate && `(${t.until} ${validityUntilDate})`}, based on 1 USD = {exchangeRateBasis} RMB.</p>
-                  {quoteRemarks?.trim() && (
-                    <p className="whitespace-pre-wrap"><span className="font-semibold">{t.remarks}</span> {quoteRemarks}</p>
-                  )}
-                  {shouldShowCertificationStandard && (
-                    <p><span className="font-semibold">{t.complianceStandard}</span> {selectedCertificationStandard}</p>
-                  )}
-                </div>
+                {language === 'zh-en' ? (
+                  <div className="mt-4 pt-4 border-t text-sm space-y-3">
+                    <div>
+                      <p className="font-semibold">I. Delivery/交货期:</p>
+                      <p className="ml-8 whitespace-pre-wrap">{zhEnDeliveryText}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">II. Payment term / 付款方式:</p>
+                      <p className="ml-8 whitespace-pre-wrap">{paymentTerm}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">III. Warranty/质保:</p>
+                      <p className="ml-8 whitespace-pre-wrap">{warrantyText || `${warrantyMonths} months from the date the goods depart from the port of shipment.`}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">IV. Price validity / 报价有效期:</p>
+                      <p className="ml-8 whitespace-pre-wrap">{zhEnPriceValidityText}</p>
+                    </div>
+                    {quoteRemarks?.trim() && (
+                      <div>
+                        <p className="font-semibold">Remarks / 备注:</p>
+                        <p className="ml-8 whitespace-pre-wrap">{quoteRemarks}</p>
+                      </div>
+                    )}
+                    {shouldShowCertificationStandard && (
+                      <p><span className="font-semibold">V. Compliance standard / 符合标准:</span> {selectedCertificationStandard}</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-4 pt-4 border-t text-sm space-y-1">
+                    <p><span className="font-semibold">{t.delivery}</span> {deliveryDays} {t.deliverySuffix}</p>
+                    <p className="whitespace-pre-wrap"><span className="font-semibold">{t.paymentTerm}</span> {paymentTerm}</p>
+                    <p><span className="font-semibold">{t.warranty}</span> {warrantyText || `${warrantyMonths} ${t.warrantySuffix}`}</p>
+                    <p><span className="font-semibold">{t.priceValidity}</span> {priceValidityDays} {t.days} {validityUntilDate && `(${t.until} ${validityUntilDate})`}, based on 1 USD = {exchangeRateBasis} RMB.</p>
+                    {quoteRemarks?.trim() && (
+                      <p className="whitespace-pre-wrap"><span className="font-semibold">{t.remarks}</span> {quoteRemarks}</p>
+                    )}
+                    {shouldShowCertificationStandard && (
+                      <p><span className="font-semibold">{t.complianceStandard}</span> {selectedCertificationStandard}</p>
+                    )}
+                  </div>
+                )}
 
                 <div className="mt-4 pt-4 border-t break-before-page">
                   <h3 className="text-lg font-semibold mb-2">{t.specificationsTitle}</h3>
