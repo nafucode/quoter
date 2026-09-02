@@ -1,4 +1,4 @@
-export type Lang = 'en' | 'zh' | 'es' | 'pt' | 'fr' | 'vi' | 'km' | 'ar' | 'ru';
+export type Lang = 'en' | 'zh-en' | 'zh' | 'es' | 'pt' | 'fr' | 'vi' | 'km' | 'ar' | 'ru';
 
 export const translations = {
   en: {
@@ -919,4 +919,32 @@ export const translations = {
   },
 } as const;
 
-export type Translations = typeof translations.en;
+export type Translations = {
+  [K in keyof typeof translations.en]: typeof translations.en[K] extends (...args: infer Args) => string
+    ? (...args: Args) => string
+    : string;
+};
+
+const bilingualText = (english: string, chinese: string) =>
+  english === chinese ? english : `${english} / ${chinese}`;
+
+export const zhEnTranslations = Object.fromEntries(
+  Object.keys(translations.en).map((key) => {
+    const translationKey = key as keyof Translations;
+    const englishValue = translations.en[translationKey];
+    const chineseValue = translations.zh[translationKey];
+    if (typeof englishValue === 'function' && typeof chineseValue === 'function') {
+      return [
+        key,
+        (...args: any[]) => bilingualText(
+          (englishValue as (...args: any[]) => string)(...args),
+          (chineseValue as (...args: any[]) => string)(...args),
+        ),
+      ];
+    }
+    return [key, bilingualText(String(englishValue), String(chineseValue))];
+  }),
+) as Translations;
+
+export const getTranslations = (lang: Lang): Translations =>
+  lang === 'zh-en' ? zhEnTranslations : translations[lang as keyof typeof translations] as Translations;

@@ -3,7 +3,7 @@ import {
   AlignmentType, BorderStyle, WidthType, ShadingType, VerticalAlignTable,
   PageBreak, ImageRun,
 } from 'docx';
-import { translations, Lang } from '@/data/translations';
+import { getTranslations, Lang } from '@/data/translations';
 import { PartListRow } from '@/data/partListDefaults';
 import { standardFeatures } from '@/data/standardFeatures';
 import { translateStandardFeature } from '@/data/standardFeatureTranslations';
@@ -22,6 +22,10 @@ const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } as const
 const NO_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER };
 
 const translateValueForLang = (value: string, lang: Lang) => {
+  if (lang === 'zh-en') {
+    const zhValue = translateValueToZh(value);
+    return zhValue === value ? value : `${value} / ${zhValue}`;
+  }
   if (lang === 'zh') return translateValueToZh(value);
   if (lang === 'es') return translateValueToEs(value);
   if (lang === 'fr') return translateValueToFr(value);
@@ -217,7 +221,7 @@ export async function generateWordBlob(state: {
   partList: PartListRow[];
   language: Lang;
 }): Promise<Blob> {
-  const t = translations[state.language];
+  const t = getTranslations(state.language);
   const showPartList = state.showPartList ?? true;
   const showFunctionList = state.showFunctionList ?? true;
   const isNoneText = (value: unknown) => String(value ?? '').trim().toLowerCase() === 'none';

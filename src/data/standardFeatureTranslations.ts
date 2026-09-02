@@ -583,5 +583,9 @@ const fallbackTranslate = (text: string, lang: Lang) => {
 
 export const translateStandardFeature = (text: string, lang: Lang) => {
   if (lang === 'en') return text;
+  if (lang === 'zh-en') {
+    const zhText = featureTranslations[text]?.zh || translateValueToZh(text);
+    return zhText === text ? text : `${text} / ${zhText}`;
+  }
   return featureTranslations[text]?.[lang] || fallbackTranslate(text, lang);
 };

@@ -100,7 +100,7 @@ const enOnly: EscalatorLabels = {
   functionText: 'Function Description',
 };
 
-export const escalatorTranslations: Record<Lang, EscalatorLabels> = {
+export const escalatorTranslations: Record<Exclude<Lang, 'zh-en'>, EscalatorLabels> = {
   en,
   zh: {
     ...en,
@@ -651,11 +651,23 @@ export function englishOnlyEscalatorText(value: string | number) {
 }
 
 export function getEscalatorLabels(lang: Lang, englishOnly = false) {
-  return englishOnly ? enOnly : escalatorTranslations[lang] || en;
+  if (englishOnly) return enOnly;
+  if (lang === 'zh-en') {
+    return Object.fromEntries(
+      Object.keys(en).map((key) => {
+        const labelKey = key as keyof EscalatorLabels;
+        const englishValue = en[labelKey];
+        const chineseValue = escalatorTranslations.zh[labelKey];
+        return [key, englishValue === chineseValue ? englishValue : `${englishValue} / ${chineseValue}`];
+      }),
+    ) as EscalatorLabels;
+  }
+  return escalatorTranslations[lang] || en;
 }
 
 export function translateEscalatorValue(value: string | number, lang: Lang, englishOnly = false) {
   if (englishOnly) return englishOnlyEscalatorText(value);
+  if (lang === 'zh-en') return String(value ?? '');
   let result = String(value ?? '');
   const valueMap = lang === 'es' ? ES_VALUE_MAP : lang === 'km' ? KM_VALUE_MAP : lang === 'ar' ? AR_VALUE_MAP : null;
   if (!valueMap) return result;

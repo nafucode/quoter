@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
 import { useQuoteStore } from '@/store/useQuoteStore';
-import { translations } from '@/data/translations';
+import { getTranslations } from '@/data/translations';
 import { generateWordBlob } from '@/utils/generateWord';
 import { translateValueToZh } from '@/data/zhValueMap';
 import { translateValueToEs } from '@/data/esValueMap';
@@ -108,7 +108,7 @@ const Quote = () => {
       : []),
   ];
 
-  const t = translations[language];
+  const t = getTranslations(language);
   const selectedCertificationStandard = certificationStandard || 'CE Certification';
   const shouldShowCertificationStandard = showCertificationStandard ?? false;
 
@@ -456,6 +456,10 @@ const Quote = () => {
   };
 
   const translateValue = (v: string) => {
+    if (language === 'zh-en') {
+      const zhValue = translateValueToZh(v);
+      return zhValue === v ? v : `${v} / ${zhValue}`;
+    }
     if (language === 'zh') return translateValueToZh(v);
     if (language === 'es') return translateValueToEs(v);
     if (language === 'fr') return translateValueToFr(v);
@@ -635,6 +639,7 @@ const Quote = () => {
                 title="Switch output language"
               >
                 <option value="en">🇬🇧 EN</option>
+                <option value="zh-en">中英</option>
                 <option value="zh">🇨🇳 中文</option>
                 <option value="es">🇪🇸 ES</option>
                 <option value="pt">🇧🇷 PT</option>
