@@ -459,6 +459,16 @@ const featureTranslations: Record<string, FeatureTranslation> = {
     ar: 'تسوية عند انقطاع الكهرباء (ARD مشمول)',
     ru: 'Выравнивание при отключении питания (ARD включен)',
   },
+  'Leveling when power failure (ARD)': {
+    zh: '停电平层（ARD）',
+    es: 'Nivelacion en fallo electrico (ARD)',
+    pt: 'Nivelamento em falha de energia (ARD)',
+    fr: 'Nivelage en cas de coupure de courant (ARD)',
+    vi: 'Can bang khi mat dien (ARD)',
+    km: 'កែសម្រួលកម្រិតពេលដាច់ភ្លើង (ARD)',
+    ar: 'تسوية عند انقطاع الكهرباء (ARD)',
+    ru: 'Выравнивание при отключении питания (ARD)',
+  },
   'Energy-regenerating device': {
     zh: '能量回馈装置',
     es: 'Dispositivo regenerador de energia',

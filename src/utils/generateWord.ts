@@ -192,6 +192,10 @@ const formatFreightText = (dest: string, freight: (dest: string) => string) =>
     : freight(dest);
 const localizedFreightDestination = (dest: string, language: Lang) =>
   (language === 'zh' || language === 'zh-en') && dest === 'SHANGHAI PORT' ? '上海港' : dest;
+const isCargoElevator = (elevator: any) =>
+  /freight|cargo/i.test(String(elevator?.description ?? '')) || /^THJW?/i.test(String(elevator?.type ?? ''));
+const cargoAdjustedFeatureText = (text: string, hasCargoElevator: boolean) =>
+  hasCargoElevator ? text.replace('Leveling when power failure (ARD) included', 'Leveling when power failure (ARD)') : text;
 
 // ─── main export ────────────────────────────────────────────────────────────
 
@@ -866,6 +870,7 @@ export async function generateWordBlob(state: {
 
     const featureCols = [Math.floor(CONTENT_W * 0.23), Math.floor(CONTENT_W * 0.385), CONTENT_W - Math.floor(CONTENT_W * 0.23) - Math.floor(CONTENT_W * 0.385)];
     const featureRows: TableRow[] = [];
+    const hasCargoElevator = state.elevators.some(isCargoElevator);
 
     standardFeatures.forEach((group) => {
       group.rows.forEach((featureRow, rowIndex) => {
@@ -879,8 +884,8 @@ export async function generateWordBlob(state: {
                 }),
               ]
             : []),
-          cell(translateStandardFeature(featureRow[0], state.language), { width: featureCols[1] }),
-          cell(translateStandardFeature(featureRow[1], state.language), { width: featureCols[2] }),
+          cell(translateStandardFeature(cargoAdjustedFeatureText(featureRow[0], hasCargoElevator), state.language), { width: featureCols[1] }),
+          cell(translateStandardFeature(cargoAdjustedFeatureText(featureRow[1], hasCargoElevator), state.language), { width: featureCols[2] }),
         ];
 
         featureRows.push(

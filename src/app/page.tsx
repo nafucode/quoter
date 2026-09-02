@@ -62,6 +62,12 @@ const formatFreightText = (dest: string, freight: (dest: string) => string) =>
 const localizedFreightDestination = (dest: string, language: string) =>
   (language === 'zh' || language === 'zh-en') && dest === 'SHANGHAI PORT' ? '上海港' : dest;
 
+const isCargoElevator = (elevator: any) =>
+  /freight|cargo/i.test(String(elevator?.description ?? '')) || /^THJW?/i.test(String(elevator?.type ?? ''));
+
+const cargoAdjustedFeatureText = (text: string, hasCargoElevator: boolean) =>
+  hasCargoElevator ? text.replace('Leveling when power failure (ARD) included', 'Leveling when power failure (ARD)') : text;
+
 const Quote = () => {
   const {
     companyName,
@@ -637,6 +643,7 @@ const Quote = () => {
     : versionStatus.canUpdate
       ? `更新 · ${currentVersionLabel}`
       : `已最新 · ${currentVersionLabel}`;
+  const hasCargoElevator = elevators.some(isCargoElevator);
 
   if (!isClient) {
     return null; // Or a loading spinner
@@ -1711,8 +1718,8 @@ const Quote = () => {
                                       {translateStandardFeature(group.category, language)}
                                     </td>
                                   )}
-                                  <td className="w-[38.5%] p-2 border border-gray-400">{translateStandardFeature(featureRow[0], language)}</td>
-                                  <td className="w-[38.5%] p-2 border border-gray-400">{translateStandardFeature(featureRow[1], language)}</td>
+                                  <td className="w-[38.5%] p-2 border border-gray-400">{translateStandardFeature(cargoAdjustedFeatureText(featureRow[0], hasCargoElevator), language)}</td>
+                                  <td className="w-[38.5%] p-2 border border-gray-400">{translateStandardFeature(cargoAdjustedFeatureText(featureRow[1], hasCargoElevator), language)}</td>
                                 </tr>
                               ))
                             )}
