@@ -59,6 +59,9 @@ const formatFreightText = (dest: string, freight: (dest: string) => string) =>
     ? `Local fee and Freight from factory ${dest} :`
     : freight(dest);
 
+const localizedFreightDestination = (dest: string, language: string) =>
+  (language === 'zh' || language === 'zh-en') && dest === 'SHANGHAI PORT' ? '上海港' : dest;
+
 const Quote = () => {
   const {
     companyName,
@@ -1394,7 +1397,7 @@ const Quote = () => {
                         </tr>
                       ) : (
                         <tr>
-                          <td colSpan={4} className="p-2 text-right font-semibold">{formatFreightText(freightDestination, t.freight)}</td>
+                          <td colSpan={4} className="p-2 text-right font-semibold">{formatFreightText(localizedFreightDestination(freightDestination, language), t.freight)}</td>
                           <td className="p-2 text-right">{freightCost.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                         </tr>
                       )}

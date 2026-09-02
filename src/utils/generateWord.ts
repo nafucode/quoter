@@ -190,6 +190,8 @@ const formatFreightText = (dest: string, freight: (dest: string) => string) =>
   dest.trim().toLowerCase().startsWith('to ')
     ? `Local fee and Freight from factory ${dest} :`
     : freight(dest);
+const localizedFreightDestination = (dest: string, language: Lang) =>
+  (language === 'zh' || language === 'zh-en') && dest === 'SHANGHAI PORT' ? '上海港' : dest;
 
 // ─── main export ────────────────────────────────────────────────────────────
 
@@ -453,7 +455,7 @@ export async function generateWordBlob(state: {
             }),
           ]
         : [
-            cell(formatFreightText(state.freightDestination, t.freight), {
+            cell(formatFreightText(localizedFreightDestination(state.freightDestination, state.language), t.freight), {
               width: priceCols[0] + priceCols[1] + priceCols[2] + priceCols[3],
               colSpan: 4,
             }),
