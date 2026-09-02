@@ -66,6 +66,7 @@ export const ZH_VALUE_MAP: [RegExp, string][] = [
   [/4\s*co\b/gi,                 '中分四折'],
 
   // ── Door header ────────────────────────────────────────────────────────────
+  [/standard\s*narrow\s*jamb/gi, '标准小门套'],
   [/standard/gi,                 '标准'],
   [/custom/gi,                   '定制'],
 
