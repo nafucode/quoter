@@ -474,6 +474,9 @@ const Quote = () => {
       </div>
     );
   };
+  const isNoneText = (value: unknown) => String(value ?? '').trim().toLowerCase() === 'none';
+  const shouldShowHandrailInQuote = (elevator: any) =>
+    !isNoneText(elevator?.carHandrail) || elevator?.showNoneHandrailInQuote !== false;
 
   useEffect(() => {
     if (focusedSection) {
@@ -1453,7 +1456,7 @@ const Quote = () => {
                             {renderSpec(t.specCarDim, elevator.carNetDimension)}
                             {renderSpec(t.specCeiling, elevator.carCeiling)}
                             {renderSpec(t.specCarFloor, elevator.carFloor)}
-                            {renderSpec(t.specHandrail, elevator.carHandrail)}
+                            {shouldShowHandrailInQuote(elevator) && renderSpec(t.specHandrail, elevator.carHandrail)}
                             {renderSpec(t.specWallLeft, elevator.carWall.left)}
                             {renderSpec(t.specWallRight, elevator.carWall.right)}
                             {renderSpec(t.specWallRear, elevator.carWall.rear)}
@@ -1516,17 +1519,21 @@ const Quote = () => {
                   </div>
 
                   {/* Row 4: Titles */}
-                  <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.landingDoor}</div>
-                  <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.handrail}</div>
+                  <div className={`font-bold text-center border-b border-r border-gray-400 p-1 ${shouldShowHandrailInQuote(elevator) ? '' : 'col-span-2'}`}>{t.landingDoor}</div>
+                  {shouldShowHandrailInQuote(elevator) && (
+                    <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.handrail}</div>
+                  )}
                   <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.copLogo}</div>
 
                   {/* Row 5: Descriptions/Images */}
-                  <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48">
+                  <div className={`border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 ${shouldShowHandrailInQuote(elevator) ? '' : 'col-span-2'}`}>
                     {elevator.cabinEffect.landingDoor.type === 'image' && elevator.cabinEffect.landingDoor.value ? <img src={elevator.cabinEffect.landingDoor.value} alt="Landing Door" className="max-h-full max-w-full"/> : elevator.cabinEffect.landingDoor.type === 'text' ? elevator.cabinEffect.landingDoor.value : null}
                   </div>
-                  <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 text-center">
-                    {elevator.cabinEffect.handrail.type === 'image' && elevator.cabinEffect.handrail.value ? <img src={elevator.cabinEffect.handrail.value} alt="Handrail" className="max-h-full max-w-full"/> : elevator.cabinEffect.handrail.type === 'text' ? elevator.cabinEffect.handrail.value : null}
-                  </div>
+                  {shouldShowHandrailInQuote(elevator) && (
+                    <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 text-center">
+                      {elevator.cabinEffect.handrail.type === 'image' && elevator.cabinEffect.handrail.value ? <img src={elevator.cabinEffect.handrail.value} alt="Handrail" className="max-h-full max-w-full"/> : elevator.cabinEffect.handrail.type === 'text' ? elevator.cabinEffect.handrail.value : null}
+                    </div>
+                  )}
                   <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 text-center">
                     {elevator.cabinEffect.copLogo.type === 'image' && elevator.cabinEffect.copLogo.value ? <img src={elevator.cabinEffect.copLogo.value} alt="COP Logo" className="max-h-full max-w-full"/> : elevator.cabinEffect.copLogo.type === 'text' ? elevator.cabinEffect.copLogo.value : null}
                   </div>

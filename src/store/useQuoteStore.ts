@@ -28,6 +28,7 @@ const normalizeElevator = (elevator: any) => ({
   ...elevator,
   baseFloorJamb: elevator?.baseFloorJamb ?? elevatorTemplate.baseFloorJamb,
   otherFloorsJamb: elevator?.otherFloorsJamb ?? elevatorTemplate.otherFloorsJamb,
+  showNoneHandrailInQuote: elevator?.showNoneHandrailInQuote ?? true,
   cabinEffect: normalizeCabinEffect(elevator?.cabinEffect),
   carWall: {
     ...(elevator?.carWall ?? elevatorTemplate.carWall),

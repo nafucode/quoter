@@ -43,6 +43,8 @@ const DESCRIPTION_OPTIONS = [
   'Platform Lift',
 ];
 
+const isNoneText = (value: unknown) => String(value ?? '').trim().toLowerCase() === 'none';
+
 const buildServingFloors = (floorsStops: string | number) => {
   const floorCount = Number(String(floorsStops).match(/\d+/)?.[0] ?? 0);
   if (!Number.isFinite(floorCount) || floorCount <= 0) return '';
@@ -431,6 +433,17 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Handrail<span className="block text-xs text-gray-500">扶手</span></label>
                   <input name="carHandrail" value={elevator.carHandrail} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                  {isNoneText(elevator.carHandrail) && (
+                    <label className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                      <input
+                        type="checkbox"
+                        checked={elevator.showNoneHandrailInQuote ?? true}
+                        onChange={(e) => updateElevator(elevator.id, 'showNoneHandrailInQuote', e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                      />
+                      <span>报价单显示 Handrail: None / 显示扶手为空</span>
+                    </label>
+                  )}
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">Car wall finish<span className="block text-xs text-gray-500">轿壁装饰</span></label>

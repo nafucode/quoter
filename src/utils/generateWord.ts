@@ -95,11 +95,12 @@ function imgDataToPara(img: ImgData | null, w: number, h: number, fallback = '')
 function effectCell(
   content: Paragraph,
   colW: number,
-  opts: { bg?: string; bold?: boolean } = {},
+  opts: { bg?: string; bold?: boolean; colSpan?: number } = {},
 ): TableCell {
   return new TableCell({
     borders: BORDERS,
     width: { size: colW, type: WidthType.DXA },
+    columnSpan: opts.colSpan,
     verticalAlign: VerticalAlignTable.CENTER,
     shading: opts.bg ? { fill: opts.bg, type: ShadingType.CLEAR } : undefined,
     margins: { top: 80, bottom: 80, left: 80, right: 80 },
@@ -219,6 +220,9 @@ export async function generateWordBlob(state: {
   const t = translations[state.language];
   const showPartList = state.showPartList ?? true;
   const showFunctionList = state.showFunctionList ?? true;
+  const isNoneText = (value: unknown) => String(value ?? '').trim().toLowerCase() === 'none';
+  const shouldShowHandrailInQuote = (elev: any) =>
+    !isNoneText(elev?.carHandrail) || elev?.showNoneHandrailInQuote !== false;
 
   // ── pre-fetch banner + all cabin effect images ───────────────────────────
   // Use pre-converted PNG (SVG type is not supported by docx 9.x)
@@ -526,6 +530,7 @@ export async function generateWordBlob(state: {
   const specCols = [Math.floor(CONTENT_W / 2), CONTENT_W - Math.floor(CONTENT_W / 2)];
 
   state.elevators.forEach((elev, idx) => {
+    const showHandrail = shouldShowHandrailInQuote(elev);
     if (idx > 0) {
       // page break before each subsequent elevator
       children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
@@ -591,16 +596,19 @@ export async function generateWordBlob(state: {
     ]);
 
     // III. Car
-    specSection(t.secCar, [
+    const carSpecRows: [string, string][] = [
       [t.specCopPlate, elev.copPlate ?? ''],
       [t.specCarDim, elev.carNetDimension ?? ''],
       [t.specCeiling, elev.carCeiling ?? ''],
       [t.specCarFloor, elev.carFloor ?? ''],
-      [t.specHandrail, elev.carHandrail ?? ''],
       [t.specWallLeft, elev.carWall?.left ?? ''],
       [t.specWallRight, elev.carWall?.right ?? ''],
       [t.specWallRear, elev.carWall?.rear ?? ''],
-    ]);
+    ];
+    if (showHandrail) {
+      carSpecRows.splice(4, 0, [t.specHandrail, elev.carHandrail ?? '']);
+    }
+    specSection(t.secCar, carSpecRows);
 
     // IV. Door
     specSection(t.secDoor, [
@@ -630,7 +638,7 @@ export async function generateWordBlob(state: {
       imgs &&
       (imgs.cabinImage || imgs.copImage || imgs.lopImage ||
         imgs.ceiling || imgs.button || imgs.floor ||
-        imgs.landingDoor || imgs.handrail || imgs.copLogo);
+        imgs.landingDoor || (showHandrail && imgs.handrail) || imgs.copLogo);
 
     if (ce && imgs && hasAnyImage) {
       children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
@@ -703,16 +711,34 @@ export async function generateWordBlob(state: {
             }),
             // Row 5 header: LANDING DOOR / HANDRAIL / COP LOGO
             new TableRow({
-              children: [hdrCell(t.landingDoor, effCols[0]), hdrCell(t.handrail, effCols[1]), hdrCell(t.copLogo, effCols[2])],
+              children: showHandrail
+                ? [hdrCell(t.landingDoor, effCols[0]), hdrCell(t.handrail, effCols[1]), hdrCell(t.copLogo, effCols[2])]
+                : [
+                    effectCell(
+                      new Paragraph({
+                        alignment: AlignmentType.CENTER,
+                        spacing: { after: 0 },
+                        children: [new TextRun({ text: t.landingDoor, bold: true, size: 18, font: 'Arial' })],
+                      }),
+                      effCols[0] + effCols[1],
+                      { bg: 'F0F0F0', colSpan: 2 },
+                    ),
+                    hdrCell(t.copLogo, effCols[2]),
+                  ],
             }),
             // Row 6: landing door / handrail / cop logo — large height
             new TableRow({
               height: { value: 3800, rule: 'atLeast' },
-              children: [
-                valCell(imgs.landingDoor, ce.landingDoor, 188, 300, effCols[0]),
-                valCell(imgs.handrail,   ce.handrail,    188, 220, effCols[1]),
-                valCell(imgs.copLogo,    ce.copLogo,     188, 220, effCols[2]),
-              ],
+              children: showHandrail
+                ? [
+                    valCell(imgs.landingDoor, ce.landingDoor, 188, 300, effCols[0]),
+                    valCell(imgs.handrail,   ce.handrail,    188, 220, effCols[1]),
+                    valCell(imgs.copLogo,    ce.copLogo,     188, 220, effCols[2]),
+                  ]
+                : [
+                    effectCell(imgDataToPara(imgs.landingDoor, 188, 300, ce.landingDoor?.type === 'text' ? ce.landingDoor.value ?? '' : ''), effCols[0] + effCols[1], { colSpan: 2 }),
+                    valCell(imgs.copLogo, ce.copLogo, 188, 220, effCols[2]),
+                  ],
             }),
           ],
         }),
