@@ -626,7 +626,14 @@ const Quote = () => {
                 {libSaved ? '✓ 已保存！' : '保存到报价库'}
               </button>
             </div>
-            <div className="grid grid-cols-[1fr_auto_auto] gap-2 xl:min-w-[480px] xl:justify-end">
+            <div className="grid grid-cols-[auto_1fr_auto_auto] gap-2 xl:min-w-[560px] xl:justify-end">
+              <button
+                onClick={() => window.location.reload()}
+                className="px-3 py-2 bg-slate-600 text-white rounded-lg shadow-md hover:bg-slate-700 font-semibold text-sm"
+                title="刷新页面，同步最新版本"
+              >
+                刷新更新
+              </button>
               <button onClick={handleGeneratePDF} className="p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 font-semibold">
                 {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
               </button>
