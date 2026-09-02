@@ -631,7 +631,7 @@ const Quote = () => {
   }, [quotationDate, priceValidityDays]);
   const zhEnDeliveryText = `${deliveryDays} days after receive down payment and confirmed drawing. / ${deliveryDays} 个工作日（收到定金及确认图纸后起算）。`;
   const zhEnPriceValidityText = `${priceValidityDays} days / ${priceValidityDays} 天${validityUntilDate ? ` (until / 至 ${validityUntilDate})` : ''}`;
-  const currentVersionLabel = versionStatus.currentSha ? `v${versionStatus.currentSha.slice(0, 7)}` : '版本未知';
+  const currentVersionLabel = versionStatus.currentSha ? `V${versionStatus.currentSha.slice(0, 3)}` : '版本未知';
   const updateButtonText = versionStatus.isChecking
     ? `检查更新 · ${currentVersionLabel}`
     : versionStatus.canUpdate
