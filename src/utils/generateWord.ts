@@ -590,14 +590,17 @@ export async function generateWordBlob(state: {
     ]);
 
     // II. Hoistway
-    specSection(t.secHoistway, [
+    const hoistwaySpecRows: [string, string][] = [
       [t.specTravel, String(elev.travel ?? '')],
       [t.specHeadroom, String(elev.headroom ?? '')],
       [t.specPit, String(elev.pitDepth ?? '')],
       [t.specShaftSize, elev.shaftSize ?? ''],
-      [t.specMachineRoom, elev.machineRoomSize ?? ''],
       [t.specShaftConst, elev.shaftConstruction ?? ''],
-    ]);
+    ];
+    if (elev.machineRoom === 'MR') {
+      hoistwaySpecRows.splice(4, 0, [t.specMachineRoom, elev.machineRoomSize ?? '']);
+    }
+    specSection(t.secHoistway, hoistwaySpecRows);
 
     // III. Car
     const carSpecRows: [string, string][] = [
