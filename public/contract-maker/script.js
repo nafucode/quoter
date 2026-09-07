@@ -1157,6 +1157,101 @@ function insertWordPageBreaks(paper) {
     });
 }
 
+function replaceWordGridWithTable(container, columns) {
+    if (!container) return;
+    const table = document.createElement('table');
+    table.className = container.className;
+    table.setAttribute('width', '100%');
+    table.setAttribute('cellspacing', '0');
+    table.setAttribute('cellpadding', '0');
+    table.style.cssText = 'width:100%;border-collapse:collapse;table-layout:fixed;';
+    const row = document.createElement('tr');
+    [...container.children].forEach((source) => {
+        const cell = document.createElement('td');
+        cell.setAttribute('width', `${100 / columns}%`);
+        cell.setAttribute('valign', 'top');
+        cell.style.cssText = 'vertical-align:top;padding:6pt 8pt;';
+        if (container.classList.contains('contract-meta')) {
+            const primary = document.createElement('p');
+            const secondary = document.createElement('p');
+            const label = source.querySelector('span');
+            const value = source.querySelector('strong');
+            const local = source.querySelector('em');
+            if (label) primary.appendChild(label);
+            if (label && value) primary.appendChild(document.createTextNode(' '));
+            if (value) primary.appendChild(value);
+            if (local) secondary.appendChild(local);
+            primary.style.cssText = 'margin:0 0 2pt;white-space:nowrap;';
+            secondary.style.cssText = 'margin:0;white-space:nowrap;';
+            cell.append(primary, secondary);
+        } else {
+            while (source.firstChild) cell.appendChild(source.firstChild);
+        }
+        row.appendChild(cell);
+    });
+    table.appendChild(row);
+    container.replaceWith(table);
+}
+
+function applyWordTypography(paper) {
+    paper.style.cssText = 'font-family:Arial,"Microsoft YaHei",sans-serif;font-size:10pt;line-height:1.35;color:#111827;';
+    paper.querySelectorAll('p').forEach((element) => {
+        element.style.fontSize = '10pt';
+        element.style.lineHeight = '1.35';
+        element.style.marginTop = '0';
+        element.style.marginBottom = '5pt';
+    });
+    paper.querySelectorAll('table').forEach((table) => {
+        table.style.fontFamily = 'Arial,"Microsoft YaHei",sans-serif';
+        table.style.fontSize = '9pt';
+    });
+    paper.querySelectorAll('th, td').forEach((cell) => {
+        cell.style.fontSize = '9pt';
+        cell.style.lineHeight = '1.25';
+    });
+
+    const title = paper.querySelector('.contract-title');
+    if (title) {
+        title.setAttribute('align', 'center');
+        title.style.cssText = 'text-align:center;margin:0 0 10pt;';
+        const localTitle = title.querySelector('p');
+        const englishTitle = title.querySelector('h2');
+        if (localTitle) localTitle.style.cssText = 'font-size:14pt;line-height:1.2;font-weight:700;margin:0 0 3pt;text-align:center;';
+        if (englishTitle) englishTitle.style.cssText = 'font-size:18pt;line-height:1.15;font-weight:700;margin:0;text-align:center;letter-spacing:0;';
+    }
+
+    paper.querySelectorAll('.contract-meta td').forEach((cell) => {
+        cell.style.borderTop = '1.5pt solid #1f2937';
+        cell.style.borderBottom = '0.75pt solid #9ca3af';
+    });
+    paper.querySelectorAll('.contract-meta span, .contract-meta strong').forEach((element) => {
+        element.style.cssText = 'display:inline;font-size:9.5pt;line-height:1.3;font-style:normal;margin:0;';
+    });
+    paper.querySelectorAll('.contract-meta em').forEach((element) => {
+        element.style.cssText = 'display:block;font-size:9pt;line-height:1.3;font-style:normal;margin:0;color:#4b5563;';
+    });
+    paper.querySelectorAll('.party-block td').forEach((cell) => {
+        cell.style.border = '0.75pt solid #9ca3af';
+    });
+    paper.querySelectorAll('.party-block p').forEach((element) => {
+        element.style.cssText = 'font-size:9.5pt;line-height:1.35;margin:0 0 5pt;';
+    });
+    paper.querySelectorAll('.legal-note, .clause p, .bank-grid p, .signature-grid p, .signature-grid strong, .total-value p').forEach((element) => {
+        element.style.fontSize = '9.5pt';
+        element.style.lineHeight = '1.35';
+    });
+    paper.querySelectorAll('.quote-doc-page h2').forEach((element) => {
+        element.style.cssText = 'font-size:16pt;line-height:1.2;font-weight:700;text-align:center;margin:6pt 0 10pt;';
+    });
+    paper.querySelectorAll('.quote-doc-page h3').forEach((element) => {
+        element.style.cssText = 'font-size:13pt;line-height:1.2;font-weight:700;text-align:center;margin:0 0 8pt;padding:6pt;background:#e5e7eb;';
+    });
+    paper.querySelectorAll('.quote-spec-section h4, .bank-block h3').forEach((element) => {
+        element.style.fontSize = '11pt';
+        element.style.lineHeight = '1.25';
+    });
+}
+
 async function exportWord() {
     updatePreview();
     wordButton.disabled = true;
@@ -1165,8 +1260,11 @@ async function exportWord() {
 
     try {
         const paper = document.getElementById('contract-paper').cloneNode(true);
+        replaceWordGridWithTable(paper.querySelector('.contract-meta'), 3);
+        replaceWordGridWithTable(paper.querySelector('.party-block'), 2);
         insertWordPageBreaks(paper);
         convertDecorationGridsToWordTables(paper);
+        applyWordTypography(paper);
         const sourceImages = [...document.getElementById('contract-paper').querySelectorAll('img')];
         await Promise.all([...paper.querySelectorAll('img')].map(async (img, index) => {
             await waitForImage(sourceImages[index]);
