@@ -76,3 +76,15 @@ test('legacy item quotations retain their original currency and quantities', () 
     assert.equal(record.currency, 'EUR');
     assert.equal(total(record), 600);
 });
+
+test('contract bank presets match the six PI account choices', () => {
+    const presets = vm.runInContext('bankPresets.map(({ id, bankName, accountNo, swiftCode }) => ({ id, bankName, accountNo, swiftCode }))', context);
+    assert.deepEqual(JSON.parse(JSON.stringify(presets)), [
+        { id: 'wema', bankName: 'Wema bank', accountNo: '7949338275', swiftCode: '' },
+        { id: 'chouzhou', bankName: 'ZHEJIANG CHOUZHOU COMMERCIAL BANK CO.,LTD', accountNo: '13601002010090003861', swiftCode: 'CZCBCN2X' },
+        { id: 'icbc', bankName: 'INDUSTRIAL & COMMERCIAL BANK OF CHINA (ICBC) Zhejiang Provincial Branch', accountNo: '1205240019200409295', swiftCode: 'ICBKCNBJZJP' },
+        { id: 'jiangsu-rural', bankName: 'JIANGSU SUZHOU RURAL COMMERCIAL BANK CO., LTD', accountNo: '0706678981420100395359', swiftCode: 'WJRBCNBWXXX' },
+        { id: 'boc-shenzhen-dongbu', bankName: 'BANK OF CHINA SHENZHEN DONGBU BRANCH', accountNo: '17870060775837651001', swiftCode: 'BKCHCNBJ45A' },
+        { id: 'first-bank-ghana-gip', bankName: 'FIRST BANK OF NIGERIA, GHANA', accountNo: '9990000019924', swiftCode: 'INCEGHACXXX' },
+    ]);
+});

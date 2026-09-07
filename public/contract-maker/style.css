@@ -514,6 +514,21 @@ textarea:focus {
     gap: 6px;
 }
 
+.bank-grid span {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.bank-requirements {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #9ca3af;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
 .signature-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

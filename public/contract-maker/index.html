@@ -151,12 +151,16 @@
                         </div>
                         <div class="field-grid">
                             <label class="field field-wide">
+                                <span>Bank Preset / 银行账户选项</span>
+                                <select id="bank-preset" name="bankPreset"></select>
+                            </label>
+                            <label class="field field-wide">
                                 <span>Beneficiary Bank / 收款银行</span>
                                 <input id="beneficiary-bank" name="beneficiaryBank" type="text" value="JIANGSU SUZHOU RURAL COMMERCIAL BANK CO., LTD">
                             </label>
                             <label class="field field-wide">
                                 <span>Bank Address / 银行地址</span>
-                                <input id="bank-address" name="bankAddress" type="text" value="NO.1777 SOUTH ZHONGSHAN ROAD, SUZHOU, CHINA">
+                                <textarea id="bank-address" name="bankAddress" rows="2">NO.1777 SOUTH ZHONGSHAN ROAD, SUZHOU, CHINA</textarea>
                             </label>
                             <label class="field">
                                 <span>A/C No. / 账号</span>
@@ -173,6 +177,18 @@
                             <label class="field">
                                 <span>Swift BIC / 中转 Swift</span>
                                 <input id="intermediary-swift" name="intermediarySwift" type="text" value="CITIUS33XXX">
+                            </label>
+                            <label class="field field-wide">
+                                <span>Beneficiary / 收款人</span>
+                                <input id="beneficiary" name="beneficiary" type="text" value="Suzhou Xinfuji Electromechanical Co., Ltd.">
+                            </label>
+                            <label class="field field-wide">
+                                <span>Beneficiary Address / 收款人地址</span>
+                                <textarea id="beneficiary-address" name="beneficiaryAddress" rows="2">Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu 215236, China</textarea>
+                            </label>
+                            <label class="field field-wide">
+                                <span>Additional Requirements / 附加付款要求</span>
+                                <textarea id="bank-additional-requirements" name="bankAdditionalRequirements" rows="4"></textarea>
                             </label>
                         </div>
                     </section>
@@ -266,9 +282,10 @@
                             <p><strong>Swift Code:</strong> <span id="preview-swift"></span></p>
                             <p><strong>Intermediary Bank:</strong> <span id="preview-intermediary"></span></p>
                             <p><strong>Swift BIC:</strong> <span id="preview-intermediary-swift"></span></p>
-                            <p><strong>Beneficiary:</strong> Suzhou Xinfuji Electromechanical Co., Ltd.</p>
-                            <p><strong>Add of Beneficiary:</strong> Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China</p>
+                            <p><strong>Beneficiary:</strong> <span id="preview-beneficiary"></span></p>
+                            <p><strong>Add of Beneficiary:</strong> <span id="preview-beneficiary-address"></span></p>
                         </div>
+                        <p class="bank-requirements" id="preview-bank-requirements" hidden></p>
                     </section>
 
                     <footer class="signature-grid">

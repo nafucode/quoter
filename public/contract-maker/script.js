@@ -13,12 +13,45 @@ const quoteSelect = document.getElementById('quote-select');
 const includeSpecificationInput = document.getElementById('include-specification');
 const quoteHelper = document.getElementById('quote-helper');
 const importQuoteButton = document.getElementById('import-quote-button');
+const bankPresetSelect = document.getElementById('bank-preset');
 
 const RECORDS_KEY = 'xinfuji_contract_records';
 const QUOTATION_KEY = 'nafu_trade_quotations';
 const QUOTER_HISTORY_KEY = 'quoter_history';
 const CURRENT_CONTRACT_QUOTE_KEY = 'quoter_current_contract_quote';
 let quotationHistory = [];
+
+const bankPresets = [
+    { id: 'wema', label: 'Wema bank', bankName: 'Wema bank', accountNo: '7949338275', swiftCode: '', bankAddress: '54 Marina, Lagos Island, Lagos, Lagos, 101241, Nigeria', intermediaryBank: '', intermediarySwift: '', beneficiary: 'Suzhou Xinfuji Electromechanical Co., Ltd.', beneficiaryAddress: 'Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China.', additionalRequirements: '' },
+    { id: 'chouzhou', label: 'Zhejiang Chouzhou Commercial Bank', bankName: 'ZHEJIANG CHOUZHOU COMMERCIAL BANK CO.,LTD', accountNo: '13601002010090003861', swiftCode: 'CZCBCN2X', bankAddress: 'No.586 Fenghuang Road, Wuxing District, Huzhou City, Zhejiang Province, China', intermediaryBank: 'JPMORGAN Chase Bank, New York', intermediarySwift: 'CHASUS33', beneficiary: 'Suzhou Xinfuji Electromechanical Co., Ltd.', beneficiaryAddress: 'Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China', additionalRequirements: '' },
+    { id: 'icbc', label: 'ICBC Zhejiang Provincial Branch', bankName: 'INDUSTRIAL & COMMERCIAL BANK OF CHINA (ICBC) Zhejiang Provincial Branch', accountNo: '1205240019200409295', swiftCode: 'ICBKCNBJZJP', bankAddress: 'No. 150 Zhonghe Middle Road, Hangzhou City, Zhejiang Province, China', intermediaryBank: '', intermediarySwift: '', beneficiary: 'SUZHOU XINFUJI ELECTROMECHANICAL CO., LTD', beneficiaryAddress: 'DADE INDUSTRIAL ZONE, TAOYUAN TOWN, WUJIANG DISTRICT', additionalRequirements: '' },
+    { id: 'jiangsu-rural', label: 'Jiangsu Suzhou Rural Commercial Bank', bankName: 'JIANGSU SUZHOU RURAL COMMERCIAL BANK CO., LTD', accountNo: '0706678981420100395359', swiftCode: 'WJRBCNBWXXX', bankAddress: 'NO.1777 SOUTH ZHONGSHAN ROAD, SUZHOU, CHINA', intermediaryBank: 'CITIBANK N.A. NEW YORK', intermediarySwift: 'CITIUS33XXX', beneficiary: 'Suzhou Xinfuji Electromechanical Co., Ltd.', beneficiaryAddress: 'Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu 215236, China', additionalRequirements: '' },
+    { id: 'boc-shenzhen-dongbu', label: 'Bank of China Shenzhen Dongbu', bankName: 'BANK OF CHINA SHENZHEN DONGBU BRANCH', accountNo: '17870060775837651001', swiftCode: 'BKCHCNBJ45A', bankAddress: 'NO.74 JINRONG ROAD, SHATOUJIAO, YANTIAN DISTRICT, SHENZHEN, CHINA', intermediaryBank: '', intermediarySwift: '', beneficiary: 'Suzhou Xinfuji Electromechanical Co., Ltd.', beneficiaryAddress: 'Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China', additionalRequirements: 'Country/Region: China\nPayment method: Only accept payments via SWIFT/CIPS.\nMemo/message: Please include the following memo/message to receiver when making a payment: [Buyer Name] [Invoice/Contract Number] [Product]' },
+    { id: 'first-bank-ghana-gip', label: 'GHS GIP - First Bank Ghana', bankName: 'FIRST BANK OF NIGERIA, GHANA', accountNo: '9990000019924', swiftCode: 'INCEGHACXXX', bankAddress: 'FIRST BANK GHANA LTD, NO. 16, 678 NEAR GOLDEN TULIP, HOTEL, LIBERA PMB ACCRA NORTH, ACCRA, Ghana', intermediaryBank: '', intermediarySwift: '', beneficiary: 'Suzhou Xinfuji Electromechanical Co., Ltd.', beneficiaryAddress: 'Country/Region: Ghana\nType of Account: Business Account\nBankCode: 300319\nBranchName: RING ROAD CENTRAL', additionalRequirements: 'Hello esteemed customer,\nFor the payment of goods, please make a GIP Payment of:\nAmount: _______\nTo the following account:\nAccount Number: 9990000019924\nAccount Name: Suzhou Xinfuji Electromechanical Co., Ltd.\nBank Name: FIRST BANK OF NIGERIA, GHANA\nBank Address: FIRST BANK GHANA LTD, NO. 16, 678 NEAR GOLDEN TULIP, HOTEL, LIBERA PMB ACCRA NORTH, ACCRA, Ghana\nCountry/Region: Ghana\nType of Account: Business Account\nPayment message: Please include the following memo/message to receiver when making a payment: [Buyer Name] [Invoice/Contract Number] [Product]\nSWIFT/BIC Code: INCEGHACXXX\nBankCode: 300319\nBranchName: RING ROAD CENTRAL\nTips:\n- This collection account only supports the collection of GHS; [SWIFT/international TT is not supported by this account]\n- The following memo/message should be included to the receiver when making a payment:\n- [Buyer Name][Invoice/Contract Number][Product]' }
+];
+
+function renderBankPresets(selectedId = 'jiangsu-rural') {
+    bankPresetSelect.innerHTML = [
+        '<option value="">Custom / 手动填写</option>',
+        ...bankPresets.map((bank) => `<option value="${bank.id}">${escapeHtml(bank.label)}</option>`)
+    ].join('');
+    bankPresetSelect.value = bankPresets.some((bank) => bank.id === selectedId) ? selectedId : '';
+}
+
+function applyBankPreset(presetId) {
+    const preset = bankPresets.find((bank) => bank.id === presetId);
+    if (!preset) return;
+    document.getElementById('beneficiary-bank').value = preset.bankName;
+    document.getElementById('bank-address').value = preset.bankAddress;
+    document.getElementById('account-number').value = preset.accountNo;
+    document.getElementById('swift-code').value = preset.swiftCode;
+    document.getElementById('intermediary-bank').value = preset.intermediaryBank;
+    document.getElementById('intermediary-swift').value = preset.intermediarySwift;
+    document.getElementById('beneficiary').value = preset.beneficiary;
+    document.getElementById('beneficiary-address').value = preset.beneficiaryAddress;
+    document.getElementById('bank-additional-requirements').value = preset.additionalRequirements;
+    updatePreview();
+}
 
 const defaultPartList = [
     { type: 'section', label: '1. Control system', brand: '', origin: '' },
@@ -682,12 +715,16 @@ function collectFormData() {
         paymentTerms: textValue('payment-terms'),
         priceNote: textValue('price-note'),
         attachments: textValue('attachments'),
+        bankPreset: bankPresetSelect.value,
         beneficiaryBank: textValue('beneficiary-bank'),
         bankAddress: textValue('bank-address'),
         accountNumber: textValue('account-number'),
         swiftCode: textValue('swift-code'),
         intermediaryBank: textValue('intermediary-bank'),
         intermediarySwift: textValue('intermediary-swift'),
+        beneficiary: textValue('beneficiary'),
+        beneficiaryAddress: textValue('beneficiary-address'),
+        bankAdditionalRequirements: textValue('bank-additional-requirements'),
         includeSpecification: includeSpecificationInput.checked,
         selectedQuotationId: quoteSelect.value,
         lineItems: getLineItems(),
@@ -714,12 +751,17 @@ function applyRecord(record) {
     document.getElementById('payment-terms').value = record.paymentTerms || '';
     document.getElementById('price-note').value = record.priceNote || '';
     document.getElementById('attachments').value = record.attachments || '';
+    const matchingBank = bankPresets.find((bank) => bank.bankName === record.beneficiaryBank);
+    renderBankPresets(record.bankPreset || matchingBank?.id || '');
     document.getElementById('beneficiary-bank').value = record.beneficiaryBank || '';
     document.getElementById('bank-address').value = record.bankAddress || '';
     document.getElementById('account-number').value = record.accountNumber || '';
     document.getElementById('swift-code').value = record.swiftCode || '';
     document.getElementById('intermediary-bank').value = record.intermediaryBank || '';
     document.getElementById('intermediary-swift').value = record.intermediarySwift || '';
+    document.getElementById('beneficiary').value = record.beneficiary || 'Suzhou Xinfuji Electromechanical Co., Ltd.';
+    document.getElementById('beneficiary-address').value = record.beneficiaryAddress || 'Dade Industrial Zone, Taoyuan Town, Wujiang District, Suzhou, Jiangsu, China';
+    document.getElementById('bank-additional-requirements').value = record.bankAdditionalRequirements || '';
     renderQuoteSelect(record.selectedQuotationId || '');
     includeSpecificationInput.checked = record.includeSpecification !== false && Boolean(quoteSelect.value);
     replaceLineItems(record.lineItems);
@@ -990,11 +1032,17 @@ function updatePreview() {
     setText('preview-swift', data.swiftCode);
     setText('preview-intermediary', data.intermediaryBank);
     setText('preview-intermediary-swift', data.intermediarySwift);
+    setText('preview-beneficiary', data.beneficiary);
+    setText('preview-beneficiary-address', data.beneficiaryAddress);
+    setText('preview-bank-requirements', data.bankAdditionalRequirements);
+    document.getElementById('preview-bank-requirements').hidden = !data.bankAdditionalRequirements;
     renderSpecificationAppendix(selectedQuotation());
 }
 
 function resetForm() {
     form.reset();
+    renderBankPresets('jiangsu-rural');
+    applyBankPreset('jiangsu-rural');
     document.getElementById('contract-date').value = todayValue();
     document.getElementById('contract-number').value = defaultContractNumber();
     replaceLineItems(defaultLines);
@@ -1083,6 +1131,14 @@ quoteSelect.addEventListener('change', () => {
     updatePreview();
 });
 includeSpecificationInput.addEventListener('change', updatePreview);
+bankPresetSelect.addEventListener('change', () => {
+    if (bankPresetSelect.value) applyBankPreset(bankPresetSelect.value);
+});
+['beneficiary-bank', 'bank-address', 'account-number', 'swift-code', 'intermediary-bank', 'intermediary-swift', 'beneficiary', 'beneficiary-address', 'bank-additional-requirements'].forEach((id) => {
+    document.getElementById(id).addEventListener('input', () => {
+        bankPresetSelect.value = '';
+    });
+});
 importQuoteButton.addEventListener('click', () => {
     const quote = quotationHistory.find((item) => item.id === quoteSelect.value);
     if (!quote) return;
@@ -1110,6 +1166,7 @@ recordsList.addEventListener('click', (event) => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    renderBankPresets();
     loadQuotationHistory();
     document.getElementById('contract-date').value = todayValue();
     document.getElementById('contract-number').value = defaultContractNumber();
