@@ -71,6 +71,8 @@
                                 <span>Buyer Name / 买方名称</span>
                                 <input id="buyer-name" name="buyerName" type="text" value="HAMER ENGINEERING AND TRADING ONE MEMBER PLC">
                             </label>
+                            <label class="field"><span>Country / 国家</span><input id="buyer-country" type="text"></label>
+                            <label class="field"><span>Tax ID / RUC / 税号</span><input id="buyer-tax-id" type="text"></label>
                             <label class="field field-wide">
                                 <span>Buyer Address / 买方地址</span>
                                 <input id="buyer-address" name="buyerAddress" type="text" value="Addis Ababa, Ethiopia">
@@ -92,6 +94,10 @@
                             <button class="small-button" type="button" id="add-line-button">Add Item / 新增项目</button>
                         </div>
                         <div class="line-items" id="line-items"></div>
+                        <div class="field-grid">
+                            <label class="field"><span>Equivalent Currency / 折算币种</span><input id="target-currency" type="text"></label>
+                            <label class="field"><span>Exchange Rate / 汇率（1 合同币种 =）</span><input id="exchange-rate" type="number" min="0" step="any"></label>
+                        </div>
                     </section>
 
                     <section class="form-section">
@@ -120,7 +126,7 @@
 
                     <section class="form-section">
                         <div class="section-head section-head-inline">
-                            <h2>Specification Attachment / 规格附件</h2>
+                            <h2>Import Quotation / 从报价导入</h2>
                             <button class="small-button" type="button" id="refresh-quotes-button">Refresh / 刷新</button>
                         </div>
                         <div class="field-grid">
@@ -128,6 +134,7 @@
                                 <span>Historical Quotation / 历史报价</span>
                                 <select id="quote-select" name="quoteSelect"></select>
                             </label>
+                            <button class="small-button" type="button" id="import-quote-button">Import from Quotation / 从报价导入</button>
                             <label class="check-field field-wide">
                                 <input id="include-specification" name="includeSpecification" type="checkbox" checked>
                                 <span>Attach selected quotation specs after contract / 将所选报价规格附在合同后面</span>
@@ -212,6 +219,7 @@
                         </div>
                         <div>
                             <p><strong>THE BUYERS:</strong> <span id="preview-buyer-name"></span></p>
+                            <p id="preview-buyer-extra"></p>
                             <p><strong>ADDRESS:</strong> <span id="preview-buyer-address"></span></p>
                             <p><strong>Tel:</strong> <span id="preview-buyer-tel"></span> &nbsp;&nbsp; <strong>Email:</strong> <span id="preview-buyer-email"></span></p>
                         </div>
@@ -242,6 +250,7 @@
                     <section class="total-value">
                         <p><strong id="preview-total-local-label">总值（大写）：</strong><span id="preview-total-local"></span></p>
                         <p><strong>Total Value:</strong> <span id="preview-total-words"></span></p>
+                        <p id="preview-equivalent" hidden></p>
                     </section>
 
                     <section class="clauses" id="preview-clauses"></section>

@@ -11,10 +11,12 @@ const refreshQuotesButton = document.getElementById('refresh-quotes-button');
 const quoteSelect = document.getElementById('quote-select');
 const includeSpecificationInput = document.getElementById('include-specification');
 const quoteHelper = document.getElementById('quote-helper');
+const importQuoteButton = document.getElementById('import-quote-button');
 
 const RECORDS_KEY = 'xinfuji_contract_records';
 const QUOTATION_KEY = 'nafu_trade_quotations';
 const QUOTER_HISTORY_KEY = 'quoter_history';
+const CURRENT_CONTRACT_QUOTE_KEY = 'quoter_current_contract_quote';
 let quotationHistory = [];
 
 const defaultPartList = [
@@ -336,7 +338,7 @@ function normalizeQuotation(quote = {}, index = 0) {
         issueDate: quote.issueDate || quote.quotationDate || quote.savedAt || quote.createdAt || '',
         customerName: customer.companyName || quote.companyName || quote.customerName || '',
         projectName: quote.projectName || quote.state?.projectName || '',
-        currency: quote.currency || quote.targetCurrency || quote.state?.targetCurrency || 'USD',
+        currency: stateElevators.length ? 'USD' : (quote.currency || 'USD'),
         totalAmount,
         items,
         elevators: stateElevators,
@@ -354,14 +356,21 @@ function dedupeQuotations(quotes) {
     });
 }
 
+function currentQuoteDraft() {
+    const draft = readJsonStorage(CURRENT_CONTRACT_QUOTE_KEY, null);
+    return draft && draft.state?.elevators ? draft : null;
+}
+
 function loadQuotationHistory() {
+    const currentQuote = currentQuoteDraft();
     const quoterHistory = readJsonStorage(QUOTER_HISTORY_KEY, []);
     const legacyHistory = readJsonStorage(QUOTATION_KEY, []);
-    quotationHistory = dedupeQuotations([...quoterHistory, ...legacyHistory].map(normalizeQuotation));
+    quotationHistory = dedupeQuotations([currentQuote, ...quoterHistory, ...legacyHistory].filter(Boolean).map(normalizeQuotation));
     renderQuoteSelect();
 }
 
 function renderQuoteSelect(selectedId = quoteSelect.value) {
+    importQuoteButton.disabled = !quotationHistory.length;
     if (!quotationHistory.length) {
         quoteSelect.innerHTML = '<option value="">No saved quotations found / 未找到历史报价</option>';
         quoteSelect.disabled = true;
@@ -606,7 +615,7 @@ function createLineItem(line = { artNo: '', description: '', unit: '台 Unit', q
         </label>
         <label class="field line-description">
             <span>Description / 名称及规格</span>
-            <input class="line-description-input" type="text" value="${escapeHtml(line.description)}">
+            <textarea class="line-description-input" rows="4">${escapeHtml(line.description)}</textarea>
         </label>
         <label class="field">
             <span>Unit / 单位</span>
@@ -664,6 +673,10 @@ function collectFormData() {
         buyerAddress: textValue('buyer-address'),
         buyerTel: textValue('buyer-tel'),
         buyerEmail: textValue('buyer-email'),
+        buyerCountry: textValue('buyer-country'),
+        buyerTaxId: textValue('buyer-tax-id'),
+        targetCurrency: textValue('target-currency'),
+        exchangeRate: numberValue('exchange-rate'),
         shipmentDays: numberValue('shipment-days'),
         paymentTerms: textValue('payment-terms'),
         priceNote: textValue('price-note'),
@@ -692,6 +705,10 @@ function applyRecord(record) {
     document.getElementById('buyer-address').value = record.buyerAddress || '';
     document.getElementById('buyer-tel').value = record.buyerTel || '';
     document.getElementById('buyer-email').value = record.buyerEmail || '';
+    document.getElementById('buyer-country').value = record.buyerCountry || '';
+    document.getElementById('buyer-tax-id').value = record.buyerTaxId || '';
+    document.getElementById('target-currency').value = record.targetCurrency || '';
+    document.getElementById('exchange-rate').value = record.exchangeRate || '';
     document.getElementById('shipment-days').value = record.shipmentDays || 45;
     document.getElementById('payment-terms').value = record.paymentTerms || '';
     document.getElementById('price-note').value = record.priceNote || '';
@@ -706,6 +723,89 @@ function applyRecord(record) {
     includeSpecificationInput.checked = record.includeSpecification !== false && Boolean(quoteSelect.value);
     replaceLineItems(record.lineItems);
     updatePreview();
+}
+
+function dateOnly(value) {
+    if (!value) return todayValue();
+    return String(value).slice(0, 10);
+}
+
+function elevatorLineItem(elevator = {}, item = {}, index = 0) {
+    const description = [
+        compactValue(elevator.description || item.description || item.name || 'Elevator'),
+        compactValue(elevator.type || item.model),
+        compactValue(elevator.capacity) ? `${compactValue(elevator.capacity)}KG` : '',
+        compactValue(elevator.speed) ? `${compactValue(elevator.speed)}m/s` : '',
+        compactValue(elevator.floorsStops),
+        compactValue(elevator.machineRoom)
+    ].filter(Boolean).join('\n');
+    const quantity = Number(elevator.qty ?? elevator.quantity ?? item.quantity ?? 1);
+    const unitPrice = Number(elevator.unitPrice ?? item.unitPrice ?? 0);
+    return {
+        artNo: `L${index + 1}`,
+        description,
+        unit: '台 Unit',
+        quantity,
+        price: unitPrice
+    };
+}
+
+function quotationContractRecord(quote) {
+    const state = quote.raw?.state || {};
+    const elevators = quote.elevators.length ? quote.elevators : [];
+    const lineItems = (elevators.length ? elevators : quote.items).map((elevator, index) => {
+        const sourceElevator = elevators.length ? elevator : {};
+        const sourceItem = quote.items[index] || quote.items[0] || {};
+        return elevatorLineItem(sourceElevator, sourceItem, index);
+    });
+    const customer = quote.raw.customerSnapshot || {};
+    const destination = state.freightDestination || '';
+    const pickup = state.quotationType === 'EXW' && (!destination ||
+        ['SHANGHAI PORT', 'e.g., Port of Shanghai', 'Pickup from factory arranged by the customer. 客户安排工厂自提。'].includes(destination));
+    for (const [key, label] of [['shaftFrame', 'Shaft frame'], ['temperedGlass', 'Tempered glass']]) {
+        const item = state[key];
+        if (item?.enabled) lineItems.push({ artNo: `A${lineItems.length + 1}`, description: item.text || label, unit: 'Set', quantity: Number(item.qty ?? 1), price: Number(item.price ?? 0) });
+    }
+    if (!pickup && Number(state.freightCost)) {
+        lineItems.push({ artNo: 'F', description: `Local fee and Freight from factory to ${destination}`, unit: 'Lot', quantity: 1, price: Number(state.freightCost) });
+    }
+    const currency = currencySettings[quote.currency] ? quote.currency : 'USD';
+    const contractDate = todayValue();
+
+    return {
+        contractNumber: defaultContractNumber(contractDate),
+        contractDate,
+        signedAt: 'SUZHOU, CHINA',
+        languagePair: 'zh-en',
+        tradeTerm: [state.quotationType || quote.raw.quotationType, pickup ? 'Factory pickup' : destination].filter(Boolean).join(' ') || '',
+        currency,
+        buyerName: quote.customerName || state.companyName || '',
+        buyerAddress: customer.address || state.buyerAddress || '',
+        buyerTel: customer.phone || customer.tel || state.buyerTel || '',
+        buyerEmail: customer.email || state.buyerEmail || '',
+        buyerCountry: state.country || quote.raw.country || customer.country || '',
+        buyerTaxId: state.ruc || quote.raw.ruc || customer.ruc || '',
+        shipmentDays: Number(state.deliveryDays ?? 45),
+        paymentTerms: state.paymentTerm || quote.raw.paymentTerm || '',
+        priceNote: [quote.quotationNo ? `Based on quotation ${quote.quotationNo}.` : '', quote.projectName ? `Project: ${quote.projectName}` : '', state.warrantyText ? `Warranty: ${state.warrantyText}` : '', state.quoteRemarks].filter(Boolean).join('\n'),
+        exchangeRate: elevators.length ? Number(state.exchangeRate || 0) : 0,
+        targetCurrency: elevators.length ? (state.targetCurrency || '') : '',
+        attachments: 'Specification',
+        includeSpecification: true,
+        selectedQuotationId: quote.id,
+        lineItems: lineItems.length ? lineItems : defaultLines
+    };
+}
+
+function applyCurrentQuoteFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('from') !== 'quote') return false;
+    const draft = currentQuoteDraft();
+    if (!draft) return false;
+    const quote = quotationHistory.find((item) => item.raw === draft || item.raw?.source === 'current-quote') || normalizeQuotation(draft);
+    applyRecord({ ...collectFormData(), ...quotationContractRecord(quote) });
+    quoteHelper.textContent = '已从当前报价器内容自动生成合同明细，并附加 Specification。';
+    return true;
 }
 
 function readRecords() {
@@ -853,6 +953,13 @@ function updatePreview() {
     setText('preview-buyer-address', data.buyerAddress || ' ');
     setText('preview-buyer-tel', data.buyerTel || ' ');
     setText('preview-buyer-email', data.buyerEmail || ' ');
+    const buyerExtra = [data.buyerCountry ? `Country: ${data.buyerCountry}` : '', data.buyerTaxId ? `Tax ID / RUC: ${data.buyerTaxId}` : ''].filter(Boolean).join(' · ');
+    setText('preview-buyer-extra', buyerExtra);
+    document.getElementById('preview-buyer-extra').hidden = !buyerExtra;
+    const equivalent = data.targetCurrency && data.exchangeRate > 0
+        ? `${data.targetCurrency} ${(total * data.exchangeRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (1 ${data.currency} = ${data.exchangeRate} ${data.targetCurrency})` : '';
+    setText('preview-equivalent', equivalent);
+    document.getElementById('preview-equivalent').hidden = !equivalent;
     setText('preview-party-note', partyNotice[russianContract ? 'ru-zh-en' : 'zh-en']);
     setText('preview-total-label', `TOTAL / ${data.tradeTerm}`);
     setText('preview-total', formatMoney(total));
@@ -922,10 +1029,17 @@ refreshQuotesButton.addEventListener('click', () => {
     updatePreview();
 });
 quoteSelect.addEventListener('change', () => {
+    importQuoteButton.disabled = !quoteSelect.value;
     includeSpecificationInput.checked = Boolean(quoteSelect.value);
     updatePreview();
 });
 includeSpecificationInput.addEventListener('change', updatePreview);
+importQuoteButton.addEventListener('click', () => {
+    const quote = quotationHistory.find((item) => item.id === quoteSelect.value);
+    if (!quote) return;
+    applyRecord({ ...collectFormData(), ...quotationContractRecord(quote) });
+    quoteHelper.textContent = '已导入货物、费用、客户资料及条款。请核对并补齐买方地址、联系方式和签约信息。';
+});
 
 recordsList.addEventListener('click', (event) => {
     const button = event.target.closest('button[data-record-id]');
@@ -951,6 +1065,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('contract-date').value = todayValue();
     document.getElementById('contract-number').value = defaultContractNumber();
     replaceLineItems(defaultLines);
+    applyCurrentQuoteFromUrl();
     updatePreview();
     renderRecords();
 });

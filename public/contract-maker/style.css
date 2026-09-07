@@ -108,6 +108,7 @@ h1 {
 }
 
 .form-section {
+    min-width: 0;
     padding: 12px;
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -139,6 +140,7 @@ h1 {
 }
 
 .field {
+    min-width: 0;
     display: grid;
     gap: 5px;
 }
@@ -182,6 +184,7 @@ h1 {
 input,
 select,
 textarea {
+    min-width: 0;
     width: 100%;
     min-height: 36px;
     border: 1px solid var(--line-strong);
@@ -261,9 +264,14 @@ textarea:focus {
 
 .line-item {
     display: grid;
-    grid-template-columns: 70px minmax(200px, 1fr) 86px 72px 112px 34px;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) 34px;
     gap: 8px;
     align-items: end;
+}
+
+.line-description {
+    grid-column: 1 / -1;
+    grid-row: 1;
 }
 
 .icon-button {
@@ -1054,4 +1062,9 @@ textarea:focus {
         page-break-before: always;
         break-before: page;
     }
+}
+#preview-lines td:nth-child(2),
+#preview-clauses .clause p {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
 }
