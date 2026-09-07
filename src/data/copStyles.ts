@@ -20,6 +20,16 @@ export const copStyles = [
     previewImage: '/cop-styles/带 IC 卡一体式-黑底白字-标配.png',
   },
   {
+    id: 'COP-06',
+    name: '一体式图片机',
+    previewImage: '/cop-styles/一体式图片机.png',
+  },
+  {
+    id: 'COP-07',
+    name: '一体式带 IC 卡 图片机COP',
+    previewImage: '/cop-styles/一体式带 IC 卡 图片机COP.png',
+  },
+  {
     id: 'COP-05',
     name: '医院挂壁式含残操',
     previewImage: '/cop-styles/医院挂壁式含残操.png',
