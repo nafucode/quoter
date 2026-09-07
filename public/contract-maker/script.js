@@ -1089,9 +1089,14 @@ function containedImageSize(image, maxWidth, maxHeight) {
 function wordEffectImageSize(image) {
     const cell = image.closest('.decoration-image');
     if (!cell) return null;
-    if (cell.classList.contains('tall')) return containedImageSize(image, 150, 320);
-    if (cell.classList.contains('medium')) return containedImageSize(image, 150, 180);
-    return containedImageSize(image, 150, 76);
+    if (cell.classList.contains('cabin-cell')) return containedImageSize(image, 188, 330);
+    if (cell.classList.contains('cop-cell')) return containedImageSize(image, 110, 330);
+    if (cell.classList.contains('lop-cell')) return containedImageSize(image, 140, 330);
+    const column = [...cell.parentElement.children].indexOf(cell) % 3;
+    if (cell.classList.contains('medium')) {
+        return containedImageSize(image, column === 2 ? 150 : 188, column === 0 ? 300 : column === 1 ? 220 : 176);
+    }
+    return containedImageSize(image, column === 1 ? 120 : 188, 200);
 }
 
 function waitForImage(image) {
@@ -1174,18 +1179,12 @@ async function exportWord() {
             }
         }));
         const styles = await fetch(new URL('style.css', window.location.href)).then((response) => response.text());
-        const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Sales Contract</title><style>@page { size: A4; margin: 10mm; } body { margin: 0; background: #fff; } ${styles} .word-document .word-decoration-table { width: 100%; border-collapse: collapse; table-layout: fixed; } .word-document .word-decoration-table td { width: 33.33%; border: 1px solid #6b7280; text-align: center; vertical-align: middle; } .word-document .word-decoration-table .decoration-title { height: auto; padding: 5px; background: #f0f0f0; font-weight: 700; } .word-document .word-decoration-table .tall { height: 250pt; } .word-document .word-decoration-table .short { height: 62pt; } .word-document .word-decoration-table .medium { height: 145pt; } .word-document .decoration-image img { position: static !important; inset: auto !important; }</style></head><body><main class="word-document">${paper.outerHTML}</main></body></html>`;
-        const response = await fetch('/api/contract-word', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ html, title: `Sales Contract ${textValue('contract-number')}` })
-        });
-        if (!response.ok) throw new Error(await response.text() || 'Unable to create Word document.');
-        const blob = await response.blob();
+        const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Sales Contract</title><style>@page { size: A4; margin: 10mm; } body { margin: 0; background: #fff; } ${styles} .word-document .word-decoration-table { width: 100%; border-collapse: collapse; table-layout: fixed; } .word-document .word-decoration-table td { width: 33.33%; border: 1px solid #6b7280; text-align: center; vertical-align: middle; } .word-document .word-decoration-table .decoration-title { height: auto; padding: 5px; background: #f0f0f0; font-weight: 700; } .word-document .word-decoration-table .tall { height: 225pt; } .word-document .word-decoration-table .short { height: 110pt; } .word-document .word-decoration-table .medium { height: 190pt; } .word-document .decoration-image img { position: static !important; inset: auto !important; }</style></head><body><main class="word-document">${paper.outerHTML}</main></body></html>`;
+        const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${fileSafeName(`Sales Contract ${textValue('contract-number')}`)}.docx`;
+        link.download = `${fileSafeName(`Sales Contract ${textValue('contract-number')}`)}.doc`;
         document.body.appendChild(link);
         link.click();
         link.remove();
