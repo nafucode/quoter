@@ -88,3 +88,10 @@ test('contract bank presets match the six PI account choices', () => {
         { id: 'first-bank-ghana-gip', bankName: 'FIRST BANK OF NIGERIA, GHANA', accountNo: '9990000019924', swiftCode: 'INCEGHACXXX' },
     ]);
 });
+
+test('Word effect images are proportionally contained inside fixed bounds', () => {
+    const resize = vm.runInContext('(width, height, maxWidth, maxHeight) => containedImageSize({ naturalWidth: width, naturalHeight: height }, maxWidth, maxHeight)', context);
+    assert.deepEqual(JSON.parse(JSON.stringify(resize(274, 1252, 150, 320))), { width: 70, height: 320 });
+    assert.deepEqual(JSON.parse(JSON.stringify(resize(1494, 1525, 150, 320))), { width: 150, height: 153 });
+    assert.deepEqual(JSON.parse(JSON.stringify(resize(512, 512, 150, 76))), { width: 76, height: 76 });
+});

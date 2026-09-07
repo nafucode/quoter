@@ -1076,6 +1076,32 @@ async function imageDataUrl(source) {
     });
 }
 
+function containedImageSize(image, maxWidth, maxHeight) {
+    const width = Number(image.naturalWidth) || maxWidth;
+    const height = Number(image.naturalHeight) || maxHeight;
+    const scale = Math.min(maxWidth / width, maxHeight / height, 1);
+    return {
+        width: Math.max(1, Math.round(width * scale)),
+        height: Math.max(1, Math.round(height * scale))
+    };
+}
+
+function wordEffectImageSize(image) {
+    const cell = image.closest('.decoration-image');
+    if (!cell) return null;
+    if (cell.classList.contains('tall')) return containedImageSize(image, 150, 320);
+    if (cell.classList.contains('medium')) return containedImageSize(image, 150, 180);
+    return containedImageSize(image, 150, 76);
+}
+
+function waitForImage(image) {
+    if (image.complete) return Promise.resolve();
+    return new Promise((resolve) => {
+        image.addEventListener('load', resolve, { once: true });
+        image.addEventListener('error', resolve, { once: true });
+    });
+}
+
 async function exportWord() {
     updatePreview();
     wordButton.disabled = true;
@@ -1084,11 +1110,19 @@ async function exportWord() {
 
     try {
         const paper = document.getElementById('contract-paper').cloneNode(true);
-        await Promise.all([...paper.querySelectorAll('img')].map(async (img) => {
+        const sourceImages = [...document.getElementById('contract-paper').querySelectorAll('img')];
+        await Promise.all([...paper.querySelectorAll('img')].map(async (img, index) => {
+            await waitForImage(sourceImages[index]);
+            const effectSize = wordEffectImageSize(sourceImages[index]);
             img.src = await imageDataUrl(new URL(img.getAttribute('src'), window.location.href).href);
+            if (effectSize) {
+                img.width = effectSize.width;
+                img.height = effectSize.height;
+                img.style.cssText = `position:static;width:${effectSize.width}px;height:${effectSize.height}px;max-width:${effectSize.width}px;max-height:${effectSize.height}px;object-fit:contain;`;
+            }
         }));
         const styles = await fetch(new URL('style.css', window.location.href)).then((response) => response.text());
-        const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Sales Contract</title><style>@page { size: A4; margin: 10mm; } body { margin: 0; background: #fff; } ${styles}</style></head><body><main class="word-document">${paper.outerHTML}</main></body></html>`;
+        const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Sales Contract</title><style>@page { size: A4; margin: 10mm; } body { margin: 0; background: #fff; } ${styles} .word-document .decoration-image img { position: static !important; inset: auto !important; }</style></head><body><main class="word-document">${paper.outerHTML}</main></body></html>`;
         const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
