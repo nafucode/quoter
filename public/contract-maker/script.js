@@ -1102,6 +1102,56 @@ function waitForImage(image) {
     });
 }
 
+function convertDecorationGridsToWordTables(paper) {
+    paper.querySelectorAll('.decoration-grid').forEach((grid) => {
+        const page = grid.closest('.decoration-page');
+        const heading = page?.querySelector('h3');
+        const note = page?.querySelector('.decoration-note');
+        if (heading) heading.setAttribute('align', 'center');
+        if (note) note.setAttribute('align', 'center');
+        const table = document.createElement('table');
+        table.className = 'word-decoration-table';
+        table.setAttribute('border', '1');
+        table.setAttribute('cellspacing', '0');
+        table.setAttribute('cellpadding', '4');
+        table.setAttribute('width', '100%');
+        const cells = [...grid.children];
+
+        for (let index = 0; index < cells.length; index += 3) {
+            const row = document.createElement('tr');
+            cells.slice(index, index + 3).forEach((sourceCell) => {
+                const cell = document.createElement('td');
+                cell.className = sourceCell.className;
+                cell.setAttribute('width', '33.33%');
+                cell.setAttribute('align', 'center');
+                cell.setAttribute('valign', 'middle');
+                cell.style.textAlign = 'center';
+                cell.style.verticalAlign = 'middle';
+                if (sourceCell.classList.contains('decoration-title')) {
+                    cell.setAttribute('bgcolor', '#F0F0F0');
+                }
+                const content = document.createElement('p');
+                content.setAttribute('align', 'center');
+                content.style.cssText = 'text-align:center;margin:0;';
+                while (sourceCell.firstChild) content.appendChild(sourceCell.firstChild);
+                cell.appendChild(content);
+                row.appendChild(cell);
+            });
+            table.appendChild(row);
+        }
+        grid.replaceWith(table);
+    });
+}
+
+function insertWordPageBreaks(paper) {
+    paper.querySelectorAll('.quote-doc-page').forEach((page) => {
+        const pageBreak = document.createElement('div');
+        pageBreak.className = 'page-break';
+        pageBreak.style.pageBreakAfter = 'always';
+        page.before(pageBreak);
+    });
+}
+
 async function exportWord() {
     updatePreview();
     wordButton.disabled = true;
@@ -1110,6 +1160,8 @@ async function exportWord() {
 
     try {
         const paper = document.getElementById('contract-paper').cloneNode(true);
+        insertWordPageBreaks(paper);
+        convertDecorationGridsToWordTables(paper);
         const sourceImages = [...document.getElementById('contract-paper').querySelectorAll('img')];
         await Promise.all([...paper.querySelectorAll('img')].map(async (img, index) => {
             await waitForImage(sourceImages[index]);
@@ -1122,12 +1174,18 @@ async function exportWord() {
             }
         }));
         const styles = await fetch(new URL('style.css', window.location.href)).then((response) => response.text());
-        const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Sales Contract</title><style>@page { size: A4; margin: 10mm; } body { margin: 0; background: #fff; } ${styles} .word-document .decoration-image img { position: static !important; inset: auto !important; }</style></head><body><main class="word-document">${paper.outerHTML}</main></body></html>`;
-        const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
+        const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Sales Contract</title><style>@page { size: A4; margin: 10mm; } body { margin: 0; background: #fff; } ${styles} .word-document .word-decoration-table { width: 100%; border-collapse: collapse; table-layout: fixed; } .word-document .word-decoration-table td { width: 33.33%; border: 1px solid #6b7280; text-align: center; vertical-align: middle; } .word-document .word-decoration-table .decoration-title { height: auto; padding: 5px; background: #f0f0f0; font-weight: 700; } .word-document .word-decoration-table .tall { height: 250pt; } .word-document .word-decoration-table .short { height: 62pt; } .word-document .word-decoration-table .medium { height: 145pt; } .word-document .decoration-image img { position: static !important; inset: auto !important; }</style></head><body><main class="word-document">${paper.outerHTML}</main></body></html>`;
+        const response = await fetch('/api/contract-word', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ html, title: `Sales Contract ${textValue('contract-number')}` })
+        });
+        if (!response.ok) throw new Error(await response.text() || 'Unable to create Word document.');
+        const blob = await response.blob();
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${fileSafeName(`Sales Contract ${textValue('contract-number')}`)}.doc`;
+        link.download = `${fileSafeName(`Sales Contract ${textValue('contract-number')}`)}.docx`;
         document.body.appendChild(link);
         link.click();
         link.remove();
