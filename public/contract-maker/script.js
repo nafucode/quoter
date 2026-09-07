@@ -912,6 +912,17 @@ function saveRecord() {
 
 function buildClauses(data) {
     const russianContract = isRussianContract(data.languagePair);
+    const versionClause = russianContract
+        ? {
+            ru: '16. Языки: настоящий договор составлен на русском, китайском и английском языках. Все языковые версии имеют одинаковую юридическую силу; при расхождениях преимущественную силу имеет китайская версия.',
+            zh: '16. 文字：本合同以俄文、中文和英文三种文字订立，各语言版本具有同等法律效力；如有歧义，以中文版本为准。',
+            en: '16. Languages: This contract is executed in Russian, Chinese and English. All language versions are equally valid; in case of discrepancy, the Chinese version shall prevail.'
+        }
+        : {
+            ru: '',
+            zh: '16. 文字：本合同以中文和英文两种文字订立，两种文字具有同等法律效力；如有歧义，以中文版本为准。',
+            en: '16. Languages: This contract is executed in Chinese and English. Both language versions are equally valid; in case of discrepancy, the Chinese version shall prevail.'
+        };
 
     const clauses = [
         { ru: `2. Условия поставки: ${data.tradeTerm}`, zh: `2. 成交价格术语：${data.tradeTerm}`, en: `2. Terms: ${data.tradeTerm}` },
@@ -928,7 +939,7 @@ function buildClauses(data) {
         { ru: '13. Форс-мажор: продавец не несет ответственности за частичное или полное неисполнение договора вследствие форс-мажора, но обязан своевременно уведомить покупателя.', zh: '13. 人力不可抗拒：因不可抗力造成不能履约，卖方不承担责任，但应及时通知买方。', en: '13. Force Majeure: The sellers shall not hold responsibility for partial or total non-performance due to Force Majeure, but shall advise the buyers in time.' },
         { ru: '14. Разрешение споров: споры передаются в CIETAC для арбитража в Шанхае, Китай. Арбитражное решение является окончательным и обязательным для обеих сторон.', zh: '14. 争议解决：提交中国国际经济贸易仲裁委员会在中国上海仲裁，裁决为终局并对双方有约束力。', en: '14. Disputes settlement: Disputes shall be submitted to CIETAC for arbitration in Shanghai, China. The arbitral award is final and binding upon both parties.' },
         { ru: '15. Применимое право: настоящий договор регулируется законодательством Китайской Народной Республики и, где применимо, Конвенцией ООН о договорах международной купли-продажи товаров.', zh: '15. 法律适用：本合同适用中华人民共和国法律，并在适用时适用《联合国国际货物销售公约》。', en: '15. Law application: This contract shall be governed by the law of the People’s Republic of China and, where applicable, the United Nations Convention on Contracts for the International Sale of Goods.' },
-        { ru: '16. Языки: настоящий договор составлен на русском, китайском и английском языках. Все языковые версии имеют одинаковую юридическую силу; при расхождениях преимущественную силу имеет китайская версия.', zh: '16. 文字：本合同俄、中、英三种文字具有同等法律效力，在文字解释上若有异议，以中文解释为准。', en: '16. Versions: This contract is made out in Russian, Chinese and English, all versions being equally effective. In case of discrepancy, the Chinese version shall prevail.' },
+        versionClause,
         { ru: '17. Дополнительные условия: при противоречии между основными и дополнительными условиями преимущественную силу имеют дополнительные условия.', zh: '17. 附加条款：本合同上述条款与附加条款有抵触时，以附加条款为准。', en: '17. Additional Clauses: Conflicts between contract clauses and additional clauses, if any, are subject to the additional clauses.' },
         { ru: '18. Настоящий договор составлен в 2 экземплярах и вступает в силу с даты подписания / проставления печатей обеими сторонами.', zh: '18. 本合同共贰份，自双方代表签字（盖章）之日起生效。', en: '18. This contract is in 2 copies, effective since being signed / sealed by both parties.' },
         { ru: `19. Технические характеристики см. в приложениях. Все приложения являются неотъемлемой частью настоящего договора. ${data.attachments}`, zh: '19. 有关的技术规格和参数见附件，所有附件均为本合同不可分割的部分。', en: `19. ${data.attachments}` }
@@ -1250,6 +1261,24 @@ function applyWordTypography(paper) {
         element.style.fontSize = '11pt';
         element.style.lineHeight = '1.25';
     });
+    const bankBlock = paper.querySelector('.bank-block');
+    if (bankBlock) {
+        bankBlock.style.cssText = 'margin-top:14pt;padding-top:10pt;border-top:0.75pt solid #4b5563;';
+        const heading = bankBlock.querySelector('h3');
+        if (heading) heading.style.cssText = 'font-size:12pt;line-height:1.25;font-weight:700;margin:0 0 9pt;';
+        bankBlock.querySelectorAll('.bank-grid p').forEach((element) => {
+            element.style.cssText = 'font-size:10pt;line-height:1.35;margin:0 0 9pt;';
+        });
+    }
+    paper.querySelectorAll('.signature-grid td').forEach((cell) => {
+        cell.style.cssText = 'width:50%;vertical-align:top;padding:10pt 24pt 0 0;border:0;';
+    });
+    paper.querySelectorAll('.signature-grid p').forEach((element) => {
+        element.style.cssText = 'font-size:10pt;line-height:1.35;margin:0 0 9pt;';
+    });
+    paper.querySelectorAll('.signature-grid strong').forEach((element) => {
+        element.style.cssText = 'display:block;font-size:10pt;line-height:1.35;margin-top:12pt;';
+    });
 }
 
 async function exportWord() {
@@ -1262,6 +1291,7 @@ async function exportWord() {
         const paper = document.getElementById('contract-paper').cloneNode(true);
         replaceWordGridWithTable(paper.querySelector('.contract-meta'), 3);
         replaceWordGridWithTable(paper.querySelector('.party-block'), 2);
+        replaceWordGridWithTable(paper.querySelector('.signature-grid'), 2);
         insertWordPageBreaks(paper);
         convertDecorationGridsToWordTables(paper);
         applyWordTypography(paper);

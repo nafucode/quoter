@@ -95,3 +95,13 @@ test('Word effect images are proportionally contained inside fixed bounds', () =
     assert.deepEqual(JSON.parse(JSON.stringify(resize(1494, 1525, 150, 320))), { width: 150, height: 153 });
     assert.deepEqual(JSON.parse(JSON.stringify(resize(512, 512, 150, 76))), { width: 76, height: 76 });
 });
+
+test('contract language clause reflects the selected document languages', () => {
+    const clauses = vm.runInContext('(languagePair) => buildClauses({ languagePair, tradeTerm: "FOB", shipmentDays: 45, paymentTerms: "TT", attachments: "Specification" })', context);
+    const bilingual = clauses('zh-en');
+    assert.match(bilingual, /executed in Chinese and English/);
+    assert.doesNotMatch(bilingual, /executed in Russian, Chinese and English/);
+    const trilingual = clauses('ru-zh-en');
+    assert.match(trilingual, /executed in Russian, Chinese and English/);
+    assert.match(trilingual, /составлен на русском, китайском и английском языках/);
+});
