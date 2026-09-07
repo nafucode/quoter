@@ -3,6 +3,7 @@ const lineItemsContainer = document.getElementById('line-items');
 const addLineButton = document.getElementById('add-line-button');
 const resetButton = document.getElementById('reset-button');
 const saveRecordButton = document.getElementById('save-record-button');
+const wordButton = document.getElementById('word-button');
 const pdfButton = document.getElementById('pdf-button');
 const printPreviewButton = document.getElementById('print-preview-button');
 const recordsList = document.getElementById('records-list');
@@ -1010,6 +1011,53 @@ function exportPdf() {
     }, 1000);
 }
 
+function fileSafeName(value) {
+    return String(value || 'Sales Contract').replace(/[/\\?%*:|"<>]/g, '-').trim();
+}
+
+async function imageDataUrl(source) {
+    if (!source || source.startsWith('data:')) return source;
+    const response = await fetch(source);
+    if (!response.ok) throw new Error(`Unable to load image: ${source}`);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+async function exportWord() {
+    updatePreview();
+    wordButton.disabled = true;
+    const originalLabel = wordButton.textContent;
+    wordButton.textContent = 'Preparing... / 生成中...';
+
+    try {
+        const paper = document.getElementById('contract-paper').cloneNode(true);
+        await Promise.all([...paper.querySelectorAll('img')].map(async (img) => {
+            img.src = await imageDataUrl(new URL(img.getAttribute('src'), window.location.href).href);
+        }));
+        const styles = await fetch(new URL('style.css', window.location.href)).then((response) => response.text());
+        const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Sales Contract</title><style>@page { size: A4; margin: 10mm; } body { margin: 0; background: #fff; } ${styles}</style></head><body><main class="word-document">${paper.outerHTML}</main></body></html>`;
+        const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${fileSafeName(`Sales Contract ${textValue('contract-number')}`)}.doc`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+        window.alert(`Word export failed / Word 导出失败：${error.message}`);
+    } finally {
+        wordButton.disabled = false;
+        wordButton.textContent = originalLabel;
+    }
+}
+
 addLineButton.addEventListener('click', () => {
     createLineItem();
     updatePreview();
@@ -1020,6 +1068,7 @@ form.addEventListener('change', updatePreview);
 form.addEventListener('submit', (event) => event.preventDefault());
 resetButton.addEventListener('click', resetForm);
 saveRecordButton.addEventListener('click', saveRecord);
+wordButton.addEventListener('click', exportWord);
 pdfButton.addEventListener('click', exportPdf);
 printPreviewButton.addEventListener('click', exportPdf);
 refreshQuotesButton.addEventListener('click', () => {

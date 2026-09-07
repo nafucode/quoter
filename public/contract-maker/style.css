@@ -73,7 +73,9 @@ h1 {
 
 .topbar-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
+    justify-content: flex-end;
 }
 
 .workspace {
@@ -227,6 +229,17 @@ textarea:focus {
     font-weight: 800;
     font-size: 13px;
     transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.button-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.word-document .preview-toolbar {
+    display: none;
 }
 
 .primary-button {
