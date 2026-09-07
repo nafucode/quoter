@@ -767,11 +767,11 @@ export async function generateWordBlob(state: {
                 ? [
                     valCell(imgs.landingDoor, ce.landingDoor, 188, 300, effCols[0]),
                     valCell(imgs.handrail,   ce.handrail,    188, 220, effCols[1]),
-                    valCell(imgs.copLogo,    ce.copLogo,     188, 220, effCols[2]),
+                    valCell(imgs.copLogo,    ce.copLogo,     150, 176, effCols[2]),
                   ]
                 : [
                     effectCell(imgDataToPara(imgs.landingDoor, 188, 300, ce.landingDoor?.type === 'text' ? ce.landingDoor.value ?? '' : ''), effCols[0] + effCols[1], { colSpan: 2 }),
-                    valCell(imgs.copLogo, ce.copLogo, 188, 220, effCols[2]),
+                    valCell(imgs.copLogo, ce.copLogo, 150, 176, effCols[2]),
                   ],
             }),
           ],
