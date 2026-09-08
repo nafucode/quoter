@@ -68,6 +68,68 @@ const isCargoElevator = (elevator: any) =>
 const cargoAdjustedFeatureText = (text: string, hasCargoElevator: boolean) =>
   hasCargoElevator ? text.replace('Leveling when power failure (ARD) included', 'Leveling when power failure (ARD)') : text;
 
+type ExportKind = 'pdf' | 'word';
+type ExportPreflightIssue = { category: string; message: string };
+
+const hasEffectValue = (value: unknown) => {
+  if (typeof value === 'string') return Boolean(value.trim());
+  if (!value || typeof value !== 'object' || !('value' in value)) return false;
+  return Boolean(String(value.value ?? '').trim());
+};
+
+const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getState>): ExportPreflightIssue[] => {
+  const issues: ExportPreflightIssue[] = [];
+  if (!state.companyName.trim() || state.companyName.trim() === 'Your Company Name') {
+    issues.push({ category: '客户信息', message: '尚未填写正式的客户公司名称。' });
+  }
+  if (!state.country.trim()) {
+    issues.push({ category: '客户信息', message: '尚未选择客户国家。' });
+  }
+  if (state.country === 'Peru' && !state.ruc.trim()) {
+    issues.push({ category: '客户信息', message: '秘鲁客户尚未填写 RUC 税号。' });
+  }
+
+  state.elevators.forEach((elevator, index) => {
+    const label = elevator.title || `电梯 #L${index + 1}`;
+    if (!(Number(elevator.unitPrice) > 0)) {
+      issues.push({ category: '价格', message: `${label} 的单价为空或为 0。` });
+    }
+    const effect = elevator.cabinEffect || {};
+    const missingMainImages = [
+      ['CABIN', effect.cabinImage],
+      ['COP', effect.copImage],
+      ['LOP', effect.lopImage],
+    ].filter(([, value]) => !hasEffectValue(value)).map(([name]) => name);
+    if (missingMainImages.length) {
+      issues.push({ category: '图片', message: `${label} 缺少 ${missingMainImages.join('、')} 效果图。` });
+    }
+    const missingDetailImages = [
+      ['Ceiling', effect.ceiling],
+      ['Button', effect.button],
+      ['Floor', effect.floor],
+      ['Landing Door', effect.landingDoor],
+      ...(elevator.showNoneHandrailInQuote === false ? [] : [['Handrail', effect.handrail]]),
+      ['COP Logo', effect.copLogo],
+    ].filter(([, value]) => !hasEffectValue(value)).map(([name]) => name);
+    if (missingDetailImages.length) {
+      issues.push({ category: '图片', message: `${label} 缺少 ${missingDetailImages.join('、')} 图片或文字选项。` });
+    }
+  });
+
+  const destination = state.freightDestination.trim();
+  const destinationMissing = !destination || destination === DEFAULT_FREIGHT_PLACEHOLDER;
+  if ((state.quotationType === 'CIF' || state.quotationType === 'FOB') && destinationMissing) {
+    issues.push({ category: '港口', message: `${state.quotationType} 报价尚未填写目的港。` });
+  }
+  if (state.quotationType === 'CIF' && !(Number(state.freightCost) > 0)) {
+    issues.push({ category: '价格', message: 'CIF 报价的运费为空或为 0。' });
+  }
+  if (!state.paymentTerm.trim()) {
+    issues.push({ category: '付款方式', message: '尚未填写付款方式。' });
+  }
+  return issues;
+};
+
 const Quote = () => {
   const {
     companyName,
@@ -124,6 +186,8 @@ const Quote = () => {
   const [focusedSection, setFocusedSection] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
   const [libSaved, setLibSaved] = useState(false);
+  const [preflightIssues, setPreflightIssues] = useState<ExportPreflightIssue[]>([]);
+  const [pendingExport, setPendingExport] = useState<ExportKind | null>(null);
   const [quoteHistory, setQuoteHistory] = useState<any[]>([]);
   const [versionStatus, setVersionStatus] = useState<{
     currentSha: string;
@@ -401,7 +465,7 @@ const Quote = () => {
     return `Quotation-${sanitize(company)}-${sanitize(project)}`;
   };
 
-  const handleGeneratePDF = () => {
+  const performGeneratePDF = () => {
     // When embedded as iframe in SEO workbench, window.print() is unreliable.
     // Open in a new tab so the user can print from a clean context.
     if (window !== window.top) {
@@ -417,7 +481,7 @@ const Quote = () => {
     setTimeout(() => { document.title = prevTitle; }, 500);
   };
 
-  const handleExportWord = async () => {
+  const performExportWord = async () => {
     try {
       const s = useQuoteStore.getState();
       const blob = await generateWordBlob({
@@ -460,6 +524,32 @@ const Quote = () => {
     } catch (err: any) {
       alert('Word 导出失败: ' + err.message);
     }
+  };
+
+  const runExport = (kind: ExportKind) => {
+    if (kind === 'pdf') performGeneratePDF();
+    else void performExportWord();
+  };
+
+  const requestExport = (kind: ExportKind) => {
+    const issues = getExportPreflightIssues(useQuoteStore.getState());
+    if (!issues.length) {
+      runExport(kind);
+      return;
+    }
+    setPreflightIssues(issues);
+    setPendingExport(kind);
+  };
+
+  const closePreflight = () => {
+    setPendingExport(null);
+    setPreflightIssues([]);
+  };
+
+  const continueExport = () => {
+    const kind = pendingExport;
+    closePreflight();
+    if (kind) window.setTimeout(() => runExport(kind), 0);
   };
 
   const handleExport = () => {
@@ -693,11 +783,11 @@ const Quote = () => {
               >
                 {updateButtonText}
               </button>
-              <button onClick={handleGeneratePDF} className="p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 font-semibold">
+              <button onClick={() => requestExport('pdf')} className="p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 font-semibold">
                 {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
               </button>
               <button
-                onClick={handleExportWord}
+                onClick={() => requestExport('word')}
                 className="px-4 p-2 bg-emerald-600 text-white rounded-lg shadow-md hover:bg-emerald-700 font-semibold tracking-wide"
                 title="Export as Word document"
               >
@@ -1817,6 +1907,35 @@ const Quote = () => {
                 })}
               </div>
             )}
+          </div>
+        )}
+
+        {pendingExport && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 no-print" role="dialog" aria-modal="true" aria-labelledby="export-preflight-title">
+            <div className="w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-2xl">
+              <div className="border-b border-gray-200 px-6 py-4">
+                <h2 id="export-preflight-title" className="text-lg font-bold text-gray-900">导出前检查</h2>
+                <p className="mt-1 text-sm text-gray-600">发现以下内容可能影响报价完整性，请确认后再导出。</p>
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto px-6 py-4">
+                <ul className="divide-y divide-gray-100">
+                  {preflightIssues.map((issue, index) => (
+                    <li key={`${issue.category}-${index}`} className="flex gap-4 py-3">
+                      <span className="w-20 shrink-0 text-sm font-semibold text-amber-700">{issue.category}</span>
+                      <span className="text-sm leading-6 text-gray-800">{issue.message}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="flex flex-col-reverse gap-2 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:justify-end">
+                <button type="button" onClick={continueExport} className="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-gray-950">
+                  仍然导出
+                </button>
+                <button type="button" onClick={closePreflight} className="rounded-md bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+                  返回修改
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
