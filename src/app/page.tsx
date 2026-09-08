@@ -82,9 +82,6 @@ const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getStat
   if (!state.companyName.trim() || state.companyName.trim() === 'Your Company Name') {
     issues.push({ category: '客户信息', message: '尚未填写正式的客户公司名称。' });
   }
-  if (!state.country.trim()) {
-    issues.push({ category: '客户信息', message: '尚未选择客户国家。' });
-  }
   if (state.country === 'Peru' && !state.ruc.trim()) {
     issues.push({ category: '客户信息', message: '秘鲁客户尚未填写 RUC 税号。' });
   }
