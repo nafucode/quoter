@@ -54,8 +54,13 @@ const normalizePartList = (partList: any) =>
   Array.isArray(partList)
     ? partList.map((row) => ({
         ...row,
+        ...(row?.id === 's5-3' || /(?:rotate|traction machine) encoder/i.test(String(row?.label ?? ''))
+          ? { label: '3、Traction machine encoder', brand: 'HEIDENHAIN', origin: 'Germany' }
+          : {}),
         brand:
-          row?.brand === 'Shenling/Ouling'
+          row?.id === 's5-3' || /(?:rotate|traction machine) encoder/i.test(String(row?.label ?? ''))
+            ? 'HEIDENHAIN'
+            : row?.brand === 'Shenling/Ouling'
             ? 'Ouling'
             : row?.brand === 'XINFUJI'
               ? 'FUJI'
@@ -262,7 +267,7 @@ export const useQuoteStore = create<QuoteState>()(
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
-      version: 7,
+      version: 8,
       partialize: (state) => {
         const { quotationDate, ...persistedState } = state;
         return persistedState;
@@ -299,6 +304,9 @@ export const useQuoteStore = create<QuoteState>()(
                 ? DEFAULT_FREIGHT_DESTINATION
                 : nextState.freightDestination,
           };
+        }
+        if (version < 8) {
+          nextState = normalizeQuoteState(nextState);
         }
         return nextState;
       },

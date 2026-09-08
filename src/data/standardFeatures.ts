@@ -26,6 +26,7 @@ export const standardFeatures: StandardFeatureGroup[] = [
       ['Inspection operation', 'Steel rope slipping self-detection'],
       ['Braking force self-detection functions', 'Balance system of self-learning'],
       ['Door opening re-leveling', 'Cabin safety gear'],
+      ['Control cabinet EMI filter (compliant with European standards)', 'Lightning surge protection'],
     ],
   },
   {

@@ -31,7 +31,7 @@ export const defaultPartList: PartListRow[] = [
   { id: 's5',       type: 'section', label: '5. Traction drive',         brand: '',                   origin: ''         },
   { id: 's5-1',     type: 'item',    label: '1、Traction machine',       brand: 'MONA DRIVE',         origin: 'Suzhou'   },
   { id: 's5-2',     type: 'item',    label: '2、Rubber buffer',          brand: 'AODEPU',             origin: 'Ningbo'   },
-  { id: 's5-3',     type: 'item',    label: '3、Rotate encoder',         brand: 'Huitong',            origin: 'Changchun'},
+  { id: 's5-3',     type: 'item',    label: '3、Traction machine encoder', brand: 'HEIDENHAIN',        origin: 'Germany'  },
 
   { id: 's6',       type: 'section', label: '6. Cabin',                  brand: '',                   origin: ''         },
   { id: 's6-1',     type: 'item',    label: '1、Level switch',           brand: 'Monarch',            origin: 'Suzhou'   },

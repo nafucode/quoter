@@ -29,6 +29,22 @@ const featureTranslations: Record<string, FeatureTranslation> = {
     ar: 'وظائف السلامة',
     ru: 'Функции безопасности',
   },
+  'Control cabinet EMI filter (compliant with European standards)': {
+    zh: '控制柜 EMI 滤波器（符合欧洲标准）',
+    es: 'Filtro EMI del armario de control (conforme a las normas europeas)',
+    pt: 'Filtro EMI do painel de controle (em conformidade com as normas europeias)',
+    fr: "Filtre EMI de l'armoire de commande (conforme aux normes europeennes)",
+    vi: 'Bo loc EMI tu dieu khien (phu hop tieu chuan Chau Au)',
+    ru: 'EMI-фильтр шкафа управления (соответствует европейским стандартам)',
+  },
+  'Lightning surge protection': {
+    zh: '浪涌及雷击保护',
+    es: 'Proteccion contra sobretensiones y rayos',
+    pt: 'Protecao contra surtos e descargas atmosfericas',
+    fr: 'Protection contre les surtensions et la foudre',
+    vi: 'Bao ve chong set va xung dien',
+    ru: 'Защита от импульсных перенапряжений и ударов молнии',
+  },
   'Man-machine interface': {
     zh: '人机界面',
     es: 'Interfaz hombre-maquina',
