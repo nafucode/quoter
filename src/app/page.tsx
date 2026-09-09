@@ -189,11 +189,13 @@ const Quote = () => {
   const [versionStatus, setVersionStatus] = useState<{
     currentSha: string;
     latestSha: string;
+    currentDate: string;
     isChecking: boolean;
     canUpdate: boolean;
   }>({
     currentSha: '',
     latestSha: '',
+    currentDate: '',
     isChecking: true,
     canUpdate: true,
   });
@@ -237,10 +239,21 @@ const Quote = () => {
         const latest = await latestRes.json();
         const currentSha = String(current.commitSha || '');
         const latestSha = String(latest.sha || '');
+        let currentDate = '';
+        if (currentSha && currentSha === latestSha) {
+          currentDate = String(latest.commit?.committer?.date || latest.commit?.author?.date || '');
+        } else if (currentSha) {
+          const currentCommitRes = await fetch(`https://api.github.com/repos/nafucode/quoter/commits/${encodeURIComponent(currentSha)}`, { cache: 'no-store' });
+          if (currentCommitRes.ok) {
+            const currentCommit = await currentCommitRes.json();
+            currentDate = String(currentCommit.commit?.committer?.date || currentCommit.commit?.author?.date || '');
+          }
+        }
         if (cancelled) return;
         setVersionStatus({
           currentSha,
           latestSha,
+          currentDate,
           isChecking: false,
           canUpdate: !currentSha || !latestSha || currentSha !== latestSha,
         });
@@ -724,7 +737,19 @@ const Quote = () => {
   }, [quotationDate, priceValidityDays]);
   const zhEnDeliveryText = `${deliveryDays} days after receive down payment and confirmed drawing. / ${deliveryDays} 个工作日（收到定金及确认图纸后起算）。`;
   const zhEnPriceValidityText = `${priceValidityDays} days / ${priceValidityDays} 天${validityUntilDate ? ` (until / 至 ${validityUntilDate})` : ''}`;
-  const currentVersionLabel = versionStatus.currentSha ? `V${versionStatus.currentSha.slice(0, 3)}` : '版本未知';
+  const currentVersionLabel = (() => {
+    if (!versionStatus.currentDate) return '版本未知';
+    const date = new Date(versionStatus.currentDate);
+    if (Number.isNaN(date.getTime())) return '版本未知';
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Shanghai',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(date);
+    const month = parts.find((part) => part.type === 'month')?.value || '';
+    const day = parts.find((part) => part.type === 'day')?.value || '';
+    return month && day ? `${month}${day}` : '版本未知';
+  })();
   const updateButtonText = versionStatus.isChecking
     ? `检查更新 · ${currentVersionLabel}`
     : versionStatus.canUpdate
