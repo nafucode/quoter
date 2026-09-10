@@ -37,6 +37,15 @@ test('imports all goods, freight and original USD prices with the saved exchange
     assert.equal(record.shipmentDays, 35);
 });
 
+test('CFR quotations preserve their destination and freight in contract import', () => {
+    const raw = fixture();
+    raw.state.quotationType = 'CFR';
+    raw.state.freightDestination = 'Callao Port';
+    const record = convert(raw);
+    assert.equal(record.tradeTerm, 'CFR Callao Port');
+    assert.equal(total(record), 30000);
+});
+
 test('default EXW pickup ignores stale freight; custom EXW transport is charged', () => {
     const raw = fixture();
     raw.state.quotationType = 'EXW';

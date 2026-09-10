@@ -115,11 +115,11 @@ const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getStat
 
   const destination = state.freightDestination.trim();
   const destinationMissing = !destination || destination === DEFAULT_FREIGHT_PLACEHOLDER;
-  if ((state.quotationType === 'CIF' || state.quotationType === 'FOB') && destinationMissing) {
+  if (['CIF', 'CFR', 'FOB'].includes(state.quotationType) && destinationMissing) {
     issues.push({ category: '港口', message: `${state.quotationType} 报价尚未填写目的港。` });
   }
-  if (state.quotationType === 'CIF' && !(Number(state.freightCost) > 0)) {
-    issues.push({ category: '价格', message: 'CIF 报价的运费为空或为 0。' });
+  if (['CIF', 'CFR'].includes(state.quotationType) && !(Number(state.freightCost) > 0)) {
+    issues.push({ category: '价格', message: `${state.quotationType} 报价的运费为空或为 0。` });
   }
   if (!state.paymentTerm.trim()) {
     issues.push({ category: '付款方式', message: '尚未填写付款方式。' });
@@ -319,7 +319,7 @@ const Quote = () => {
     if (value === 'FOB' && shouldUseDefaultDestination) {
       setField('freightDestination', 'SHANGHAI PORT');
     }
-    if (value === 'CIF' && shouldUseDefaultDestination && availableDestinationPorts[0]) {
+    if ((value === 'CIF' || value === 'CFR') && shouldUseDefaultDestination && availableDestinationPorts[0]) {
       setField('freightDestination', availableDestinationPorts[0]);
     }
     if (value === 'EXW' && shouldUseDefaultDestination) {
@@ -332,7 +332,7 @@ const Quote = () => {
     setField('country', value);
     const ports = countryPorts[value] || [];
     const shouldUseDefaultDestination =
-      quotationType === 'CIF' &&
+      (quotationType === 'CIF' || quotationType === 'CFR') &&
       ports[0] &&
       (!freightDestination ||
         freightDestination === DEFAULT_FREIGHT_PLACEHOLDER ||
@@ -960,6 +960,7 @@ const Quote = () => {
                   <option>EXW</option>
                   <option>FOB</option>
                   <option>CIF</option>
+                  <option>CFR</option>
                   <option>DDP</option>
                 </select>
               </div>
@@ -1021,7 +1022,7 @@ const Quote = () => {
                       value={freightDestination}
                       onChange={(e) => setField('freightDestination', e.target.value)}
                     />
-                    {quotationType === 'CIF' && country && availableDestinationPorts.length > 0 && (
+                    {(quotationType === 'CIF' || quotationType === 'CFR') && country && availableDestinationPorts.length > 0 && (
                       <select
                         className="mt-2 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
                         value={availableDestinationPorts.includes(freightDestination) ? freightDestination : ''}
