@@ -65,6 +65,11 @@ export const landingDoorStyles = [
     previewImage: '/landing-door-styles/货梯-中分双折 4CO.png',
   },
   {
+    id: 'LD-07-PASSENGER-GLASS',
+    name: 'Passenger Glass Door 4CO 中分双折',
+    previewImage: '/landing-door-styles/passenger-glass-4co.png',
+  },
+  {
     id: 'LD-08',
     name: 'Manual Door 手拉门',
     previewImage: '/landing-door-styles/Manual Door 手拉门.png',

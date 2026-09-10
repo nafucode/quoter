@@ -13,7 +13,7 @@ import { floorStyleGroups } from '@/data/floorStyles';
 const DOOR_OPENING_TYPE_OPTIONS = [
   { value: 'Center Opening', label: 'Center Opening' },
   { value: 'Side Opening', label: 'Side Opening' },
-  { value: 'Center Opening 4 Panels', label: 'Center Opening 4 Panels' },
+  { value: 'Center Opening 4 Panels', label: 'Center Opening 4 Panels / 4CO 中分双折' },
   { value: 'Swing Door', label: 'Swing Door（平开门）' },
   { value: 'Manual Door', label: 'Manual Door（手拉门）' },
   { value: 'Single Swing Door', label: 'Single Swing Door（单扇平开门）' },
