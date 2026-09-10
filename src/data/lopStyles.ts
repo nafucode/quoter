@@ -20,6 +20,11 @@ export const lopStyles = [
     previewImage: '/lop-styles/黑底白字-标配 2.png',
   },
   {
+    id: 'LOP-HORIZONTAL-DISPLAY',
+    name: '横显组合款 Horizontal Display Set',
+    previewImage: '/lop-styles/horizontal-display-lop-set.png',
+  },
+  {
     id: 'OZL-W2506',
     name: 'OZL-W2506',
     previewImage: '/lop-styles/OZL-W2506.png',
