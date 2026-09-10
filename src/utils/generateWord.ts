@@ -789,70 +789,70 @@ export async function generateWordBlob(state: {
       para([bold(t.partListTitle, 24)], { align: AlignmentType.CENTER, spacingAfter: 120 }),
     );
 
-    const isPlatformPartList = state.partListTemplate === 'platform';
-    const partCols = isPlatformPartList
-      ? [
-          Math.floor(CONTENT_W * 0.08),
-          Math.floor(CONTENT_W * 0.28),
-          Math.floor(CONTENT_W * 0.42),
-          CONTENT_W - Math.floor(CONTENT_W * 0.08) - Math.floor(CONTENT_W * 0.28) - Math.floor(CONTENT_W * 0.42),
-        ]
-      : [Math.floor(CONTENT_W * 0.5), Math.floor(CONTENT_W * 0.25), CONTENT_W - Math.floor(CONTENT_W * 0.5) - Math.floor(CONTENT_W * 0.25)];
-    const partRows: TableRow[] = [
-      isPlatformPartList
-        ? headerRow([
-            { text: 'No.', width: partCols[0] },
-            { text: 'Category 类别', width: partCols[1] },
-            { text: 'Component 名称', width: partCols[2] },
-            { text: 'Brand 品牌', width: partCols[3] },
-          ])
-        : headerRow([
-            { text: t.partListColPart, width: partCols[0] },
-            { text: t.partListColBrand, width: partCols[1] },
-            { text: t.partListColOrigin, width: partCols[2] },
-          ]),
+    const partListGroups = [
+      ...(state.partListTemplate !== 'platform'
+        ? [{ title: 'Standard Elevator', isPlatform: false, rows: state.partList.filter((row) => !row.id.startsWith('platform-')) }]
+        : []),
+      ...(state.partListTemplate !== 'standard'
+        ? [{ title: 'Platform Lift', isPlatform: true, rows: state.partList.filter((row) => row.id.startsWith('platform-')) }]
+        : []),
     ];
 
-    state.partList.forEach((row) => {
-      if (row.type === 'section') {
-        partRows.push(
-          new TableRow({
-            children: [
-              cell(row.label, { bold: true, bg: 'D9D9D9', colSpan: isPlatformPartList ? 4 : 3, width: CONTENT_W }),
-            ],
-          }),
-        );
-      } else if (isPlatformPartList) {
-        partRows.push(
-          new TableRow({
-            children: [
-              cell(row.no || '', { width: partCols[0] }),
-              cell(row.category || '', { width: partCols[1] }),
-              cell(row.label, { width: partCols[2] }),
-              cell(row.brand, { width: partCols[3] }),
-            ],
-          }),
-        );
-      } else {
-        partRows.push(
-          new TableRow({
-            children: [
-              cell(row.label, { width: partCols[0] }),
-              cell(row.brand, { width: partCols[1] }),
-              cell(row.origin, { width: partCols[2] }),
-            ],
-          }),
-        );
+    partListGroups.forEach((group, groupIndex) => {
+      if (state.partListTemplate === 'both') {
+        if (groupIndex) children.push(para([], { spacingAfter: 80 }));
+        children.push(para([bold(group.title, 20)], { spacingAfter: 80 }));
       }
-    });
+      const partCols = group.isPlatform
+        ? [
+            Math.floor(CONTENT_W * 0.08),
+            Math.floor(CONTENT_W * 0.28),
+            Math.floor(CONTENT_W * 0.42),
+            CONTENT_W - Math.floor(CONTENT_W * 0.08) - Math.floor(CONTENT_W * 0.28) - Math.floor(CONTENT_W * 0.42),
+          ]
+        : [Math.floor(CONTENT_W * 0.5), Math.floor(CONTENT_W * 0.25), CONTENT_W - Math.floor(CONTENT_W * 0.5) - Math.floor(CONTENT_W * 0.25)];
+      const partRows: TableRow[] = [
+        group.isPlatform
+          ? headerRow([
+              { text: 'No.', width: partCols[0] },
+              { text: 'Category 类别', width: partCols[1] },
+              { text: 'Component 名称', width: partCols[2] },
+              { text: 'Brand 品牌', width: partCols[3] },
+            ])
+          : headerRow([
+              { text: t.partListColPart, width: partCols[0] },
+              { text: t.partListColBrand, width: partCols[1] },
+              { text: t.partListColOrigin, width: partCols[2] },
+            ]),
+      ];
 
-    children.push(
-      new Table({
+      group.rows.forEach((row) => {
+        if (row.type === 'section') {
+          partRows.push(new TableRow({
+            children: [cell(row.label, { bold: true, bg: 'D9D9D9', colSpan: group.isPlatform ? 4 : 3, width: CONTENT_W })],
+          }));
+        } else if (group.isPlatform) {
+          partRows.push(new TableRow({ children: [
+            cell(row.no || '', { width: partCols[0] }),
+            cell(row.category || '', { width: partCols[1] }),
+            cell(row.label, { width: partCols[2] }),
+            cell(row.brand, { width: partCols[3] }),
+          ] }));
+        } else {
+          partRows.push(new TableRow({ children: [
+            cell(row.label, { width: partCols[0] }),
+            cell(row.brand, { width: partCols[1] }),
+            cell(row.origin, { width: partCols[2] }),
+          ] }));
+        }
+      });
+
+      children.push(new Table({
         width: { size: CONTENT_W, type: WidthType.DXA },
         columnWidths: partCols,
         rows: partRows,
-      }),
-    );
+      }));
+    });
 
     children.push(para([], { spacingAfter: 100 }));
     children.push(

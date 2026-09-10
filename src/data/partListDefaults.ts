@@ -8,7 +8,7 @@ export interface PartListRow {
   origin: string;
 }
 
-export type PartListTemplate = 'standard' | 'platform';
+export type PartListTemplate = 'standard' | 'platform' | 'both';
 
 export const defaultPartList: PartListRow[] = [
   { id: 's1',       type: 'section', label: '1. Control system',        brand: '',                   origin: ''         },
@@ -95,6 +95,7 @@ export const platformPartList: PartListRow[] = [
 export const partListTemplates: Record<PartListTemplate, PartListRow[]> = {
   standard: defaultPartList,
   platform: platformPartList,
+  both: [...defaultPartList, ...platformPartList],
 };
 
 export const partListNote =

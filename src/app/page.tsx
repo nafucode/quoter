@@ -166,7 +166,14 @@ const Quote = () => {
     setPartListTemplate,
   } = useQuoteStore();
 
-  const isPlatformPartList = partListTemplate === 'platform';
+  const partListGroups = [
+    ...(partListTemplate !== 'platform'
+      ? [{ key: 'standard', title: 'Standard Elevator 标准电梯', isPlatform: false, rows: partList.filter((row) => !row.id.startsWith('platform-')) }]
+      : []),
+    ...(partListTemplate !== 'standard'
+      ? [{ key: 'platform', title: 'Platform Lift 平台梯', isPlatform: true, rows: partList.filter((row) => row.id.startsWith('platform-')) }]
+      : []),
+  ];
   const availableDestinationPorts = countryPorts[country] || [];
   const shouldShowRuc = country === 'Peru' && ruc.trim();
   const exwDeliveryOptions = [
@@ -1418,16 +1425,20 @@ const Quote = () => {
               <select
                 className="mt-1 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
                 value={partListTemplate || 'standard'}
-                onChange={(e) => setPartListTemplate(e.target.value as 'standard' | 'platform')}
+                onChange={(e) => setPartListTemplate(e.target.value as 'standard' | 'platform' | 'both')}
               >
                 <option value="standard">Standard Elevator 标准电梯</option>
                 <option value="platform">Platform Lift 平台梯</option>
+                <option value="both">Standard + Platform 标准电梯和平台梯</option>
               </select>
             </div>
-            <div className="overflow-x-auto">
+            <div className="space-y-5">
+              {partListGroups.map((group) => (
+              <div key={group.key} className="overflow-x-auto">
+                {partListTemplate === 'both' && <h4 className="mb-2 text-sm font-semibold text-gray-700">{group.title}</h4>}
               <table className="w-full text-sm border-collapse">
                 <thead>
-                  {isPlatformPartList ? (
+                  {group.isPlatform ? (
                     <tr className="bg-gray-100">
                       <th className="text-left p-2 border border-gray-300 w-16">No.</th>
                       <th className="text-left p-2 border border-gray-300">Category / 类别</th>
@@ -1443,12 +1454,12 @@ const Quote = () => {
                   )}
                 </thead>
                 <tbody>
-                  {partList.map(row =>
+                  {group.rows.map(row =>
                     row.type === 'section' ? (
                       <tr key={row.id} className="bg-gray-50">
-                        <td colSpan={isPlatformPartList ? 4 : 3} className="p-2 border border-gray-300 font-semibold text-gray-700">{row.label}</td>
+                        <td colSpan={group.isPlatform ? 4 : 3} className="p-2 border border-gray-300 font-semibold text-gray-700">{row.label}</td>
                       </tr>
-                    ) : isPlatformPartList ? (
+                    ) : group.isPlatform ? (
                       <tr key={row.id}>
                         <td className="p-1 border border-gray-300">
                           <input
@@ -1501,6 +1512,8 @@ const Quote = () => {
                   )}
                 </tbody>
               </table>
+              </div>
+              ))}
             </div>
           </div>
 
@@ -1771,9 +1784,12 @@ const Quote = () => {
                     {showPartList && (
                       <div className="mt-6 pt-4 border-t">
                         <h3 className="text-lg font-semibold mb-3">{t.partListTitle}</h3>
+                        {partListGroups.map((group) => (
+                        <div key={group.key} className="mb-5">
+                          {partListTemplate === 'both' && <h4 className="mb-2 font-semibold">{group.title}</h4>}
                         <table className="w-full text-sm border-collapse printable-table">
                           <thead className="bg-gray-200">
-                            {isPlatformPartList ? (
+                            {group.isPlatform ? (
                               <tr>
                                 <th className="p-2 border border-gray-400 text-left">No.</th>
                                 <th className="p-2 border border-gray-400 text-left">Category 类别</th>
@@ -1789,12 +1805,12 @@ const Quote = () => {
                             )}
                           </thead>
                           <tbody>
-                            {partList.map(row =>
+                            {group.rows.map(row =>
                               row.type === 'section' ? (
                                 <tr key={row.id} className="bg-gray-100">
-                                  <td colSpan={isPlatformPartList ? 4 : 3} className="p-2 border border-gray-400 font-semibold">{row.label}</td>
+                                  <td colSpan={group.isPlatform ? 4 : 3} className="p-2 border border-gray-400 font-semibold">{row.label}</td>
                                 </tr>
-                              ) : isPlatformPartList ? (
+                              ) : group.isPlatform ? (
                                 <tr key={row.id}>
                                   <td className="p-2 border border-gray-400">{row.no}</td>
                                   <td className="p-2 border border-gray-400">{row.category}</td>
@@ -1811,6 +1827,8 @@ const Quote = () => {
                             )}
                           </tbody>
                         </table>
+                        </div>
+                        ))}
                         <p className="mt-3 text-xs text-gray-500 italic leading-relaxed">{t.partListNote}</p>
                       </div>
                     )}
