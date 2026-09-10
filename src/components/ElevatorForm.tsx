@@ -27,6 +27,14 @@ const ENTRANCE_OPTIONS = [
   'Front & Right Side Entrance (90°)',
 ];
 
+const SHAFT_CONSTRUCTION_OPTIONS = [
+  { value: 'Concrete', label: 'Concrete 混凝土' },
+  { value: 'Concrete and Brick', label: 'Concrete and Brick 混凝土和砖墙' },
+  { value: 'Steel Structure', label: 'Steel Structure 钢结构（客梯）' },
+  { value: 'Bent Steel Plate', label: 'Bent Steel Plate 钢板折弯' },
+  { value: 'Aluminum', label: 'Aluminum 铝合金' },
+];
+
 const CAR_FLOOR_OPTIONS = [
   { label: 'Marble', value: 'Marble' },
   { label: 'Sintered Slab 岩板', value: 'Sintered Slab' },
@@ -365,7 +373,14 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Shaft construction<span className="block text-xs text-gray-500">井道结构</span></label>
-                  <input name="shaftConstruction" value={elevator.shaftConstruction} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                  <select name="shaftConstruction" value={elevator.shaftConstruction} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+                    {!SHAFT_CONSTRUCTION_OPTIONS.some((option) => option.value === elevator.shaftConstruction) && elevator.shaftConstruction && (
+                      <option value={elevator.shaftConstruction}>{elevator.shaftConstruction}（历史值）</option>
+                    )}
+                    {SHAFT_CONSTRUCTION_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Travel (mm)<span className="block text-xs text-gray-500">提升高度 (mm)</span></label>
