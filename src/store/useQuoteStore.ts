@@ -20,7 +20,6 @@ const normalizeCabinEffect = (cabinEffect: any) => {
   const nextCabinEffect = JSON.parse(JSON.stringify(cabinEffect ?? elevatorTemplate.cabinEffect));
   nextCabinEffect.cabinImage2 = nextCabinEffect.cabinImage2 ?? '';
   nextCabinEffect.cabinImage3 = nextCabinEffect.cabinImage3 ?? '';
-  nextCabinEffect.landingDoor2 = nextCabinEffect.landingDoor2 ?? { type: 'image', value: '' };
   if (nextCabinEffect.button?.type === 'text' && nextCabinEffect.button.value === LEGACY_BUTTON_TEXT) {
     nextCabinEffect.button.value = DEFAULT_BUTTON_TEXT;
   }

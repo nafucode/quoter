@@ -245,7 +245,7 @@ export async function generateWordBlob(state: {
     state.elevators.map(async (elev) => {
       const ce = elev.cabinEffect;
       if (!ce) return null;
-      const [cabinImage, cabinImage2, cabinImage3, copImage, lopImage, ceiling, button, floor, landingDoor, landingDoor2, handrail, copLogo] =
+      const [cabinImage, cabinImage2, cabinImage3, copImage, lopImage, ceiling, button, floor, landingDoor, handrail, copLogo] =
         await Promise.all([
           fetchImgData(ce.cabinImage),
           fetchImgData(ce.cabinImage2),
@@ -256,11 +256,10 @@ export async function generateWordBlob(state: {
           fetchImgData(ce.button?.type === 'image' ? ce.button.value : null),
           fetchImgData(ce.floor?.type === 'image' ? ce.floor.value : null),
           fetchImgData(ce.landingDoor?.type === 'image' ? ce.landingDoor.value : null),
-          fetchImgData(ce.landingDoor2?.type === 'image' ? ce.landingDoor2.value : null),
           fetchImgData(ce.handrail?.type === 'image' ? ce.handrail.value : null),
           fetchImgData(ce.copLogo?.type === 'image' ? ce.copLogo.value : null),
         ]);
-      return { cabinImage, cabinImage2, cabinImage3, copImage, lopImage, ceiling, button, floor, landingDoor, landingDoor2, handrail, copLogo };
+      return { cabinImage, cabinImage2, cabinImage3, copImage, lopImage, ceiling, button, floor, landingDoor, handrail, copLogo };
     }),
   );
 
@@ -679,7 +678,7 @@ export async function generateWordBlob(state: {
       imgs &&
       (imgs.cabinImage || imgs.cabinImage2 || imgs.cabinImage3 || imgs.copImage || imgs.lopImage ||
         imgs.ceiling || imgs.button || imgs.floor ||
-        imgs.landingDoor || imgs.landingDoor2 || (showHandrail && imgs.handrail) || imgs.copLogo);
+        imgs.landingDoor || (showHandrail && imgs.handrail) || imgs.copLogo);
 
     if (ce && imgs && hasAnyImage) {
       children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
@@ -772,7 +771,9 @@ export async function generateWordBlob(state: {
             // Row 5 header: LANDING DOOR / HANDRAIL / COP LOGO
             new TableRow({
               children: isProposal
-                ? [hdrCell(`${t.landingDoor} 1`, effCols[0]), hdrCell(`${t.landingDoor} 2`, effCols[1]), hdrCell(showHandrail ? t.handrail : '', effCols[2])]
+                ? showHandrail
+                  ? [effectCell(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: t.landingDoor, bold: true, size: 18, font: 'Arial' })] }), effCols[0] + effCols[1], { bg: 'F0F0F0', colSpan: 2 }), hdrCell(t.handrail, effCols[2])]
+                  : [effectCell(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: t.landingDoor, bold: true, size: 18, font: 'Arial' })] }), CONTENT_W, { bg: 'F0F0F0', colSpan: 3 })]
                 : showHandrail
                 ? [hdrCell(t.landingDoor, effCols[0]), hdrCell(t.handrail, effCols[1]), hdrCell(t.copLogo, effCols[2])]
                 : [
@@ -792,11 +793,9 @@ export async function generateWordBlob(state: {
             new TableRow({
               height: { value: 3800, rule: 'atLeast' },
               children: isProposal
-                ? [
-                    valCell(imgs.landingDoor, ce.landingDoor, 188, 300, effCols[0]),
-                    valCell(imgs.landingDoor2, ce.landingDoor2, 188, 300, effCols[1]),
-                    showHandrail ? valCell(imgs.handrail, ce.handrail, 188, 220, effCols[2]) : effectCell(new Paragraph({}), effCols[2]),
-                  ]
+                ? showHandrail
+                  ? [effectCell(imgDataToPara(imgs.landingDoor, 260, 300, ce.landingDoor?.type === 'text' ? ce.landingDoor.value ?? '' : ''), effCols[0] + effCols[1], { colSpan: 2 }), valCell(imgs.handrail, ce.handrail, 188, 220, effCols[2])]
+                  : [effectCell(imgDataToPara(imgs.landingDoor, 260, 300, ce.landingDoor?.type === 'text' ? ce.landingDoor.value ?? '' : ''), CONTENT_W, { colSpan: 3 })]
                 : showHandrail
                 ? [
                     valCell(imgs.landingDoor, ce.landingDoor, 188, 300, effCols[0]),

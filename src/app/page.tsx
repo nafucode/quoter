@@ -107,7 +107,6 @@ const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getStat
       ['Button', effect.button],
       ['Floor', effect.floor],
       ['Landing Door', effect.landingDoor],
-      ...(isProposal ? [['Landing Door 2', effect.landingDoor2]] : []),
       ...(elevator.showNoneHandrailInQuote === false ? [] : [['Handrail', effect.handrail]]),
       ['COP Logo', effect.copLogo],
     ].filter(([, value]) => !hasEffectValue(value)).map(([name]) => name);
@@ -395,7 +394,6 @@ const Quote = () => {
         button: safeHybrid(e.cabinEffect?.button),
         floor: safeHybrid(e.cabinEffect?.floor),
         landingDoor: safeHybrid(e.cabinEffect?.landingDoor),
-        landingDoor2: safeHybrid(e.cabinEffect?.landingDoor2),
         handrail: safeHybrid(e.cabinEffect?.handrail),
         copLogo: safeHybrid(e.cabinEffect?.copLogo),
       },
@@ -1800,17 +1798,14 @@ const Quote = () => {
                   </div>
 
                   {/* Row 4: Titles */}
-                  <div className={`font-bold text-center border-b border-r border-gray-400 p-1 ${!isProposal && !shouldShowHandrailInQuote(elevator) ? 'col-span-2' : ''}`}>{isProposal ? `${t.landingDoor} 1` : t.landingDoor}</div>
-                  {isProposal ? <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.landingDoor} 2</div> : shouldShowHandrailInQuote(elevator) && <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.handrail}</div>}
-                  <div className="font-bold text-center border-b border-r border-gray-400 p-1">{isProposal ? (shouldShowHandrailInQuote(elevator) ? t.handrail : '') : t.copLogo}</div>
+                  <div className={`font-bold text-center border-b border-r border-gray-400 p-1 ${isProposal ? (shouldShowHandrailInQuote(elevator) ? 'col-span-2' : 'col-span-3') : (!shouldShowHandrailInQuote(elevator) ? 'col-span-2' : '')}`}>{t.landingDoor}</div>
+                  {shouldShowHandrailInQuote(elevator) && <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.handrail}</div>}
+                  {!isProposal && <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.copLogo}</div>}
 
                   {/* Row 5: Descriptions/Images */}
-                  <div className={`border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 ${!isProposal && !shouldShowHandrailInQuote(elevator) ? 'col-span-2' : ''}`}>
+                  <div className={`border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 ${isProposal ? (shouldShowHandrailInQuote(elevator) ? 'col-span-2' : 'col-span-3') : (!shouldShowHandrailInQuote(elevator) ? 'col-span-2' : '')}`}>
                     {elevator.cabinEffect.landingDoor.type === 'image' && elevator.cabinEffect.landingDoor.value ? <img src={elevator.cabinEffect.landingDoor.value} alt="Landing Door" className="max-h-full max-w-full"/> : elevator.cabinEffect.landingDoor.type === 'text' ? elevator.cabinEffect.landingDoor.value : null}
                   </div>
-                  {isProposal && <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 text-center">
-                    {elevator.cabinEffect.landingDoor2?.type === 'image' && elevator.cabinEffect.landingDoor2.value ? <img src={elevator.cabinEffect.landingDoor2.value} alt="Landing Door 2" className="max-h-full max-w-full"/> : elevator.cabinEffect.landingDoor2?.type === 'text' ? elevator.cabinEffect.landingDoor2.value : null}
-                  </div>}
                   {shouldShowHandrailInQuote(elevator) && (
                     <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 text-center">
                       {elevator.cabinEffect.handrail.type === 'image' && elevator.cabinEffect.handrail.value ? <img src={elevator.cabinEffect.handrail.value} alt="Handrail" className="max-h-full max-w-full"/> : elevator.cabinEffect.handrail.type === 'text' ? elevator.cabinEffect.handrail.value : null}
@@ -1819,7 +1814,6 @@ const Quote = () => {
                   {!isProposal && <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 text-center">
                     {elevator.cabinEffect.copLogo.type === 'image' && elevator.cabinEffect.copLogo.value ? <img src={elevator.cabinEffect.copLogo.value} alt="COP Logo" className="max-h-[70%] max-w-[70%]"/> : elevator.cabinEffect.copLogo.type === 'text' ? elevator.cabinEffect.copLogo.value : null}
                   </div>}
-                  {isProposal && !shouldShowHandrailInQuote(elevator) && <div className="border-b border-r border-gray-400 h-48" />}
                         </div>
                       </div>
                     </div>
