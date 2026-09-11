@@ -207,6 +207,9 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: 
       case 'landingDoor':
         newCabinEffect = { ...elevator.cabinEffect, landingDoor: { type: 'image', value: style.previewImage } };
         break;
+      case 'landingDoor2':
+        newCabinEffect = { ...elevator.cabinEffect, landingDoor2: { type: 'image', value: style.previewImage } };
+        break;
       case 'floor':
         newCabinEffect = { ...elevator.cabinEffect, floor: { type: 'image', value: style.previewImage } };
         updateElevator(elevator.id, 'carFloor', style.id);
@@ -232,7 +235,8 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: 
       case 'cabin3': return { styleGroups: cabinStyleGroups, title: 'Choose a Cabin Style' };
       case 'cop': return { styleGroups: copStyleGroups, title: 'Choose a COP Style' };
       case 'lop': return { styleGroups: [{ groupName: 'LOP Styles', styles: lopStyles }], title: 'Choose a LOP Style' };
-      case 'landingDoor': return { styleGroups: [{ groupName: 'Landing Door Styles', styles: landingDoorStyles }], title: 'Choose a Landing Door Style' };
+      case 'landingDoor':
+      case 'landingDoor2': return { styleGroups: [{ groupName: 'Landing Door Styles', styles: landingDoorStyles }], title: 'Choose a Landing Door Style' };
       case 'floor': return { styleGroups: floorStyleGroups, title: 'Choose a Floor Style' };
       case 'handrail': return { styleGroups: [{ groupName: 'Handrail Styles', styles: handrailStyles }], title: 'Choose a Handrail Style' };
       case 'copLogo': return { styleGroups: [{ groupName: 'Logo Styles', styles: logoStyles }], title: 'Choose a Logo' };
@@ -581,13 +585,24 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: 
 
             <div className="sm:col-span-2" onFocus={() => onSectionFocus('cabin-effect')}>
               <h4 className="text-md font-semibold mt-4 border-b">VI. Cabin Effect<span className="block text-sm font-normal text-gray-500">效果图</span></h4>
+              {documentMode === 'proposal' && (
+                <label className="mt-3 flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={elevator.showThreeCabinsInProposal ?? false}
+                    onChange={(event) => updateElevator(elevator.id, 'showThreeCabinsInProposal', event.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>Show 3 cabin options<span className="ml-2 text-xs font-normal text-gray-500">显示 3 个轿厢方案</span></span>
+                </label>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">{documentMode === 'proposal' ? 'Cabin Image 1' : 'Cabin Image'}<span className="block text-xs text-gray-500">{documentMode === 'proposal' ? '轿厢图片 1' : '轿厢图片'}</span></label>
                   <input type="file" name="cabinImage" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                   <button onClick={() => openPicker('cabin')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
                 </div>
-                {documentMode === 'proposal' && (
+                {documentMode === 'proposal' && elevator.showThreeCabinsInProposal && (
                   <>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Cabin Image 2<span className="block text-xs text-gray-500">轿厢图片 2</span></label>
@@ -612,8 +627,8 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: 
                   <button onClick={() => openPicker('lop')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
                 </div>
                 <HybridInput 
-                  label="Landing Door" 
-                  labelChinese="厅门" 
+                  label={documentMode === 'proposal' ? 'Landing Door 1' : 'Landing Door'}
+                  labelChinese={documentMode === 'proposal' ? '厅门 1' : '厅门'}
                   fieldName="landingDoor" 
                   fieldData={elevator.cabinEffect.landingDoor}
                   onTypeChange={handleHybridTypeChange}
@@ -621,6 +636,18 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: 
                   onFileChange={handleHybridFileChange}
                   onChooseFromLibrary={() => openPicker('landingDoor')} 
                 />
+                {documentMode === 'proposal' && (
+                  <HybridInput
+                    label="Landing Door 2"
+                    labelChinese="厅门 2"
+                    fieldName="landingDoor2"
+                    fieldData={elevator.cabinEffect.landingDoor2 ?? { type: 'image', value: '' }}
+                    onTypeChange={handleHybridTypeChange}
+                    onValueChange={handleHybridValueChange}
+                    onFileChange={handleHybridFileChange}
+                    onChooseFromLibrary={() => openPicker('landingDoor2')}
+                  />
+                )}
                 <HybridInput 
                   label="Ceiling" 
                   labelChinese="天花板" 
