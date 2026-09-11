@@ -69,6 +69,12 @@ export const cabinStyleGroups = [
     ]
   },
   {
+    groupName: 'VIP系列样册 (VIP)',
+    styles: [
+      { id: 'VIP-01', name: 'VIP-01', previewImage: '/cabin-styles/VIP-01.png' },
+    ]
+  },
+  {
     groupName: '观光梯样册 (FJ-OLV)',
     styles: [
       { id: 'FJ-Panoramic Rose Gold', name: 'FJ-Panoramic Rose Gold 金色轿厢', previewImage: '/cabin-styles/FJ-Panoramic Rose Gold金色轿厢.png' },
