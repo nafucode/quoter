@@ -861,22 +861,22 @@ const Quote = () => {
         <div className="flex flex-col md:flex-row md:space-x-4">
           {/* Left Side - Inputs */}
           <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md no-print">
-            <div className="mb-5 border-b border-gray-200 pb-5">
-              <label className="mb-2 block text-sm font-semibold text-gray-800">Document Purpose<span className="block text-xs font-normal text-gray-500">文档用途</span></label>
-              <div className="grid grid-cols-2 overflow-hidden rounded-md border border-gray-300 bg-gray-50 p-1">
+            <div className="mb-3 flex flex-wrap items-center gap-2 border-b border-gray-200 pb-3">
+              <span className="text-xs font-semibold text-gray-600">文档用途</span>
+              <div className="inline-grid grid-cols-2 overflow-hidden rounded-md border border-gray-300 bg-gray-50 p-0.5">
                 <button
                   type="button"
                   onClick={() => setField('documentMode', 'quotation')}
-                  className={`min-h-12 rounded px-3 py-2 text-sm font-semibold ${!isProposal ? 'bg-slate-700 text-white shadow-sm' : 'text-gray-600 hover:bg-white'}`}
+                  className={`min-h-8 rounded px-3 py-1 text-xs font-semibold whitespace-nowrap ${!isProposal ? 'bg-slate-700 text-white shadow-sm' : 'text-gray-600 hover:bg-white'}`}
                 >
-                  Quotation<span className="block text-xs font-normal">正式报价</span>
+                  Quotation 正式报价
                 </button>
                 <button
                   type="button"
                   onClick={() => setField('documentMode', 'proposal')}
-                  className={`min-h-12 rounded px-3 py-2 text-sm font-semibold ${isProposal ? 'bg-slate-700 text-white shadow-sm' : 'text-gray-600 hover:bg-white'}`}
+                  className={`min-h-8 rounded px-3 py-1 text-xs font-semibold whitespace-nowrap ${isProposal ? 'bg-slate-700 text-white shadow-sm' : 'text-gray-600 hover:bg-white'}`}
                 >
-                  Technical Proposal<span className="block text-xs font-normal">参数方案</span>
+                  Technical Proposal 参数方案
                 </button>
               </div>
             </div>
