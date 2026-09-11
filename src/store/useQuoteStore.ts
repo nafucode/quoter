@@ -18,6 +18,8 @@ const LEGACY_CAR_WALL_TEXTS = new Set([
 
 const normalizeCabinEffect = (cabinEffect: any) => {
   const nextCabinEffect = JSON.parse(JSON.stringify(cabinEffect ?? elevatorTemplate.cabinEffect));
+  nextCabinEffect.cabinImage2 = nextCabinEffect.cabinImage2 ?? '';
+  nextCabinEffect.cabinImage3 = nextCabinEffect.cabinImage3 ?? '';
   if (nextCabinEffect.button?.type === 'text' && nextCabinEffect.button.value === LEGACY_BUTTON_TEXT) {
     nextCabinEffect.button.value = DEFAULT_BUTTON_TEXT;
   }
@@ -79,6 +81,7 @@ const normalizeQuoteState = (state: any) => {
   if (!state || typeof state !== 'object') return state;
   return {
     ...state,
+    documentMode: state.documentMode ?? 'quotation',
     warrantyText: state.warrantyText || buildDefaultWarrantyText(state.warrantyMonths),
     quoteRemarks: state.quoteRemarks ?? '',
     shaftFrame: normalizeOptionalItem(state.shaftFrame, initialState.shaftFrame),
@@ -106,6 +109,7 @@ interface OptionalItem {
 }
 
 interface QuoteState {
+  documentMode: 'quotation' | 'proposal';
   companyName: string;
   country: string;
   ruc: string;
@@ -148,6 +152,7 @@ interface QuoteState {
 }
 
 const initialState = {
+  documentMode: 'quotation' as const,
   companyName: 'Your Company Name',
   country: '',
   ruc: '',

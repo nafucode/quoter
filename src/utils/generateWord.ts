@@ -200,6 +200,7 @@ const cargoAdjustedFeatureText = (text: string, hasCargoElevator: boolean) =>
 // ─── main export ────────────────────────────────────────────────────────────
 
 export async function generateWordBlob(state: {
+  documentMode?: 'quotation' | 'proposal';
   companyName: string;
   country?: string;
   ruc?: string;
@@ -229,6 +230,7 @@ export async function generateWordBlob(state: {
   language: Lang;
 }): Promise<Blob> {
   const t = getTranslations(state.language);
+  const isProposal = state.documentMode === 'proposal';
   const showPartList = state.showPartList ?? true;
   const showFunctionList = state.showFunctionList ?? true;
   const isNoneText = (value: unknown) => String(value ?? '').trim().toLowerCase() === 'none';
@@ -243,9 +245,11 @@ export async function generateWordBlob(state: {
     state.elevators.map(async (elev) => {
       const ce = elev.cabinEffect;
       if (!ce) return null;
-      const [cabinImage, copImage, lopImage, ceiling, button, floor, landingDoor, handrail, copLogo] =
+      const [cabinImage, cabinImage2, cabinImage3, copImage, lopImage, ceiling, button, floor, landingDoor, handrail, copLogo] =
         await Promise.all([
           fetchImgData(ce.cabinImage),
+          fetchImgData(ce.cabinImage2),
+          fetchImgData(ce.cabinImage3),
           fetchImgData(ce.copImage),
           fetchImgData(ce.lopImage),
           fetchImgData(ce.ceiling?.type === 'image' ? ce.ceiling.value : null),
@@ -255,7 +259,7 @@ export async function generateWordBlob(state: {
           fetchImgData(ce.handrail?.type === 'image' ? ce.handrail.value : null),
           fetchImgData(ce.copLogo?.type === 'image' ? ce.copLogo.value : null),
         ]);
-      return { cabinImage, copImage, lopImage, ceiling, button, floor, landingDoor, handrail, copLogo };
+      return { cabinImage, cabinImage2, cabinImage3, copImage, lopImage, ceiling, button, floor, landingDoor, handrail, copLogo };
     }),
   );
 
@@ -311,7 +315,7 @@ export async function generateWordBlob(state: {
 
   // === QUOTATION TITLE ===
   children.push(
-    para([bold(`${t.quotation}`, 32)], { align: AlignmentType.CENTER, spacingAfter: 120 }),
+    para([bold(isProposal ? (state.language === 'zh' ? '参数方案' : state.language === 'zh-en' ? 'Technical Proposal / 参数方案' : 'Technical Proposal') : `${t.quotation}`, 32)], { align: AlignmentType.CENTER, spacingAfter: 120 }),
   );
 
   // Info table (2-col)
@@ -328,7 +332,7 @@ export async function generateWordBlob(state: {
             cell([bold(`${t.company}: `, 20), plain(state.companyName, 20)], {
               width: infoColW,
             }),
-            cell([bold(`${t.quotationNo}: `, 20), plain(state.quotationNo, 20)], {
+            cell([bold(`${isProposal ? (state.language === 'zh' ? '方案编号' : state.language === 'zh-en' ? 'Proposal No / 方案编号' : 'Proposal No') : t.quotationNo}: `, 20), plain(state.quotationNo, 20)], {
               width: CONTENT_W - infoColW,
             }),
           ],
@@ -352,7 +356,7 @@ export async function generateWordBlob(state: {
             cell([bold(`${t.projectName}: `, 20), plain(state.projectName, 20)], {
               width: infoColW,
             }),
-            cell([bold(`${t.quotationType}: `, 20), plain(state.quotationType, 20)], {
+            cell(isProposal ? '' : [bold(`${t.quotationType}: `, 20), plain(state.quotationType, 20)], {
               width: CONTENT_W - infoColW,
             }),
           ],
@@ -363,6 +367,7 @@ export async function generateWordBlob(state: {
   children.push(para([], { spacingAfter: 200 }));
 
   // === PRICE TABLE ===
+  if (!isProposal) {
   children.push(para([bold(t.priceTitle, 22)], { spacingAfter: 80 }));
 
   // col widths: description, specs, qty, unit price, total price
@@ -549,6 +554,7 @@ export async function generateWordBlob(state: {
     }
   }
   children.push(para([], { spacingAfter: 200 }));
+  }
 
   // === SPECIFICATIONS (one per elevator) ===
   children.push(
@@ -670,7 +676,7 @@ export async function generateWordBlob(state: {
     const ce = elev.cabinEffect;
     const hasAnyImage =
       imgs &&
-      (imgs.cabinImage || imgs.copImage || imgs.lopImage ||
+      (imgs.cabinImage || imgs.cabinImage2 || imgs.cabinImage3 || imgs.copImage || imgs.lopImage ||
         imgs.ceiling || imgs.button || imgs.floor ||
         imgs.landingDoor || (showHandrail && imgs.handrail) || imgs.copLogo);
 
@@ -719,17 +725,32 @@ export async function generateWordBlob(state: {
           rows: [
             // Row 1 header: CABIN / COP / LOP
             new TableRow({
-              children: [hdrCell(t.cabin, effCols[0]), hdrCell(t.cop, effCols[1]), hdrCell(t.lop, effCols[2])],
+              children: isProposal
+                ? [hdrCell(`${t.cabin} 1`, effCols[0]), hdrCell(`${t.cabin} 2`, effCols[1]), hdrCell(`${t.cabin} 3`, effCols[2])]
+                : [hdrCell(t.cabin, effCols[0]), hdrCell(t.cop, effCols[1]), hdrCell(t.lop, effCols[2])],
             }),
             // Row 2: main images — large height to fill ~40% of page
             new TableRow({
               height: { value: 4500, rule: 'atLeast' },
               children: [
                 effectCell(imgDataToPara(imgs.cabinImage, 188, 330), effCols[0]),
-                effectCell(imgDataToPara(imgs.copImage,  110, 330), effCols[1]),
-                effectCell(imgDataToPara(imgs.lopImage,  140, 330), effCols[2]),
+                effectCell(imgDataToPara(isProposal ? imgs.cabinImage2 : imgs.copImage, isProposal ? 188 : 110, 330), effCols[1]),
+                effectCell(imgDataToPara(isProposal ? imgs.cabinImage3 : imgs.lopImage, isProposal ? 188 : 140, 330), effCols[2]),
               ],
             }),
+            ...(isProposal ? [
+              new TableRow({
+                children: [hdrCell(t.cop, effCols[0]), hdrCell(t.lop, effCols[1]), hdrCell(t.landingDoor, effCols[2])],
+              }),
+              new TableRow({
+                height: { value: 3000, rule: 'atLeast' as const },
+                children: [
+                  effectCell(imgDataToPara(imgs.copImage, 110, 240), effCols[0]),
+                  effectCell(imgDataToPara(imgs.lopImage, 140, 240), effCols[1]),
+                  valCell(imgs.landingDoor, ce.landingDoor, 160, 240, effCols[2]),
+                ],
+              }),
+            ] : []),
             // Row 3 header: CEILING / BUTTON / FLOOR
             new TableRow({
               children: [hdrCell(t.cellCeiling, effCols[0]), hdrCell(t.cellButton, effCols[1]), hdrCell(t.cellFloor, effCols[2])],

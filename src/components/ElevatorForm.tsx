@@ -59,7 +59,7 @@ const buildServingFloors = (floorsStops: string | number) => {
   return ['GF', ...Array.from({ length: Math.max(floorCount - 1, 0) }, (_, index) => `${index + 1}F`)].join('-');
 };
 
-const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFocus: (section: string) => void }) => {
+const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: { elevator: any, onSectionFocus: (section: string) => void, documentMode?: 'quotation' | 'proposal' }) => {
   const { updateElevator, removeElevator, toggleElevatorCollapse } = useQuoteStore();
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
   const [isDoorOpeningMenuOpen, setIsDoorOpeningMenuOpen] = useState(false);
@@ -192,6 +192,12 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
       case 'cabin':
         newCabinEffect = { ...elevator.cabinEffect, cabinImage: style.previewImage, ceiling: { type: 'text', value: style.id } };
         break;
+      case 'cabin2':
+        newCabinEffect = { ...elevator.cabinEffect, cabinImage2: style.previewImage };
+        break;
+      case 'cabin3':
+        newCabinEffect = { ...elevator.cabinEffect, cabinImage3: style.previewImage };
+        break;
       case 'cop':
         newCabinEffect = { ...elevator.cabinEffect, copImage: style.previewImage };
         break;
@@ -221,7 +227,9 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
 
   const getPickerProps = () => {
     switch (pickerState.type) {
-      case 'cabin': return { styleGroups: cabinStyleGroups, title: 'Choose a Cabin Style' };
+      case 'cabin':
+      case 'cabin2':
+      case 'cabin3': return { styleGroups: cabinStyleGroups, title: 'Choose a Cabin Style' };
       case 'cop': return { styleGroups: copStyleGroups, title: 'Choose a COP Style' };
       case 'lop': return { styleGroups: [{ groupName: 'LOP Styles', styles: lopStyles }], title: 'Choose a LOP Style' };
       case 'landingDoor': return { styleGroups: [{ groupName: 'Landing Door Styles', styles: landingDoorStyles }], title: 'Choose a Landing Door Style' };
@@ -311,10 +319,10 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
                 <label className="block text-sm font-medium text-gray-700">Qty<span className="block text-xs text-gray-500">数量</span></label>
                 <input name="qty" value={elevator.qty} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
               </div>
-              <div>
+              {documentMode === 'quotation' && <div>
                 <label className="block text-sm font-medium text-gray-700">Unit Price<span className="block text-xs text-gray-500">单价</span></label>
                 <input name="unitPrice" value={elevator.unitPrice} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
-              </div>
+              </div>}
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Type<span className="block text-xs text-gray-500">类型（根据机房 / 载重 / 速度自动生成）</span></label>
                 <input name="type" value={generatedType} readOnly className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 shadow-sm" />
@@ -575,10 +583,24 @@ const ElevatorForm = ({ elevator, onSectionFocus }: { elevator: any, onSectionFo
               <h4 className="text-md font-semibold mt-4 border-b">VI. Cabin Effect<span className="block text-sm font-normal text-gray-500">效果图</span></h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Cabin Image<span className="block text-xs text-gray-500">轿厢图片</span></label>
+                  <label className="block text-sm font-medium text-gray-700">{documentMode === 'proposal' ? 'Cabin Image 1' : 'Cabin Image'}<span className="block text-xs text-gray-500">{documentMode === 'proposal' ? '轿厢图片 1' : '轿厢图片'}</span></label>
                   <input type="file" name="cabinImage" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                   <button onClick={() => openPicker('cabin')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
                 </div>
+                {documentMode === 'proposal' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Cabin Image 2<span className="block text-xs text-gray-500">轿厢图片 2</span></label>
+                      <input type="file" name="cabinImage2" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
+                      <button onClick={() => openPicker('cabin2')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Cabin Image 3<span className="block text-xs text-gray-500">轿厢图片 3</span></label>
+                      <input type="file" name="cabinImage3" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
+                      <button onClick={() => openPicker('cabin3')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
+                    </div>
+                  </>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">COP Image<span className="block text-xs text-gray-500">操纵盘图片</span></label>
                   <input type="file" name="copImage" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>

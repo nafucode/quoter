@@ -79,6 +79,7 @@ const hasEffectValue = (value: unknown) => {
 
 const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getState>): ExportPreflightIssue[] => {
   const issues: ExportPreflightIssue[] = [];
+  const isProposal = state.documentMode === 'proposal';
   if (!state.companyName.trim() || state.companyName.trim() === 'Your Company Name') {
     issues.push({ category: '客户信息', message: '尚未填写正式的客户公司名称。' });
   }
@@ -88,7 +89,7 @@ const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getStat
 
   state.elevators.forEach((elevator, index) => {
     const label = elevator.title || `电梯 #L${index + 1}`;
-    if (!(Number(elevator.unitPrice) > 0)) {
+    if (!isProposal && !(Number(elevator.unitPrice) > 0)) {
       issues.push({ category: '价格', message: `${label} 的单价为空或为 0。` });
     }
     const effect = elevator.cabinEffect || {};
@@ -113,6 +114,8 @@ const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getStat
     }
   });
 
+  if (isProposal) return issues;
+
   const destination = state.freightDestination.trim();
   const destinationMissing = !destination || destination === DEFAULT_FREIGHT_PLACEHOLDER;
   if (['CIF', 'CFR', 'FOB'].includes(state.quotationType) && destinationMissing) {
@@ -129,6 +132,7 @@ const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getStat
 
 const Quote = () => {
   const {
+    documentMode,
     companyName,
     country,
     ruc,
@@ -165,6 +169,7 @@ const Quote = () => {
     updatePartListItem,
     setPartListTemplate,
   } = useQuoteStore();
+  const isProposal = documentMode === 'proposal';
 
   const partListGroups = [
     ...(partListTemplate !== 'platform'
@@ -380,6 +385,8 @@ const Quote = () => {
       ...e,
       cabinEffect: {
         cabinImage: libraryImage(e.cabinEffect?.cabinImage),
+        cabinImage2: libraryImage(e.cabinEffect?.cabinImage2),
+        cabinImage3: libraryImage(e.cabinEffect?.cabinImage3),
         copImage: libraryImage(e.cabinEffect?.copImage),
         lopImage: libraryImage(e.cabinEffect?.lopImage),
         ceiling: safeHybrid(e.cabinEffect?.ceiling),
@@ -391,6 +398,7 @@ const Quote = () => {
       },
     }));
     const safeState = {
+      documentMode: s.documentMode,
       companyName: s.companyName, country: s.country, ruc: s.ruc, quotationNo: s.quotationNo, projectName: s.projectName,
       quotationType: s.quotationType, quotationDate: s.quotationDate,
       elevators: safeElevators, freightDestination: s.freightDestination,
@@ -477,9 +485,9 @@ const Quote = () => {
     }
   };
 
-  const buildQuotationFileTitle = (company: string, project: string) => {
+  const buildQuotationFileTitle = (company: string, project: string, mode: 'quotation' | 'proposal' = documentMode) => {
     const sanitize = (s: string) => s.replace(/[/\\?%*:|"<>]/g, '-').trim();
-    return `Quotation-${sanitize(company)}-${sanitize(project)}`;
+    return `${mode === 'proposal' ? 'Technical-Proposal' : 'Quotation'}-${sanitize(company)}-${sanitize(project)}`;
   };
 
   const performGeneratePDF = () => {
@@ -490,7 +498,7 @@ const Quote = () => {
       return;
     }
     // Set document.title so the browser uses it as the default PDF filename.
-    const pdfTitle = buildQuotationFileTitle(companyName, projectName);
+    const pdfTitle = buildQuotationFileTitle(companyName, projectName, documentMode);
     const prevTitle = document.title;
     document.title = pdfTitle;
     window.print();
@@ -502,6 +510,7 @@ const Quote = () => {
     try {
       const s = useQuoteStore.getState();
       const blob = await generateWordBlob({
+        documentMode: s.documentMode,
         companyName: s.companyName,
         country: s.country,
         ruc: s.ruc,
@@ -533,7 +542,7 @@ const Quote = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${buildQuotationFileTitle(s.companyName, s.projectName)}.docx`;
+      a.download = `${buildQuotationFileTitle(s.companyName, s.projectName, s.documentMode)}.docx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -852,8 +861,27 @@ const Quote = () => {
         <div className="flex flex-col md:flex-row md:space-x-4">
           {/* Left Side - Inputs */}
           <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md no-print">
+            <div className="mb-5 border-b border-gray-200 pb-5">
+              <label className="mb-2 block text-sm font-semibold text-gray-800">Document Purpose<span className="block text-xs font-normal text-gray-500">文档用途</span></label>
+              <div className="grid grid-cols-2 overflow-hidden rounded-md border border-gray-300 bg-gray-50 p-1">
+                <button
+                  type="button"
+                  onClick={() => setField('documentMode', 'quotation')}
+                  className={`min-h-12 rounded px-3 py-2 text-sm font-semibold ${!isProposal ? 'bg-slate-700 text-white shadow-sm' : 'text-gray-600 hover:bg-white'}`}
+                >
+                  Quotation<span className="block text-xs font-normal">正式报价</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setField('documentMode', 'proposal')}
+                  className={`min-h-12 rounded px-3 py-2 text-sm font-semibold ${isProposal ? 'bg-slate-700 text-white shadow-sm' : 'text-gray-600 hover:bg-white'}`}
+                >
+                  Technical Proposal<span className="block text-xs font-normal">参数方案</span>
+                </button>
+              </div>
+            </div>
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <h2 className="text-xl font-semibold">报价详情</h2>
+              <h2 className="text-xl font-semibold">{isProposal ? '参数方案详情' : '报价详情'}</h2>
               <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-end">
                 <div className="w-full sm:w-64">
                   <label className="block text-sm font-medium text-gray-700">Country<span className="block text-xs text-gray-500">国家</span></label>
@@ -918,7 +946,7 @@ const Quote = () => {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Quotation No<span className="block text-xs text-gray-500">报价单号</span></label>
+                <label className="block text-sm font-medium text-gray-700">{isProposal ? 'Proposal No' : 'Quotation No'}<span className="block text-xs text-gray-500">{isProposal ? '方案编号' : '报价单号'}</span></label>
                 <div className="mt-1 flex gap-1">
                   <input
                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -957,7 +985,7 @@ const Quote = () => {
                   onChange={(e) => setField('projectName', e.target.value)}
                 />
               </div>
-              <div>
+              {!isProposal && <div>
                 <label className="block text-sm font-medium text-gray-700">Quotation Type<span className="block text-xs text-gray-500">报价类型</span></label>
                 <select
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -970,9 +998,9 @@ const Quote = () => {
                   <option>CFR</option>
                   <option>DDP</option>
                 </select>
-              </div>
+              </div>}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Quotation Date<span className="block text-xs text-gray-500">报价日期</span></label>
+                <label className="block text-sm font-medium text-gray-700">{isProposal ? 'Proposal Date' : 'Quotation Date'}<span className="block text-xs text-gray-500">{isProposal ? '方案日期' : '报价日期'}</span></label>
                 <input
                   type="date"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -982,6 +1010,7 @@ const Quote = () => {
               </div>
             </div>
             
+            {!isProposal && <>
             <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Freight & Currency<span className="block text-sm font-normal text-gray-500">运费和货币</span></h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {isExw ? (
@@ -1390,6 +1419,8 @@ const Quote = () => {
               )}
             </div>
 
+            </>}
+
             {/* Output Options */}
             <h3 className="text-lg font-semibold mt-6 mb-3 border-t pt-4">Print Options<span className="block text-sm font-normal text-gray-500">打印选项</span></h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1414,7 +1445,7 @@ const Quote = () => {
             </div>
 
             {elevators.map((elevator) => (
-              <ElevatorForm key={elevator.id} elevator={elevator} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
+              <ElevatorForm key={elevator.id} elevator={elevator} documentMode={documentMode} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
             ))}
             <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">+ 添加电梯</button>
 
@@ -1522,16 +1553,16 @@ const Quote = () => {
             <div className="w-full p-4 bg-white rounded-lg shadow-md">
               <Header />
               <div className="p-4">
-                <h2 className="text-2xl font-bold mb-4 border-b pb-2">{t.quotation}</h2>
+                <h2 className="text-2xl font-bold mb-4 border-b pb-2">{isProposal ? (language === 'zh' ? '参数方案' : language === 'zh-en' ? 'Technical Proposal / 参数方案' : 'Technical Proposal') : t.quotation}</h2>
                 <div className="space-y-2">
                   <p><span className="font-semibold">{t.company}:</span> {companyName}</p>
                   {shouldShowRuc && <p><span className="font-semibold">RUC:</span> {ruc}</p>}
-                  <p><span className="font-semibold">{t.quotationNo}:</span> {quotationNo}</p>
+                  <p><span className="font-semibold">{isProposal ? (language === 'zh' ? '方案编号' : language === 'zh-en' ? 'Proposal No / 方案编号' : 'Proposal No') : t.quotationNo}:</span> {quotationNo}</p>
                   <p><span className="font-semibold">{t.projectName}:</span> {projectName}</p>
-                  <p><span className="font-semibold">{t.quotationType}:</span> {quotationType}</p>
+                  {!isProposal && <p><span className="font-semibold">{t.quotationType}:</span> {quotationType}</p>}
                 </div>
 
-                <div className="mt-4 pt-4 border-t overflow-x-auto">
+                {!isProposal && <div className="mt-4 pt-4 border-t overflow-x-auto">
                   <h3 className="text-lg font-semibold mb-2">{t.priceTitle}</h3>
                   <table className="w-full text-sm text-left printable-table border-collapse">
                     <thead className="bg-gray-200">
@@ -1605,9 +1636,9 @@ const Quote = () => {
                       )}
                     </tbody>
                   </table>
-                </div>
+                </div>}
 
-                {language === 'zh-en' ? (
+                {!isProposal && (language === 'zh-en' ? (
                   <div className="mt-4 pt-4 border-t text-sm space-y-3">
                     <div>
                       <p className="font-semibold">I. Delivery/交货期:</p>
@@ -1648,7 +1679,7 @@ const Quote = () => {
                       <p><span className="font-semibold">{t.complianceStandard}</span> {selectedCertificationStandard}</p>
                     )}
                   </div>
-                )}
+                ))}
 
                 <div className="mt-4 pt-4 border-t break-before-page">
                   <h3 className="text-lg font-semibold mb-2">{t.specificationsTitle}</h3>
@@ -1719,20 +1750,35 @@ const Quote = () => {
                         <p className="text-center text-sm text-gray-500 mb-2">{t.decorationNote}</p>
                         <div className="grid grid-cols-3 border-t border-l border-gray-400">
                           {/* Row 1: Titles */}
-                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cabin}</div>
-                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cop}</div>
-                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.lop}</div>
+                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{isProposal ? `${t.cabin} 1` : t.cabin}</div>
+                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{isProposal ? `${t.cabin} 2` : t.cop}</div>
+                          <div className="font-bold text-center border-b border-r border-gray-400 p-1">{isProposal ? `${t.cabin} 3` : t.lop}</div>
 
                           {/* Row 2: Images */}
                           <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
                             {elevator.cabinEffect.cabinImage && <img src={elevator.cabinEffect.cabinImage} alt="Cabin" className="max-h-full max-w-full"/>}
                           </div>
                           <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
-                            {elevator.cabinEffect.copImage && <img src={elevator.cabinEffect.copImage} alt="COP" className="max-h-full max-w-full"/>}
+                            {(isProposal ? elevator.cabinEffect.cabinImage2 : elevator.cabinEffect.copImage) && <img src={isProposal ? elevator.cabinEffect.cabinImage2 : elevator.cabinEffect.copImage} alt={isProposal ? 'Cabin 2' : 'COP'} className="max-h-full max-w-full"/>}
                           </div>
                           <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
-                            {elevator.cabinEffect.lopImage && <img src={elevator.cabinEffect.lopImage} alt="LOP" className="max-h-full max-w-full"/>}
+                            {(isProposal ? elevator.cabinEffect.cabinImage3 : elevator.cabinEffect.lopImage) && <img src={isProposal ? elevator.cabinEffect.cabinImage3 : elevator.cabinEffect.lopImage} alt={isProposal ? 'Cabin 3' : 'LOP'} className="max-h-full max-w-full"/>}
                           </div>
+
+                          {isProposal && <>
+                            <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cop}</div>
+                            <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.lop}</div>
+                            <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.landingDoor}</div>
+                            <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48">
+                              {elevator.cabinEffect.copImage && <img src={elevator.cabinEffect.copImage} alt="COP" className="max-h-full max-w-full"/>}
+                            </div>
+                            <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48">
+                              {elevator.cabinEffect.lopImage && <img src={elevator.cabinEffect.lopImage} alt="LOP" className="max-h-full max-w-full"/>}
+                            </div>
+                            <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48">
+                              {elevator.cabinEffect.landingDoor.type === 'image' && elevator.cabinEffect.landingDoor.value ? <img src={elevator.cabinEffect.landingDoor.value} alt="Landing Door" className="max-h-full max-w-full"/> : elevator.cabinEffect.landingDoor.type === 'text' ? elevator.cabinEffect.landingDoor.value : null}
+                            </div>
+                          </>}
 
                           {/* Row 2: Titles */}
                           <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cellCeiling}</div>
@@ -1776,7 +1822,7 @@ const Quote = () => {
                 </div>
 
                 <div className="mt-4 pt-4 border-t text-right text-sm text-gray-500">
-                  <p>{t.quotationDate}: {quotationDate}</p>
+                  <p>{isProposal ? (language === 'zh' ? '方案日期' : language === 'zh-en' ? 'Proposal Date / 方案日期' : 'Proposal Date') : t.quotationDate}: {quotationDate}</p>
                 </div>
 
                 {(showPartList || showFunctionList) && (
