@@ -23,6 +23,7 @@ const ENTRANCE_OPTIONS = [
   'Single Entrance',
   'Double Entrance',
   'Front & Rear Entrance (Through Loading)',
+  'Front & Side Entrance (90°)',
   'Front & Left Side Entrance (90°)',
   'Front & Right Side Entrance (90°)',
 ];
@@ -368,7 +369,9 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                   <label className="block text-sm font-medium text-gray-700">Entrances<span className="block text-xs text-gray-500">入口</span></label>
                   <select name="entrances" value={elevator.entrances} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
                     {ENTRANCE_OPTIONS.map((option) => (
-                      <option key={option} value={option}>{option}</option>
+                      <option key={option} value={option}>
+                        {option === 'Front & Side Entrance (90°)' ? `${option} / 直角贯通` : option}
+                      </option>
                     ))}
                   </select>
                 </div>

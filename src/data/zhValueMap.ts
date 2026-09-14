@@ -46,6 +46,7 @@ export const ZH_VALUE_MAP: [RegExp, string][] = [
   // ── Entrances ──────────────────────────────────────────────────────────────
   [/single\s*entrance/gi,        '单入口'],
   [/double\s*entrance/gi,        '双入口'],
+  [/front\s*&?\s*side\s*entrance\s*\(90°?\)/gi, '直角贯通'],
   [/through\s*(car|entrance)/gi, '前后贯通'],
   [/front\s*and\s*rear/gi,       '前后贯通'],
 
