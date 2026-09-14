@@ -51,6 +51,8 @@ type PiForm = {
   showTargetCurrency: boolean;
   targetCurrency: string;
   targetExchangeRate: number;
+  freightDescription: string;
+  freightAmount: number;
   goodsDescription: string;
   deliveryTerms: string;
   leadTime: string;
@@ -168,6 +170,8 @@ const initialForm: PiForm = {
   showTargetCurrency: false,
   targetCurrency: "NGN",
   targetExchangeRate: 1460,
+  freightDescription: "",
+  freightAmount: 0,
   goodsDescription: "1 Unit of Elevator (HS CODE: 8428101090)",
   deliveryTerms: "EXW SUZHOU",
   leadTime: "30 days after deposit.",
@@ -477,6 +481,8 @@ function piFromQuote(source: QuoteSnapshot, current: PiForm): PiForm {
     showTargetCurrency: Boolean(quotePricing?.targetCurrency) || current.showTargetCurrency,
     targetCurrency: quotePricing?.targetCurrency || current.targetCurrency,
     targetExchangeRate: Number(source.exchangeRate || current.targetExchangeRate),
+    freightDescription: quotePricing?.freightText || current.freightDescription,
+    freightAmount: Number(quotePricing?.freightCost || 0),
     destination: source.freightDestination || current.destination,
     deliveryTerms:
       source.quotationType === "EXW"
@@ -521,6 +527,10 @@ function normalizePiForm(value: PiForm): PiForm {
   const merged = { ...initialForm, ...value };
   return {
     ...merged,
+    freightDescription:
+      value.freightDescription ?? value.quotePricing?.freightText ?? initialForm.freightDescription,
+    freightAmount:
+      Number(value.freightAmount ?? value.quotePricing?.freightCost ?? initialForm.freightAmount) || 0,
     quotePricing: normalizeQuotePricing(merged.quotePricing, Number(merged.targetExchangeRate || 0)),
   };
 }
@@ -553,18 +563,23 @@ export default function ProformaInvoicePage() {
 
   const total = useMemo(
     () => {
-      if (form.quotePricing) return Number(form.quotePricing.grandTotal || 0);
-      return form.items.reduce(
-        (sum, item) => sum + Number(item.quantity || 0) * Number(item.unitPrice || 0),
-        0,
-      );
+      const goodsTotal = form.quotePricing
+        ? form.quotePricing.rows.reduce(
+            (sum, row) => sum + Number(row.quantity || 0) * Number(row.unitPrice || 0),
+            0,
+          )
+        : form.items.reduce(
+            (sum, item) => sum + Number(item.quantity || 0) * Number(item.unitPrice || 0),
+            0,
+          );
+      return goodsTotal + Number(form.freightAmount || 0);
     },
-    [form.items, form.quotePricing],
+    [form.freightAmount, form.items, form.quotePricing],
   );
 
   const targetTotal = useMemo(
-    () => form.quotePricing?.targetTotal || total * Number(form.targetExchangeRate || 0),
-    [form.quotePricing, form.targetExchangeRate, total],
+    () => total * Number(form.targetExchangeRate || 0),
+    [form.targetExchangeRate, total],
   );
 
   const piNo = useMemo(() => piNoFromContract(form.contractNo), [form.contractNo]);
@@ -1028,6 +1043,38 @@ export default function ProformaInvoicePage() {
             </div>
           </div>
 
+          <div className="mt-6 border-t border-slate-200 pt-4">
+            <h3 className="mb-3 font-semibold">Freight / 运费项目</h3>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_180px]">
+              <label className="block">
+                <span className="text-xs font-medium text-slate-600">Freight Description / 运费描述</span>
+                <textarea
+                  rows={2}
+                  value={form.freightDescription}
+                  onChange={(event) => updateField("freightDescription", event.target.value)}
+                  placeholder="例如：Freight from factory to Lagos Port"
+                  className="mt-1 w-full resize-y rounded-md border border-slate-300 px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-medium text-slate-600">Total Price / 总价</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={form.freightAmount}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      freightAmount: Number(event.target.value),
+                    }))
+                  }
+                  className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
+          </div>
+
           <div className="hidden">
           <div className="mt-6 border-t border-slate-200 pt-4">
             <div className="mb-3 flex items-center justify-between">
@@ -1274,27 +1321,23 @@ export default function ProformaInvoicePage() {
                     ))}
                   </tbody>
                 </table>
-                {form.quotePricing.freightCost > 0 ? (
+                {form.freightDescription || form.freightAmount > 0 ? (
                   <div className="mt-3 grid grid-cols-[1fr_150px] gap-4 text-[13px]">
                     <div className="text-right font-bold whitespace-pre-wrap">
-                      {form.quotePricing.freightText}
+                      {form.freightDescription || "Freight"}
                     </div>
-                    <div className="text-right">${formatMoney(form.quotePricing.freightCost)}</div>
+                    <div className="text-right">${formatMoney(form.freightAmount)}</div>
                   </div>
-                ) : (
-                  <div className="mt-3 text-right font-bold text-[13px] whitespace-pre-wrap">
-                    {form.quotePricing.freightText}
-                  </div>
-                )}
+                ) : null}
                 <div className="mt-3 grid grid-cols-[1fr_150px] gap-4 bg-slate-100 px-2 py-2 text-[13px] font-bold">
                   <div className="text-right">Total amount :</div>
-                  <div className="text-right">${formatMoney(form.quotePricing.grandTotal)}</div>
+                  <div className="text-right">${formatMoney(total)}</div>
                 </div>
-                {form.quotePricing.targetCurrency && form.quotePricing.targetTotal > 0 && (
+                {form.showTargetCurrency && form.targetCurrency && targetTotal > 0 && (
                   <div className="mt-3 grid grid-cols-[1fr_190px] gap-4 px-2 py-1 text-[13px] font-bold">
                     <div className="text-right">=</div>
                     <div className="text-right">
-                      {form.quotePricing.targetCurrency} {formatMoney(form.quotePricing.targetTotal)}
+                      {form.targetCurrency} {formatMoney(targetTotal)}
                     </div>
                   </div>
                 )}
@@ -1343,6 +1386,17 @@ export default function ProformaInvoicePage() {
                       </td>
                     </tr>
                   ))}
+                  {(form.freightDescription || form.freightAmount > 0) && (
+                    <tr>
+                      <td className="border border-black px-2 py-2 text-left font-bold" colSpan={7}>
+                        {form.freightDescription || "Freight"}
+                      </td>
+                      <td className="border border-black px-2 py-2 font-bold">{form.currency}</td>
+                      <td className="border border-black px-2 py-2 text-right font-bold">
+                        {formatMoney(form.freightAmount)}
+                      </td>
+                    </tr>
+                  )}
                   <tr>
                     <td className="border border-black px-2 py-2 text-left font-bold" colSpan={2}>
                       Total:
