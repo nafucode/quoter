@@ -45,10 +45,20 @@ const paymentTermOptions = [
   },
 ];
 
-const sortCompanyOptions = (names: string[]) =>
-  [...names]
-    .filter((name) => typeof name === 'string' && name.trim())
-    .sort((a, b) => a.trim().localeCompare(b.trim(), undefined, { sensitivity: 'base', numeric: true }));
+type CompanyOption = { name: string; country: string };
+
+const normalizeCompanyOptions = (options: unknown[]): CompanyOption[] =>
+  options
+    .map((option) =>
+      typeof option === 'string'
+        ? { name: option.trim(), country: '' }
+        : {
+            name: typeof (option as CompanyOption)?.name === 'string' ? (option as CompanyOption).name.trim() : '',
+            country: typeof (option as CompanyOption)?.country === 'string' ? (option as CompanyOption).country : '',
+          },
+    )
+    .filter((option) => option.name)
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true }));
 
 const DEFAULT_FREIGHT_PLACEHOLDER = 'e.g., Port of Shanghai';
 const EXW_PICKUP_DESTINATION = 'Pickup from factory arranged by the customer. 客户安排工厂自提。';
@@ -228,7 +238,7 @@ const Quote = () => {
   const CURRENT_CONTRACT_QUOTE_KEY = 'quoter_current_contract_quote';
   const COMPANY_OPTIONS_KEY = 'quoter_company_options';
 
-  const [companyOptions, setCompanyOptions] = useState<string[]>([]);
+  const [companyOptions, setCompanyOptions] = useState<CompanyOption[]>([]);
 
   useEffect(() => {
     setIsClient(true);
@@ -239,7 +249,7 @@ const Quote = () => {
     try {
       const savedCompanies = JSON.parse(localStorage.getItem(COMPANY_OPTIONS_KEY) || '[]');
       if (Array.isArray(savedCompanies)) {
-        setCompanyOptions(sortCompanyOptions(savedCompanies));
+        setCompanyOptions(normalizeCompanyOptions(savedCompanies));
       }
     } catch {}
   }, []);
@@ -319,10 +329,20 @@ const Quote = () => {
     const trimmedName = companyName.trim();
     if (!trimmedName) return;
     setCompanyOptions(prev => {
-      const updated = sortCompanyOptions([trimmedName, ...prev.filter(name => name !== trimmedName)]).slice(0, 100);
+      const updated = normalizeCompanyOptions([
+        { name: trimmedName, country },
+        ...prev.filter(option => option.name.toLocaleLowerCase() !== trimmedName.toLocaleLowerCase()),
+      ]).slice(0, 100);
       localStorage.setItem(COMPANY_OPTIONS_KEY, JSON.stringify(updated));
       return updated;
     });
+  };
+
+  const selectCompanyOption = (name: string) => {
+    const selected = companyOptions.find(option => option.name === name);
+    if (!selected) return;
+    setField('companyName', selected.name);
+    if (selected.country) setField('country', selected.country);
   };
 
   const handleQuotationTypeChange = (value: string) => {
@@ -941,11 +961,13 @@ const Quote = () => {
                   <select
                     className="mt-2 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
                     value=""
-                    onChange={(e) => e.target.value && setField('companyName', e.target.value)}
+                    onChange={(e) => e.target.value && selectCompanyOption(e.target.value)}
                   >
                     <option value="">选择已保存公司</option>
-                    {companyOptions.map(name => (
-                      <option key={name} value={name}>{name}</option>
+                    {companyOptions.map(option => (
+                      <option key={option.name} value={option.name}>
+                        {option.name}{option.country ? ` · ${option.country}` : ''}
+                      </option>
                     ))}
                   </select>
                 )}
