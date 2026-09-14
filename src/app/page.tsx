@@ -1472,7 +1472,7 @@ const Quote = () => {
             </div>
 
             {elevators.map((elevator) => (
-              <ElevatorForm key={elevator.id} elevator={elevator} documentMode={documentMode} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
+              <ElevatorForm key={elevator.id} elevator={elevator} country={country} documentMode={documentMode} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
             ))}
             <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">+ 添加电梯</button>
 

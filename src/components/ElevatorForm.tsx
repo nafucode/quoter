@@ -53,13 +53,14 @@ const DESCRIPTION_OPTIONS = [
 
 const isNoneText = (value: unknown) => String(value ?? '').trim().toLowerCase() === 'none';
 
-const buildServingFloors = (floorsStops: string | number) => {
+const buildServingFloors = (floorsStops: string | number, country = '') => {
   const floorCount = Number(String(floorsStops).match(/\d+/)?.[0] ?? 0);
   if (!Number.isFinite(floorCount) || floorCount <= 0) return '';
-  return ['GF', ...Array.from({ length: Math.max(floorCount - 1, 0) }, (_, index) => `${index + 1}F`)].join('-');
+  const firstUpperFloor = country === 'Philippines' ? 2 : 1;
+  return ['GF', ...Array.from({ length: Math.max(floorCount - 1, 0) }, (_, index) => `${index + firstUpperFloor}F`)].join('-');
 };
 
-const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: { elevator: any, onSectionFocus: (section: string) => void, documentMode?: 'quotation' | 'proposal' }) => {
+const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', country = '' }: { elevator: any, onSectionFocus: (section: string) => void, documentMode?: 'quotation' | 'proposal', country?: string }) => {
   const { updateElevator, removeElevator, toggleElevatorCollapse } = useQuoteStore();
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
   const [isDoorOpeningMenuOpen, setIsDoorOpeningMenuOpen] = useState(false);
@@ -80,6 +81,19 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: 
       updateElevator(elevator.id, 'type', generatedType);
     }
   }, [elevator.id, elevator.type, generatedType, updateElevator]);
+
+  useEffect(() => {
+    const regularFloors = buildServingFloors(elevator.floorsStops);
+    const philippinesFloors = buildServingFloors(elevator.floorsStops, 'Philippines');
+    const nextServingFloors = buildServingFloors(elevator.floorsStops, country);
+    if (
+      nextServingFloors &&
+      elevator.servingFloors !== nextServingFloors &&
+      (!elevator.servingFloors || elevator.servingFloors === regularFloors || elevator.servingFloors === philippinesFloors)
+    ) {
+      updateElevator(elevator.id, 'servingFloors', nextServingFloors);
+    }
+  }, [country, elevator.floorsStops, elevator.id, elevator.servingFloors, updateElevator]);
 
   const handleBasicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -102,8 +116,8 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: 
       updateElevator(elevator.id, 'type', buildElevatorType(elevator.machineRoom, elevator.capacity, elevator.speed, value));
     }
     if (name === 'floorsStops') {
-      const previousServingFloors = buildServingFloors(elevator.floorsStops);
-      const nextServingFloors = buildServingFloors(value);
+      const previousServingFloors = buildServingFloors(elevator.floorsStops, country);
+      const nextServingFloors = buildServingFloors(value, country);
       const shouldSyncServingFloors =
         !elevator.servingFloors || elevator.servingFloors === previousServingFloors;
       if (shouldSyncServingFloors) {
