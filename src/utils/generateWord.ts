@@ -201,6 +201,7 @@ const cargoAdjustedFeatureText = (text: string, hasCargoElevator: boolean) =>
 
 export async function generateWordBlob(state: {
   documentMode?: 'quotation' | 'proposal';
+  showProposalCommercial?: boolean;
   companyName: string;
   country?: string;
   ruc?: string;
@@ -231,6 +232,7 @@ export async function generateWordBlob(state: {
 }): Promise<Blob> {
   const t = getTranslations(state.language);
   const isProposal = state.documentMode === 'proposal';
+  const showCommercialContent = !isProposal || Boolean(state.showProposalCommercial);
   const showPartList = state.showPartList ?? true;
   const showFunctionList = state.showFunctionList ?? true;
   const isNoneText = (value: unknown) => String(value ?? '').trim().toLowerCase() === 'none';
@@ -356,7 +358,7 @@ export async function generateWordBlob(state: {
             cell([bold(`${t.projectName}: `, 20), plain(state.projectName, 20)], {
               width: infoColW,
             }),
-            cell(isProposal ? '' : [bold(`${t.quotationType}: `, 20), plain(state.quotationType, 20)], {
+            cell(showCommercialContent ? [bold(`${t.quotationType}: `, 20), plain(state.quotationType, 20)] : '', {
               width: CONTENT_W - infoColW,
             }),
           ],
@@ -367,7 +369,7 @@ export async function generateWordBlob(state: {
   children.push(para([], { spacingAfter: 200 }));
 
   // === PRICE TABLE ===
-  if (!isProposal) {
+  if (showCommercialContent) {
   children.push(para([bold(t.priceTitle, 22)], { spacingAfter: 80 }));
 
   // col widths: description, specs, qty, unit price, total price

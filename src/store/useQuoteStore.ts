@@ -84,6 +84,7 @@ const normalizeQuoteState = (state: any) => {
   return {
     ...state,
     documentMode: state.documentMode ?? 'quotation',
+    showProposalCommercial: state.showProposalCommercial ?? false,
     warrantyText: state.warrantyText || buildDefaultWarrantyText(state.warrantyMonths),
     quoteRemarks: state.quoteRemarks ?? '',
     shaftFrame: normalizeOptionalItem(state.shaftFrame, initialState.shaftFrame),
@@ -112,6 +113,7 @@ interface OptionalItem {
 
 interface QuoteState {
   documentMode: 'quotation' | 'proposal';
+  showProposalCommercial: boolean;
   companyName: string;
   country: string;
   ruc: string;
@@ -155,6 +157,7 @@ interface QuoteState {
 
 const initialState = {
   documentMode: 'quotation' as const,
+  showProposalCommercial: false,
   companyName: 'Your Company Name',
   country: '',
   ruc: '',

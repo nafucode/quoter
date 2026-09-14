@@ -60,7 +60,7 @@ const buildServingFloors = (floorsStops: string | number, country = '') => {
   return ['GF', ...Array.from({ length: Math.max(floorCount - 1, 0) }, (_, index) => `${index + firstUpperFloor}F`)].join('-');
 };
 
-const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', country = '' }: { elevator: any, onSectionFocus: (section: string) => void, documentMode?: 'quotation' | 'proposal', country?: string }) => {
+const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', country = '', showCommercialFields = false }: { elevator: any, onSectionFocus: (section: string) => void, documentMode?: 'quotation' | 'proposal', country?: string, showCommercialFields?: boolean }) => {
   const { updateElevator, removeElevator, toggleElevatorCollapse } = useQuoteStore();
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
   const [isDoorOpeningMenuOpen, setIsDoorOpeningMenuOpen] = useState(false);
@@ -334,7 +334,7 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                 <label className="block text-sm font-medium text-gray-700">Qty<span className="block text-xs text-gray-500">数量</span></label>
                 <input name="qty" value={elevator.qty} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
               </div>
-              {documentMode === 'quotation' && <div>
+              {(documentMode === 'quotation' || showCommercialFields) && <div>
                 <label className="block text-sm font-medium text-gray-700">Unit Price<span className="block text-xs text-gray-500">单价</span></label>
                 <input name="unitPrice" value={elevator.unitPrice} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
               </div>}

@@ -93,6 +93,7 @@ const getProposalCabinCount = (elevator: any) =>
 const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getState>): ExportPreflightIssue[] => {
   const issues: ExportPreflightIssue[] = [];
   const isProposal = state.documentMode === 'proposal';
+  const showCommercialContent = !isProposal || state.showProposalCommercial;
   if (!state.companyName.trim() || state.companyName.trim() === 'Your Company Name') {
     issues.push({ category: '客户信息', message: '尚未填写正式的客户公司名称。' });
   }
@@ -102,7 +103,7 @@ const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getStat
 
   state.elevators.forEach((elevator, index) => {
     const label = elevator.title || `电梯 #L${index + 1}`;
-    if (!isProposal && !(Number(elevator.unitPrice) > 0)) {
+    if (showCommercialContent && !(Number(elevator.unitPrice) > 0)) {
       issues.push({ category: '价格', message: `${label} 的单价为空或为 0。` });
     }
     const effect = elevator.cabinEffect || {};
@@ -129,7 +130,7 @@ const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getStat
     }
   });
 
-  if (isProposal) return issues;
+  if (!showCommercialContent) return issues;
 
   const destination = state.freightDestination.trim();
   const destinationMissing = !destination || destination === DEFAULT_FREIGHT_PLACEHOLDER;
@@ -148,6 +149,7 @@ const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getStat
 const Quote = () => {
   const {
     documentMode,
+    showProposalCommercial,
     companyName,
     country,
     ruc,
@@ -185,6 +187,7 @@ const Quote = () => {
     setPartListTemplate,
   } = useQuoteStore();
   const isProposal = documentMode === 'proposal';
+  const showCommercialContent = !isProposal || showProposalCommercial;
 
   const partListGroups = [
     ...(partListTemplate !== 'platform'
@@ -424,6 +427,7 @@ const Quote = () => {
     }));
     const safeState = {
       documentMode: s.documentMode,
+      showProposalCommercial: s.showProposalCommercial,
       companyName: s.companyName, country: s.country, ruc: s.ruc, quotationNo: s.quotationNo, projectName: s.projectName,
       quotationType: s.quotationType, quotationDate: s.quotationDate,
       elevators: safeElevators, freightDestination: s.freightDestination,
@@ -536,6 +540,7 @@ const Quote = () => {
       const s = useQuoteStore.getState();
       const blob = await generateWordBlob({
         documentMode: s.documentMode,
+        showProposalCommercial: s.showProposalCommercial,
         companyName: s.companyName,
         country: s.country,
         ruc: s.ruc,
@@ -904,6 +909,17 @@ const Quote = () => {
                   Technical Proposal 参数方案
                 </button>
               </div>
+              {isProposal && (
+                <label className="inline-flex min-h-8 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={showProposalCommercial}
+                    onChange={(e) => setField('showProposalCommercial', e.target.checked)}
+                    className="h-4 w-4 accent-slate-700"
+                  />
+                  显示价格与商务条款
+                </label>
+              )}
             </div>
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <h2 className="text-xl font-semibold">{isProposal ? '参数方案详情' : '报价详情'}</h2>
@@ -1012,7 +1028,7 @@ const Quote = () => {
                   onChange={(e) => setField('projectName', e.target.value)}
                 />
               </div>
-              {!isProposal && <div>
+              {showCommercialContent && <div>
                 <label className="block text-sm font-medium text-gray-700">Quotation Type<span className="block text-xs text-gray-500">报价类型</span></label>
                 <select
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -1037,7 +1053,7 @@ const Quote = () => {
               </div>
             </div>
             
-            {!isProposal && <>
+            {showCommercialContent && <>
             <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Freight & Currency<span className="block text-sm font-normal text-gray-500">运费和货币</span></h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {isExw ? (
@@ -1472,7 +1488,7 @@ const Quote = () => {
             </div>
 
             {elevators.map((elevator) => (
-              <ElevatorForm key={elevator.id} elevator={elevator} country={country} documentMode={documentMode} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
+              <ElevatorForm key={elevator.id} elevator={elevator} country={country} documentMode={documentMode} showCommercialFields={showCommercialContent} onSectionFocus={(section: string) => setFocusedSection(`${section}-${elevator.id}`)} />
             ))}
             <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">+ 添加电梯</button>
 
@@ -1586,10 +1602,10 @@ const Quote = () => {
                   {shouldShowRuc && <p><span className="font-semibold">RUC:</span> {ruc}</p>}
                   <p><span className="font-semibold">{isProposal ? (language === 'zh' ? '方案编号' : language === 'zh-en' ? 'Proposal No / 方案编号' : 'Proposal No') : t.quotationNo}:</span> {quotationNo}</p>
                   <p><span className="font-semibold">{t.projectName}:</span> {projectName}</p>
-                  {!isProposal && <p><span className="font-semibold">{t.quotationType}:</span> {quotationType}</p>}
+                  {showCommercialContent && <p><span className="font-semibold">{t.quotationType}:</span> {quotationType}</p>}
                 </div>
 
-                {!isProposal && <div className="mt-4 pt-4 border-t overflow-x-auto">
+                {showCommercialContent && <div className="mt-4 pt-4 border-t overflow-x-auto">
                   <h3 className="text-lg font-semibold mb-2">{t.priceTitle}</h3>
                   <table className="w-full text-sm text-left printable-table border-collapse">
                     <thead className="bg-gray-200">
@@ -1665,7 +1681,7 @@ const Quote = () => {
                   </table>
                 </div>}
 
-                {!isProposal && (language === 'zh-en' ? (
+                {showCommercialContent && (language === 'zh-en' ? (
                   <div className="mt-4 pt-4 border-t text-sm space-y-3">
                     <div>
                       <p className="font-semibold">I. Delivery/交货期:</p>
