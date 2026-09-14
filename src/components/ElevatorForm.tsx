@@ -63,6 +63,7 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: 
   const { updateElevator, removeElevator, toggleElevatorCollapse } = useQuoteStore();
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
   const [isDoorOpeningMenuOpen, setIsDoorOpeningMenuOpen] = useState(false);
+  const proposalCabinCount = Math.min(3, Math.max(1, Number(elevator.proposalCabinCount) || (elevator.showThreeCabinsInProposal ? 3 : 1)));
 
   const buildElevatorType = (machineRoom: string, capacity: string | number, speed: string | number, description: string) => {
     const isCargoLift = /freight|cargo/i.test(description);
@@ -582,15 +583,28 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: 
             <div className="sm:col-span-2" onFocus={() => onSectionFocus('cabin-effect')}>
               <h4 className="text-md font-semibold mt-4 border-b">VI. Cabin Effect<span className="block text-sm font-normal text-gray-500">效果图</span></h4>
               {documentMode === 'proposal' && (
-                <label className="mt-3 flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={elevator.showThreeCabinsInProposal ?? false}
-                    onChange={(event) => updateElevator(elevator.id, 'showThreeCabinsInProposal', event.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span>Show 3 cabin options<span className="ml-2 text-xs font-normal text-gray-500">显示 3 个轿厢方案</span></span>
-                </label>
+                <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                  <span className="text-sm font-medium text-gray-700">Cabin options<span className="ml-2 text-xs font-normal text-gray-500">展示轿厢数量</span></span>
+                  <div className="flex h-9 items-center overflow-hidden rounded-md border border-gray-300 bg-white" aria-label="Cabin option count">
+                    <button
+                      type="button"
+                      title="Remove cabin option"
+                      aria-label="Remove cabin option"
+                      disabled={proposalCabinCount <= 1}
+                      onClick={() => updateElevator(elevator.id, 'proposalCabinCount', proposalCabinCount - 1)}
+                      className="h-9 w-9 text-xl text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-300"
+                    >−</button>
+                    <output className="flex h-9 min-w-10 items-center justify-center border-x border-gray-300 text-sm font-semibold text-gray-800">{proposalCabinCount}</output>
+                    <button
+                      type="button"
+                      title="Add cabin option"
+                      aria-label="Add cabin option"
+                      disabled={proposalCabinCount >= 3}
+                      onClick={() => updateElevator(elevator.id, 'proposalCabinCount', proposalCabinCount + 1)}
+                      className="h-9 w-9 text-xl text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-300"
+                    >+</button>
+                  </div>
+                </div>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
@@ -598,19 +612,19 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation' }: 
                   <input type="file" name="cabinImage" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                   <button onClick={() => openPicker('cabin')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
                 </div>
-                {documentMode === 'proposal' && elevator.showThreeCabinsInProposal && (
-                  <>
+                {documentMode === 'proposal' && proposalCabinCount >= 2 && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Cabin Image 2<span className="block text-xs text-gray-500">轿厢图片 2</span></label>
                       <input type="file" name="cabinImage2" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                       <button onClick={() => openPicker('cabin2')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
                     </div>
+                )}
+                {documentMode === 'proposal' && proposalCabinCount >= 3 && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Cabin Image 3<span className="block text-xs text-gray-500">轿厢图片 3</span></label>
                       <input type="file" name="cabinImage3" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                       <button onClick={() => openPicker('cabin3')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
                     </div>
-                  </>
                 )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">COP Image<span className="block text-xs text-gray-500">操纵盘图片</span></label>

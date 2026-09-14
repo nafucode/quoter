@@ -674,6 +674,7 @@ export async function generateWordBlob(state: {
     // === DECORATION EFFECT (only when at least one image was fetched) ===
     const imgs = elevatorImgCache[idx];
     const ce = elev.cabinEffect;
+    const proposalCabinCount = Math.min(3, Math.max(1, Number(elev.proposalCabinCount) || (elev.showThreeCabinsInProposal ? 3 : 1)));
     const hasAnyImage =
       imgs &&
       (imgs.cabinImage || imgs.cabinImage2 || imgs.cabinImage3 || imgs.copImage || imgs.lopImage ||
@@ -725,8 +726,10 @@ export async function generateWordBlob(state: {
           rows: [
             // Row 1 header: CABIN / COP / LOP
             new TableRow({
-              children: isProposal && !elev.showThreeCabinsInProposal
+              children: isProposal && proposalCabinCount === 1
                 ? [effectCell(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: t.cabin, bold: true, size: 18, font: 'Arial' })] }), CONTENT_W, { bg: 'F0F0F0', colSpan: 3 })]
+                : isProposal && proposalCabinCount === 2
+                  ? [hdrCell(`${t.cabin} 1`, effCols[0]), effectCell(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `${t.cabin} 2`, bold: true, size: 18, font: 'Arial' })] }), effCols[1] + effCols[2], { bg: 'F0F0F0', colSpan: 2 })]
                 : isProposal
                   ? [hdrCell(`${t.cabin} 1`, effCols[0]), hdrCell(`${t.cabin} 2`, effCols[1]), hdrCell(`${t.cabin} 3`, effCols[2])]
                   : [hdrCell(t.cabin, effCols[0]), hdrCell(t.cop, effCols[1]), hdrCell(t.lop, effCols[2])],
@@ -734,8 +737,10 @@ export async function generateWordBlob(state: {
             // Row 2: main images — large height to fill ~40% of page
             new TableRow({
               height: { value: 4500, rule: 'atLeast' },
-              children: isProposal && !elev.showThreeCabinsInProposal
+              children: isProposal && proposalCabinCount === 1
                 ? [effectCell(imgDataToPara(imgs.cabinImage, 260, 330), CONTENT_W, { colSpan: 3 })]
+                : isProposal && proposalCabinCount === 2
+                  ? [effectCell(imgDataToPara(imgs.cabinImage, 188, 330), effCols[0]), effectCell(imgDataToPara(imgs.cabinImage2, 260, 330), effCols[1] + effCols[2], { colSpan: 2 })]
                 : [
                     effectCell(imgDataToPara(imgs.cabinImage, 188, 330), effCols[0]),
                     effectCell(imgDataToPara(isProposal ? imgs.cabinImage2 : imgs.copImage, isProposal ? 188 : 110, 330), effCols[1]),

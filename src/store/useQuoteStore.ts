@@ -32,6 +32,7 @@ const normalizeElevator = (elevator: any) => ({
   otherFloorsJamb: elevator?.otherFloorsJamb ?? elevatorTemplate.otherFloorsJamb,
   showNoneHandrailInQuote: elevator?.showNoneHandrailInQuote ?? true,
   showThreeCabinsInProposal: elevator?.showThreeCabinsInProposal ?? false,
+  proposalCabinCount: Math.min(3, Math.max(1, Number(elevator?.proposalCabinCount) || (elevator?.showThreeCabinsInProposal ? 3 : 1))),
   cabinEffect: normalizeCabinEffect(elevator?.cabinEffect),
   carWall: {
     ...(elevator?.carWall ?? elevatorTemplate.carWall),

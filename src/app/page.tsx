@@ -77,6 +77,9 @@ const hasEffectValue = (value: unknown) => {
   return Boolean(String(value.value ?? '').trim());
 };
 
+const getProposalCabinCount = (elevator: any) =>
+  Math.min(3, Math.max(1, Number(elevator?.proposalCabinCount) || (elevator?.showThreeCabinsInProposal ? 3 : 1)));
+
 const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getState>): ExportPreflightIssue[] => {
   const issues: ExportPreflightIssue[] = [];
   const isProposal = state.documentMode === 'proposal';
@@ -95,7 +98,8 @@ const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getStat
     const effect = elevator.cabinEffect || {};
     const missingMainImages = [
       ['CABIN', effect.cabinImage],
-      ...(isProposal && elevator.showThreeCabinsInProposal ? [['CABIN 2', effect.cabinImage2], ['CABIN 3', effect.cabinImage3]] : []),
+      ...(isProposal && getProposalCabinCount(elevator) >= 2 ? [['CABIN 2', effect.cabinImage2]] : []),
+      ...(isProposal && getProposalCabinCount(elevator) >= 3 ? [['CABIN 3', effect.cabinImage3]] : []),
       ['COP', effect.copImage],
       ['LOP', effect.lopImage],
     ].filter(([, value]) => !hasEffectValue(value)).map(([name]) => name);
@@ -1750,21 +1754,37 @@ const Quote = () => {
                         <h3 className="text-lg font-semibold mb-2 text-center bg-gray-200 p-2">{t.decorationTitle}</h3>
                         <p className="text-center text-sm text-gray-500 mb-2">{t.decorationNote}</p>
                         <div className="grid grid-cols-3 border-t border-l border-gray-400">
-                          {/* Row 1: Titles */}
-                          <div className={`font-bold text-center border-b border-r border-gray-400 p-1 ${isProposal && !elevator.showThreeCabinsInProposal ? 'col-span-3' : ''}`}>{isProposal ? (elevator.showThreeCabinsInProposal ? `${t.cabin} 1` : t.cabin) : t.cabin}</div>
-                          {(!isProposal || elevator.showThreeCabinsInProposal) && <div className="font-bold text-center border-b border-r border-gray-400 p-1">{isProposal ? `${t.cabin} 2` : t.cop}</div>}
-                          {(!isProposal || elevator.showThreeCabinsInProposal) && <div className="font-bold text-center border-b border-r border-gray-400 p-1">{isProposal ? `${t.cabin} 3` : t.lop}</div>}
-
-                          {/* Row 2: Images */}
-                          <div className={`border-b border-r border-gray-400 p-2 flex items-center justify-center h-64 ${isProposal && !elevator.showThreeCabinsInProposal ? 'col-span-3' : ''}`}>
-                            {elevator.cabinEffect.cabinImage && <img src={elevator.cabinEffect.cabinImage} alt="Cabin" className="max-h-full max-w-full"/>}
-                          </div>
-                          {(!isProposal || elevator.showThreeCabinsInProposal) && <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
-                            {(isProposal ? elevator.cabinEffect.cabinImage2 : elevator.cabinEffect.copImage) && <img src={isProposal ? elevator.cabinEffect.cabinImage2 : elevator.cabinEffect.copImage} alt={isProposal ? 'Cabin 2' : 'COP'} className="max-h-full max-w-full"/>}
-                          </div>}
-                          {(!isProposal || elevator.showThreeCabinsInProposal) && <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
-                            {(isProposal ? elevator.cabinEffect.cabinImage3 : elevator.cabinEffect.lopImage) && <img src={isProposal ? elevator.cabinEffect.cabinImage3 : elevator.cabinEffect.lopImage} alt={isProposal ? 'Cabin 3' : 'LOP'} className="max-h-full max-w-full"/>}
-                          </div>}
+                          {isProposal ? (
+                            <div className="col-span-3 grid" style={{ gridTemplateColumns: `repeat(${getProposalCabinCount(elevator)}, minmax(0, 1fr))` }}>
+                              {Array.from({ length: getProposalCabinCount(elevator) }, (_, index) => (
+                                <div key={`cabin-title-${index}`} className="font-bold text-center border-b border-r border-gray-400 p-1">
+                                  {getProposalCabinCount(elevator) === 1 ? t.cabin : `${t.cabin} ${index + 1}`}
+                                </div>
+                              ))}
+                              {[elevator.cabinEffect.cabinImage, elevator.cabinEffect.cabinImage2, elevator.cabinEffect.cabinImage3]
+                                .slice(0, getProposalCabinCount(elevator))
+                                .map((image, index) => (
+                                  <div key={`cabin-image-${index}`} className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
+                                    {image && <img src={image} alt={`Cabin ${index + 1}`} className="max-h-full max-w-full"/>}
+                                  </div>
+                                ))}
+                            </div>
+                          ) : (
+                            <>
+                              <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cabin}</div>
+                              <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cop}</div>
+                              <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.lop}</div>
+                              <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
+                                {elevator.cabinEffect.cabinImage && <img src={elevator.cabinEffect.cabinImage} alt="Cabin" className="max-h-full max-w-full"/>}
+                              </div>
+                              <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
+                                {elevator.cabinEffect.copImage && <img src={elevator.cabinEffect.copImage} alt="COP" className="max-h-full max-w-full"/>}
+                              </div>
+                              <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
+                                {elevator.cabinEffect.lopImage && <img src={elevator.cabinEffect.lopImage} alt="LOP" className="max-h-full max-w-full"/>}
+                              </div>
+                            </>
+                          )}
 
                           {isProposal && <>
                             <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cop}</div>
