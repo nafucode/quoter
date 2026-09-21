@@ -949,15 +949,26 @@ const Quote = () => {
                 </button>
               </div>
               {isProposal && (
-                <label className="inline-flex min-h-8 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={showProposalCommercial}
-                    onChange={(e) => setField('showProposalCommercial', e.target.checked)}
-                    className="h-4 w-4 accent-slate-700"
-                  />
-                  显示价格与商务条款
-                </label>
+                <>
+                  <label className="inline-flex min-h-8 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={showProposalCommercial}
+                      onChange={(e) => setField('showProposalCommercial', e.target.checked)}
+                      className="h-4 w-4 accent-slate-700"
+                    />
+                    显示价格与商务条款
+                  </label>
+                  <label className="inline-flex min-h-8 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={showCompanyShowcase}
+                      onChange={(e) => setField('showCompanyShowcase', e.target.checked)}
+                      className="h-4 w-4 accent-slate-700"
+                    />
+                    显示企业展示页
+                  </label>
+                </>
               )}
             </div>
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -1524,17 +1535,6 @@ const Quote = () => {
                 />
                 Function List<span className="text-xs font-normal text-gray-500">功能清单</span>
               </label>
-              {isProposal && (
-                <label className="flex items-center gap-2 border border-gray-200 rounded-md p-3 text-sm font-medium text-gray-700 sm:col-span-2">
-                  <input
-                    type="checkbox"
-                    checked={showCompanyShowcase}
-                    onChange={(e) => setField('showCompanyShowcase', e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600"
-                  />
-                  Company Showcase Page<span className="text-xs font-normal text-gray-500">企业、发运与合作伙伴展示页</span>
-                </label>
-              )}
             </div>
 
             {elevators.map((elevator) => (
