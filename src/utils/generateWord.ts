@@ -250,11 +250,21 @@ export async function generateWordBlob(state: {
         '/company-showcase/factory-interior.jpg',
         '/company-showcase/factory-automation.jpg',
         '/company-showcase/factory-exterior.jpg',
+        '/company-showcase/factory-escalator-line.jpg',
+        '/company-showcase/factory-cabin-production.jpg',
+        '/company-showcase/factory-production-line.jpg',
         '/company-showcase/shipping-yard.jpg',
         '/company-showcase/container-loading.jpg',
         '/company-showcase/export-dispatch.jpg',
+        '/company-showcase/shipping-containers.jpg',
+        '/company-showcase/shipping-preparation.jpg',
+        '/company-showcase/shipping-forklift.jpg',
         '/company-showcase/partner-office.jpg',
         '/company-showcase/partner-factory-visit.jpg',
+        '/company-showcase/partner-egypt-expo.jpg',
+        '/company-showcase/partner-malaysia-expo.jpg',
+        '/company-showcase/partner-indonesia-visit.jpg',
+        '/company-showcase/partner-nigeria-expo.jpg',
       ].map(fetchImgData))
     : [];
 
@@ -961,13 +971,13 @@ export async function generateWordBlob(state: {
   }
 
   if (showCompanyShowcase) {
-    const showcaseCell = (img: ImgData | null, caption: string, width: number, height: number) =>
+    const showcaseCell = (img: ImgData | null, caption: string) =>
       new TableCell({
         borders: NO_BORDERS,
-        width: { size: Math.floor(CONTENT_W / 3), type: WidthType.DXA },
+        width: { size: Math.floor(CONTENT_W / 2), type: WidthType.DXA },
         margins: { top: 45, bottom: 45, left: 45, right: 45 },
         children: [
-          imgDataToPara(img, width, height),
+          imgDataToPara(img, 286, 150),
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { before: 30, after: 0 },
@@ -975,62 +985,45 @@ export async function generateWordBlob(state: {
           }),
         ],
       });
-    const sectionTitle = (number: string, title: string, chinese: string) =>
-      new Paragraph({
-        spacing: { before: 130, after: 55 },
-        children: [
-          new TextRun({ text: `${number}  `, bold: true, size: 21, font: 'Arial', color: 'B58A42' }),
-          new TextRun({ text: title, bold: true, size: 20, font: 'Arial', color: '173F75' }),
-          new TextRun({ text: `  ${chinese}`, size: 16, font: 'Arial', color: '64748B' }),
-        ],
-      });
+    const showcaseSections = [
+      {
+        number: '01', title: 'FACTORY & MANUFACTURING', chinese: '工厂与制造', start: 0,
+        captions: ['Production Facility', 'Automated Manufacturing', 'Factory & Export Area', 'Escalator Production', 'Cabin Assembly', 'Modern Production Line'],
+      },
+      {
+        number: '02', title: 'GLOBAL DELIVERY', chinese: '全球发运', start: 6,
+        captions: ['Export Shipment', 'Container Loading', 'Ready for Dispatch', 'International Shipping', 'Shipment Preparation', 'Factory Dispatch'],
+      },
+      {
+        number: '03', title: 'GLOBAL PARTNERS', chinese: '全球合作伙伴', start: 12,
+        captions: ['Partner Meeting', 'Factory Visit', 'Egypt Expo', 'Malaysia Expo', 'Indonesia Visit', 'Nigeria Expo'],
+      },
+    ];
 
     children.push(para([], { spacingAfter: 200 }));
     children.push(
       para([bold(`${t.quotationDate}: `), plain(state.quotationDate)], { align: AlignmentType.RIGHT }),
     );
-    children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
-    children.push(para([bold('XINFUJI ELEVATOR & ESCALATOR', 16)], { spacingAfter: 45 }));
-    children.push(new Paragraph({
-      spacing: { after: 20 },
-      children: [new TextRun({ text: 'Manufacturing Strength & Global Delivery', bold: true, size: 31, font: 'Arial', color: '173F75' })],
-    }));
-    children.push(new Paragraph({
-      spacing: { after: 100 },
-      children: [new TextRun({ text: '制造实力与全球交付', size: 18, font: 'Arial', color: '64748B' })],
-    }));
-
-    children.push(sectionTitle('01', 'FACTORY & MANUFACTURING', '工厂与制造'));
-    children.push(new Table({
-      width: { size: CONTENT_W, type: WidthType.DXA },
-      columnWidths: [3212, 3212, CONTENT_W - 6424],
-      rows: [new TableRow({ children: [
-        showcaseCell(showcaseImages[0], 'Production Facility', 188, 116),
-        showcaseCell(showcaseImages[1], 'Automated Manufacturing', 188, 116),
-        showcaseCell(showcaseImages[2], 'Factory & Export Area', 188, 116),
-      ] })],
-    }));
-
-    children.push(sectionTitle('02', 'GLOBAL DELIVERY', '全球发运'));
-    children.push(new Table({
-      width: { size: CONTENT_W, type: WidthType.DXA },
-      columnWidths: [3212, 3212, CONTENT_W - 6424],
-      rows: [new TableRow({ children: [
-        showcaseCell(showcaseImages[3], 'Export Shipment', 188, 112),
-        showcaseCell(showcaseImages[4], 'Container Loading', 188, 112),
-        showcaseCell(showcaseImages[5], 'Ready for Dispatch', 188, 112),
-      ] })],
-    }));
-
-    children.push(sectionTitle('03', 'GLOBAL PARTNERS', '全球合作伙伴'));
-    children.push(new Table({
-      width: { size: CONTENT_W, type: WidthType.DXA },
-      columnWidths: [Math.floor(CONTENT_W / 2), CONTENT_W - Math.floor(CONTENT_W / 2)],
-      rows: [new TableRow({ children: [
-        showcaseCell(showcaseImages[6], 'Partner Meeting', 286, 150),
-        showcaseCell(showcaseImages[7], 'Factory Visit', 286, 150),
-      ] })],
-    }));
+    showcaseSections.forEach((section) => {
+      children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
+      children.push(para([bold(`XINFUJI ELEVATOR & ESCALATOR · ${section.number}`, 16)], { spacingAfter: 45 }));
+      children.push(new Paragraph({
+        spacing: { after: 20 },
+        children: [new TextRun({ text: section.title, bold: true, size: 31, font: 'Arial', color: '173F75' })],
+      }));
+      children.push(new Paragraph({
+        spacing: { after: 90 },
+        children: [new TextRun({ text: section.chinese, size: 18, font: 'Arial', color: '64748B' })],
+      }));
+      children.push(new Table({
+        width: { size: CONTENT_W, type: WidthType.DXA },
+        columnWidths: [Math.floor(CONTENT_W / 2), CONTENT_W - Math.floor(CONTENT_W / 2)],
+        rows: [0, 2, 4].map((offset) => new TableRow({ children: [
+          showcaseCell(showcaseImages[section.start + offset], section.captions[offset]),
+          showcaseCell(showcaseImages[section.start + offset + 1], section.captions[offset + 1]),
+        ] })),
+      }));
+    });
   }
 
   // Footer: quotation date

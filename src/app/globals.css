@@ -28,25 +28,14 @@ body {
 .company-showcase-heading p { margin: 0 0 5px; color: #b58a42; font-size: 11px; font-weight: 700; letter-spacing: .12em; }
 .company-showcase-heading h2 { margin: 0; color: #173f75; font-size: 28px; line-height: 1.15; }
 .company-showcase-heading span { display: block; margin-top: 4px; color: #64748b; font-size: 13px; }
-.company-showcase-section { display: grid; grid-template-columns: 126px 1fr; gap: 14px; margin-top: 16px; }
-.company-showcase-label { display: flex; gap: 8px; align-items: flex-start; padding-top: 4px; color: #173f75; }
-.company-showcase-label b { color: #b58a42; font-size: 20px; line-height: 1; }
-.company-showcase-label span { font-size: 10px; font-weight: 700; line-height: 1.45; }
-.company-showcase-grid { display: grid; gap: 8px; }
-.company-showcase-grid.factory-grid { grid-template-columns: 1.35fr 1fr 1fr; }
-.company-showcase-grid.delivery-grid { grid-template-columns: repeat(3, 1fr); }
-.company-showcase-grid.partner-grid { grid-template-columns: repeat(2, 1fr); }
-.company-showcase-grid figure { position: relative; overflow: hidden; height: 170px; margin: 0; background: #e5e7eb; }
-.company-showcase-grid.delivery-grid figure { height: 145px; }
-.company-showcase-grid.partner-grid figure { height: 170px; }
+.company-showcase-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.company-showcase-grid figure { position: relative; overflow: hidden; height: 260px; margin: 0; background: #e5e7eb; }
 .company-showcase-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .company-showcase-grid figcaption { position: absolute; right: 0; bottom: 0; left: 0; padding: 16px 8px 6px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.72)); font-size: 9px; font-weight: 700; }
 
 @media (max-width: 760px) {
   .company-showcase-page { min-height: 0; padding: 24px 18px; }
-  .company-showcase-section { grid-template-columns: 1fr; }
-  .company-showcase-grid.factory-grid,
-  .company-showcase-grid.delivery-grid { grid-template-columns: 1fr 1fr; }
+  .company-showcase-grid { grid-template-columns: 1fr 1fr; }
   .company-showcase-grid figure { height: 150px; }
 }
 
@@ -79,5 +68,6 @@ body {
     padding: 8mm 6mm 5mm;
     break-after: page;
   }
+  .company-showcase-grid figure { height: 62mm; }
   .company-showcase-grid img { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }

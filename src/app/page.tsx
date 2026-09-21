@@ -64,6 +64,42 @@ const DEFAULT_FREIGHT_PLACEHOLDER = 'e.g., Port of Shanghai';
 const EXW_PICKUP_DESTINATION = 'Pickup from factory arranged by the customer. 客户安排工厂自提。';
 const NIGERIA_YY_CARGO_DESTINATION = 'To YY cargo Yiwu Warehouse China';
 
+const companyShowcaseSections = [
+  {
+    number: '01', title: 'FACTORY & MANUFACTURING', chinese: '工厂与制造',
+    images: [
+      ['/company-showcase/factory-interior.jpg', 'Production Facility'],
+      ['/company-showcase/factory-automation.jpg', 'Automated Manufacturing'],
+      ['/company-showcase/factory-exterior.jpg', 'Factory & Export Area'],
+      ['/company-showcase/factory-escalator-line.jpg', 'Escalator Production'],
+      ['/company-showcase/factory-cabin-production.jpg', 'Cabin Assembly'],
+      ['/company-showcase/factory-production-line.jpg', 'Modern Production Line'],
+    ],
+  },
+  {
+    number: '02', title: 'GLOBAL DELIVERY', chinese: '全球发运',
+    images: [
+      ['/company-showcase/shipping-yard.jpg', 'Export Shipment'],
+      ['/company-showcase/container-loading.jpg', 'Container Loading'],
+      ['/company-showcase/export-dispatch.jpg', 'Ready for Dispatch'],
+      ['/company-showcase/shipping-containers.jpg', 'International Shipping'],
+      ['/company-showcase/shipping-preparation.jpg', 'Shipment Preparation'],
+      ['/company-showcase/shipping-forklift.jpg', 'Factory Dispatch'],
+    ],
+  },
+  {
+    number: '03', title: 'GLOBAL PARTNERS', chinese: '全球合作伙伴',
+    images: [
+      ['/company-showcase/partner-office.jpg', 'Partner Meeting'],
+      ['/company-showcase/partner-factory-visit.jpg', 'Factory Visit'],
+      ['/company-showcase/partner-egypt-expo.jpg', 'Egypt Expo'],
+      ['/company-showcase/partner-malaysia-expo.jpg', 'Malaysia Expo'],
+      ['/company-showcase/partner-indonesia-visit.jpg', 'Indonesia Visit'],
+      ['/company-showcase/partner-nigeria-expo.jpg', 'Nigeria Expo'],
+    ],
+  },
+] as const;
+
 const formatFreightText = (dest: string, freight: (dest: string) => string) =>
   dest.trim().toLowerCase().startsWith('to ')
     ? `Local fee and Freight from factory ${dest} :`
@@ -1978,41 +2014,23 @@ const Quote = () => {
                   </div>
                 )}
 
-                {isProposal && showCompanyShowcase && (
-                  <section className="break-before-page company-showcase-page">
+                {isProposal && showCompanyShowcase && companyShowcaseSections.map((section) => (
+                  <section key={section.number} className="break-before-page company-showcase-page">
                     <div className="company-showcase-heading">
-                      <p>XINFUJI ELEVATOR &amp; ESCALATOR</p>
-                      <h2>Manufacturing Strength &amp; Global Delivery</h2>
-                      <span>制造实力与全球交付</span>
+                      <p>XINFUJI ELEVATOR &amp; ESCALATOR · {section.number}</p>
+                      <h2>{section.title}</h2>
+                      <span>{section.chinese}</span>
                     </div>
-
-                    <div className="company-showcase-section">
-                      <div className="company-showcase-label"><b>01</b><span>FACTORY &amp; MANUFACTURING<br />工厂与制造</span></div>
-                      <div className="company-showcase-grid factory-grid">
-                        <figure className="wide"><img src="/company-showcase/factory-interior.jpg" alt="XINFUJI factory interior" /><figcaption>Production Facility</figcaption></figure>
-                        <figure><img src="/company-showcase/factory-automation.jpg" alt="Automated manufacturing" /><figcaption>Automated Manufacturing</figcaption></figure>
-                        <figure><img src="/company-showcase/factory-exterior.jpg" alt="XINFUJI factory exterior" /><figcaption>Factory &amp; Export Area</figcaption></figure>
-                      </div>
-                    </div>
-
-                    <div className="company-showcase-section">
-                      <div className="company-showcase-label"><b>02</b><span>GLOBAL DELIVERY<br />全球发运</span></div>
-                      <div className="company-showcase-grid delivery-grid">
-                        <figure><img src="/company-showcase/shipping-yard.jpg" alt="XINFUJI export shipment" /><figcaption>Export Shipment</figcaption></figure>
-                        <figure><img src="/company-showcase/container-loading.jpg" alt="Container loading" /><figcaption>Container Loading</figcaption></figure>
-                        <figure><img src="/company-showcase/export-dispatch.jpg" alt="Export dispatch" /><figcaption>Ready for Dispatch</figcaption></figure>
-                      </div>
-                    </div>
-
-                    <div className="company-showcase-section partner-section">
-                      <div className="company-showcase-label"><b>03</b><span>GLOBAL PARTNERS<br />全球合作伙伴</span></div>
-                      <div className="company-showcase-grid partner-grid">
-                        <figure><img src="/company-showcase/partner-office.jpg" alt="XINFUJI partner meeting" /><figcaption>Partner Meeting</figcaption></figure>
-                        <figure><img src="/company-showcase/partner-factory-visit.jpg" alt="Partner factory visit" /><figcaption>Factory Visit</figcaption></figure>
-                      </div>
+                    <div className="company-showcase-grid">
+                      {section.images.map(([src, caption]) => (
+                        <figure key={src}>
+                          <img src={src} alt={caption} />
+                          <figcaption>{caption}</figcaption>
+                        </figure>
+                      ))}
                     </div>
                   </section>
-                )}
+                ))}
               </div>
               <div className="hidden print:block print-footer">
                 www.xinfuji.com
