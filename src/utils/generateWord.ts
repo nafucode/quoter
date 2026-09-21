@@ -202,6 +202,7 @@ const cargoAdjustedFeatureText = (text: string, hasCargoElevator: boolean) =>
 export async function generateWordBlob(state: {
   documentMode?: 'quotation' | 'proposal';
   showProposalCommercial?: boolean;
+  showCompanyShowcase?: boolean;
   companyName: string;
   country?: string;
   ruc?: string;
@@ -235,6 +236,7 @@ export async function generateWordBlob(state: {
   const showCommercialContent = !isProposal || Boolean(state.showProposalCommercial);
   const showPartList = state.showPartList ?? true;
   const showFunctionList = state.showFunctionList ?? true;
+  const showCompanyShowcase = isProposal && Boolean(state.showCompanyShowcase);
   const isNoneText = (value: unknown) => String(value ?? '').trim().toLowerCase() === 'none';
   const shouldShowHandrailInQuote = (elev: any) =>
     !isNoneText(elev?.carHandrail) || elev?.showNoneHandrailInQuote !== false;
@@ -242,6 +244,19 @@ export async function generateWordBlob(state: {
   // ── pre-fetch banner + all cabin effect images ───────────────────────────
   // Use pre-converted PNG (SVG type is not supported by docx 9.x)
   const bannerImg = await fetchImgData('/xinfuji-banner-quote.png');
+
+  const showcaseImages = showCompanyShowcase
+    ? await Promise.all([
+        '/company-showcase/factory-interior.jpg',
+        '/company-showcase/factory-automation.jpg',
+        '/company-showcase/factory-exterior.jpg',
+        '/company-showcase/shipping-yard.jpg',
+        '/company-showcase/container-loading.jpg',
+        '/company-showcase/export-dispatch.jpg',
+        '/company-showcase/partner-office.jpg',
+        '/company-showcase/partner-factory-visit.jpg',
+      ].map(fetchImgData))
+    : [];
 
   const elevatorImgCache = await Promise.all(
     state.elevators.map(async (elev) => {
@@ -945,13 +960,88 @@ export async function generateWordBlob(state: {
     );
   }
 
+  if (showCompanyShowcase) {
+    const showcaseCell = (img: ImgData | null, caption: string, width: number, height: number) =>
+      new TableCell({
+        borders: NO_BORDERS,
+        width: { size: Math.floor(CONTENT_W / 3), type: WidthType.DXA },
+        margins: { top: 45, bottom: 45, left: 45, right: 45 },
+        children: [
+          imgDataToPara(img, width, height),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 30, after: 0 },
+            children: [new TextRun({ text: caption, bold: true, size: 15, font: 'Arial', color: '475569' })],
+          }),
+        ],
+      });
+    const sectionTitle = (number: string, title: string, chinese: string) =>
+      new Paragraph({
+        spacing: { before: 130, after: 55 },
+        children: [
+          new TextRun({ text: `${number}  `, bold: true, size: 21, font: 'Arial', color: 'B58A42' }),
+          new TextRun({ text: title, bold: true, size: 20, font: 'Arial', color: '173F75' }),
+          new TextRun({ text: `  ${chinese}`, size: 16, font: 'Arial', color: '64748B' }),
+        ],
+      });
+
+    children.push(para([], { spacingAfter: 200 }));
+    children.push(
+      para([bold(`${t.quotationDate}: `), plain(state.quotationDate)], { align: AlignmentType.RIGHT }),
+    );
+    children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
+    children.push(para([bold('XINFUJI ELEVATOR & ESCALATOR', 16)], { spacingAfter: 45 }));
+    children.push(new Paragraph({
+      spacing: { after: 20 },
+      children: [new TextRun({ text: 'Manufacturing Strength & Global Delivery', bold: true, size: 31, font: 'Arial', color: '173F75' })],
+    }));
+    children.push(new Paragraph({
+      spacing: { after: 100 },
+      children: [new TextRun({ text: '制造实力与全球交付', size: 18, font: 'Arial', color: '64748B' })],
+    }));
+
+    children.push(sectionTitle('01', 'FACTORY & MANUFACTURING', '工厂与制造'));
+    children.push(new Table({
+      width: { size: CONTENT_W, type: WidthType.DXA },
+      columnWidths: [3212, 3212, CONTENT_W - 6424],
+      rows: [new TableRow({ children: [
+        showcaseCell(showcaseImages[0], 'Production Facility', 188, 116),
+        showcaseCell(showcaseImages[1], 'Automated Manufacturing', 188, 116),
+        showcaseCell(showcaseImages[2], 'Factory & Export Area', 188, 116),
+      ] })],
+    }));
+
+    children.push(sectionTitle('02', 'GLOBAL DELIVERY', '全球发运'));
+    children.push(new Table({
+      width: { size: CONTENT_W, type: WidthType.DXA },
+      columnWidths: [3212, 3212, CONTENT_W - 6424],
+      rows: [new TableRow({ children: [
+        showcaseCell(showcaseImages[3], 'Export Shipment', 188, 112),
+        showcaseCell(showcaseImages[4], 'Container Loading', 188, 112),
+        showcaseCell(showcaseImages[5], 'Ready for Dispatch', 188, 112),
+      ] })],
+    }));
+
+    children.push(sectionTitle('03', 'GLOBAL PARTNERS', '全球合作伙伴'));
+    children.push(new Table({
+      width: { size: CONTENT_W, type: WidthType.DXA },
+      columnWidths: [Math.floor(CONTENT_W / 2), CONTENT_W - Math.floor(CONTENT_W / 2)],
+      rows: [new TableRow({ children: [
+        showcaseCell(showcaseImages[6], 'Partner Meeting', 286, 150),
+        showcaseCell(showcaseImages[7], 'Factory Visit', 286, 150),
+      ] })],
+    }));
+  }
+
   // Footer: quotation date
-  children.push(para([], { spacingAfter: 200 }));
-  children.push(
-    para([bold(`${t.quotationDate}: `), plain(state.quotationDate)], {
-      align: AlignmentType.RIGHT,
-    }),
-  );
+  if (!showCompanyShowcase) {
+    children.push(para([], { spacingAfter: 200 }));
+    children.push(
+      para([bold(`${t.quotationDate}: `), plain(state.quotationDate)], {
+        align: AlignmentType.RIGHT,
+      }),
+    );
+  }
 
   // ── build document ────────────────────────────────────────────────────────
   const doc = new Document({

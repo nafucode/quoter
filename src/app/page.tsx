@@ -150,6 +150,7 @@ const Quote = () => {
   const {
     documentMode,
     showProposalCommercial,
+    showCompanyShowcase,
     companyName,
     country,
     ruc,
@@ -428,6 +429,7 @@ const Quote = () => {
     const safeState = {
       documentMode: s.documentMode,
       showProposalCommercial: s.showProposalCommercial,
+      showCompanyShowcase: s.showCompanyShowcase,
       companyName: s.companyName, country: s.country, ruc: s.ruc, quotationNo: s.quotationNo, projectName: s.projectName,
       quotationType: s.quotationType, quotationDate: s.quotationDate,
       elevators: safeElevators, freightDestination: s.freightDestination,
@@ -541,6 +543,7 @@ const Quote = () => {
       const blob = await generateWordBlob({
         documentMode: s.documentMode,
         showProposalCommercial: s.showProposalCommercial,
+        showCompanyShowcase: s.showCompanyShowcase,
         companyName: s.companyName,
         country: s.country,
         ruc: s.ruc,
@@ -1485,6 +1488,17 @@ const Quote = () => {
                 />
                 Function List<span className="text-xs font-normal text-gray-500">功能清单</span>
               </label>
+              {isProposal && (
+                <label className="flex items-center gap-2 border border-gray-200 rounded-md p-3 text-sm font-medium text-gray-700 sm:col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={showCompanyShowcase}
+                    onChange={(e) => setField('showCompanyShowcase', e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                  />
+                  Company Showcase Page<span className="text-xs font-normal text-gray-500">企业、发运与合作伙伴展示页</span>
+                </label>
+              )}
             </div>
 
             {elevators.map((elevator) => (
@@ -1962,6 +1976,42 @@ const Quote = () => {
                       </div>
                     )}
                   </div>
+                )}
+
+                {isProposal && showCompanyShowcase && (
+                  <section className="break-before-page company-showcase-page">
+                    <div className="company-showcase-heading">
+                      <p>XINFUJI ELEVATOR &amp; ESCALATOR</p>
+                      <h2>Manufacturing Strength &amp; Global Delivery</h2>
+                      <span>制造实力与全球交付</span>
+                    </div>
+
+                    <div className="company-showcase-section">
+                      <div className="company-showcase-label"><b>01</b><span>FACTORY &amp; MANUFACTURING<br />工厂与制造</span></div>
+                      <div className="company-showcase-grid factory-grid">
+                        <figure className="wide"><img src="/company-showcase/factory-interior.jpg" alt="XINFUJI factory interior" /><figcaption>Production Facility</figcaption></figure>
+                        <figure><img src="/company-showcase/factory-automation.jpg" alt="Automated manufacturing" /><figcaption>Automated Manufacturing</figcaption></figure>
+                        <figure><img src="/company-showcase/factory-exterior.jpg" alt="XINFUJI factory exterior" /><figcaption>Factory &amp; Export Area</figcaption></figure>
+                      </div>
+                    </div>
+
+                    <div className="company-showcase-section">
+                      <div className="company-showcase-label"><b>02</b><span>GLOBAL DELIVERY<br />全球发运</span></div>
+                      <div className="company-showcase-grid delivery-grid">
+                        <figure><img src="/company-showcase/shipping-yard.jpg" alt="XINFUJI export shipment" /><figcaption>Export Shipment</figcaption></figure>
+                        <figure><img src="/company-showcase/container-loading.jpg" alt="Container loading" /><figcaption>Container Loading</figcaption></figure>
+                        <figure><img src="/company-showcase/export-dispatch.jpg" alt="Export dispatch" /><figcaption>Ready for Dispatch</figcaption></figure>
+                      </div>
+                    </div>
+
+                    <div className="company-showcase-section partner-section">
+                      <div className="company-showcase-label"><b>03</b><span>GLOBAL PARTNERS<br />全球合作伙伴</span></div>
+                      <div className="company-showcase-grid partner-grid">
+                        <figure><img src="/company-showcase/partner-office.jpg" alt="XINFUJI partner meeting" /><figcaption>Partner Meeting</figcaption></figure>
+                        <figure><img src="/company-showcase/partner-factory-visit.jpg" alt="Partner factory visit" /><figcaption>Factory Visit</figcaption></figure>
+                      </div>
+                    </div>
+                  </section>
                 )}
               </div>
               <div className="hidden print:block print-footer">
