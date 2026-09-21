@@ -72,7 +72,7 @@ const companyShowcaseSections = [
       ['/company-showcase/factory-automation.jpg', 'Automated Manufacturing'],
       ['/company-showcase/factory-exterior.jpg', 'Factory & Export Area'],
       ['/company-showcase/factory-escalator-line.jpg', 'Escalator Production'],
-      ['/company-showcase/factory-cabin-production.jpg', 'Cabin Assembly'],
+      ['/company-showcase/factory-cabin-complete.jpg', 'Cabin Assembly'],
       ['/company-showcase/factory-production-line.jpg', 'Modern Production Line'],
     ],
   },
@@ -83,7 +83,7 @@ const companyShowcaseSections = [
       ['/company-showcase/container-loading.jpg', 'Container Loading'],
       ['/company-showcase/export-dispatch.jpg', 'Ready for Dispatch'],
       ['/company-showcase/shipping-containers.jpg', 'International Shipping'],
-      ['/company-showcase/shipping-preparation.jpg', 'Shipment Preparation'],
+      ['/company-showcase/shipping-wrapped-escalator.jpg', 'Shipment Preparation'],
       ['/company-showcase/shipping-forklift.jpg', 'Factory Dispatch'],
     ],
   },
@@ -2014,23 +2014,32 @@ const Quote = () => {
                   </div>
                 )}
 
-                {isProposal && showCompanyShowcase && companyShowcaseSections.map((section) => (
-                  <section key={section.number} className="break-before-page company-showcase-page">
+                {isProposal && showCompanyShowcase && (
+                  <section className="break-before-page company-showcase-page">
                     <div className="company-showcase-heading">
-                      <p>XINFUJI ELEVATOR &amp; ESCALATOR · {section.number}</p>
-                      <h2>{section.title}</h2>
-                      <span>{section.chinese}</span>
+                      <p>XINFUJI ELEVATOR &amp; ESCALATOR</p>
+                      <h2>Manufacturing Strength &amp; Global Delivery</h2>
+                      <span>制造实力与全球交付</span>
                     </div>
-                    <div className="company-showcase-grid">
-                      {section.images.map(([src, caption]) => (
-                        <figure key={src}>
-                          <img src={src} alt={caption} />
-                          <figcaption>{caption}</figcaption>
-                        </figure>
-                      ))}
-                    </div>
+                    {companyShowcaseSections.map((section) => (
+                      <div key={section.number} className="company-showcase-section">
+                        <div className="company-showcase-section-title">
+                          <b>{section.number}</b>
+                          <strong>{section.title}</strong>
+                          <span>{section.chinese}</span>
+                        </div>
+                        <div className="company-showcase-grid">
+                          {section.images.map(([src, caption]) => (
+                            <figure key={src}>
+                              <img src={src} alt={caption} />
+                              <figcaption>{caption}</figcaption>
+                            </figure>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </section>
-                ))}
+                )}
               </div>
               <div className="hidden print:block print-footer">
                 www.xinfuji.com

@@ -251,13 +251,13 @@ export async function generateWordBlob(state: {
         '/company-showcase/factory-automation.jpg',
         '/company-showcase/factory-exterior.jpg',
         '/company-showcase/factory-escalator-line.jpg',
-        '/company-showcase/factory-cabin-production.jpg',
+        '/company-showcase/factory-cabin-complete.jpg',
         '/company-showcase/factory-production-line.jpg',
         '/company-showcase/shipping-yard.jpg',
         '/company-showcase/container-loading.jpg',
         '/company-showcase/export-dispatch.jpg',
         '/company-showcase/shipping-containers.jpg',
-        '/company-showcase/shipping-preparation.jpg',
+        '/company-showcase/shipping-wrapped-escalator.jpg',
         '/company-showcase/shipping-forklift.jpg',
         '/company-showcase/partner-office.jpg',
         '/company-showcase/partner-factory-visit.jpg',
@@ -974,14 +974,14 @@ export async function generateWordBlob(state: {
     const showcaseCell = (img: ImgData | null, caption: string) =>
       new TableCell({
         borders: NO_BORDERS,
-        width: { size: Math.floor(CONTENT_W / 2), type: WidthType.DXA },
-        margins: { top: 45, bottom: 45, left: 45, right: 45 },
+        width: { size: Math.floor(CONTENT_W / 3), type: WidthType.DXA },
+        margins: { top: 25, bottom: 25, left: 30, right: 30 },
         children: [
-          imgDataToPara(img, 286, 150),
+          imgDataToPara(img, 188, 82),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { before: 30, after: 0 },
-            children: [new TextRun({ text: caption, bold: true, size: 15, font: 'Arial', color: '475569' })],
+            spacing: { before: 15, after: 0 },
+            children: [new TextRun({ text: caption, bold: true, size: 13, font: 'Arial', color: '475569' })],
           }),
         ],
       });
@@ -1004,23 +1004,33 @@ export async function generateWordBlob(state: {
     children.push(
       para([bold(`${t.quotationDate}: `), plain(state.quotationDate)], { align: AlignmentType.RIGHT }),
     );
+    children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
+    children.push(para([bold('XINFUJI ELEVATOR & ESCALATOR', 15)], { spacingAfter: 35 }));
+    children.push(new Paragraph({
+      spacing: { after: 15 },
+      children: [new TextRun({ text: 'Manufacturing Strength & Global Delivery', bold: true, size: 28, font: 'Arial', color: '173F75' })],
+    }));
+    children.push(new Paragraph({
+      spacing: { after: 45 },
+      children: [new TextRun({ text: '制造实力与全球交付', size: 16, font: 'Arial', color: '64748B' })],
+    }));
+
     showcaseSections.forEach((section) => {
-      children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
-      children.push(para([bold(`XINFUJI ELEVATOR & ESCALATOR · ${section.number}`, 16)], { spacingAfter: 45 }));
       children.push(new Paragraph({
-        spacing: { after: 20 },
-        children: [new TextRun({ text: section.title, bold: true, size: 31, font: 'Arial', color: '173F75' })],
-      }));
-      children.push(new Paragraph({
-        spacing: { after: 90 },
-        children: [new TextRun({ text: section.chinese, size: 18, font: 'Arial', color: '64748B' })],
+        spacing: { before: 45, after: 20 },
+        children: [
+          new TextRun({ text: `${section.number}  `, bold: true, size: 17, font: 'Arial', color: 'B58A42' }),
+          new TextRun({ text: section.title, bold: true, size: 16, font: 'Arial', color: '173F75' }),
+          new TextRun({ text: `  ${section.chinese}`, size: 14, font: 'Arial', color: '64748B' }),
+        ],
       }));
       children.push(new Table({
         width: { size: CONTENT_W, type: WidthType.DXA },
-        columnWidths: [Math.floor(CONTENT_W / 2), CONTENT_W - Math.floor(CONTENT_W / 2)],
-        rows: [0, 2, 4].map((offset) => new TableRow({ children: [
+        columnWidths: [Math.floor(CONTENT_W / 3), Math.floor(CONTENT_W / 3), CONTENT_W - Math.floor(CONTENT_W / 3) * 2],
+        rows: [0, 3].map((offset) => new TableRow({ children: [
           showcaseCell(showcaseImages[section.start + offset], section.captions[offset]),
           showcaseCell(showcaseImages[section.start + offset + 1], section.captions[offset + 1]),
+          showcaseCell(showcaseImages[section.start + offset + 2], section.captions[offset + 2]),
         ] })),
       }));
     });
