@@ -246,7 +246,7 @@ export async function generateWordBlob(state: {
   const bannerImg = await fetchImgData('/xinfuji-banner-quote.png');
 
   const showcaseImages = showCompanyShowcase
-      ? await Promise.all([
+    ? await Promise.all([
         '/company-showcase/factory-exterior.jpg',
         '/company-showcase/factory-interior.jpg',
         '/company-showcase/factory-automation.jpg',
