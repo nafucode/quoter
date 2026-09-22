@@ -236,7 +236,7 @@ export async function generateWordBlob(state: {
   const showCommercialContent = !isProposal || Boolean(state.showProposalCommercial);
   const showPartList = state.showPartList ?? true;
   const showFunctionList = state.showFunctionList ?? true;
-  const showCompanyShowcase = isProposal && Boolean(state.showCompanyShowcase);
+  const showCompanyShowcase = Boolean(state.showCompanyShowcase);
   const isNoneText = (value: unknown) => String(value ?? '').trim().toLowerCase() === 'none';
   const shouldShowHandrailInQuote = (elev: any) =>
     !isNoneText(elev?.carHandrail) || elev?.showNoneHandrailInQuote !== false;
