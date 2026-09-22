@@ -72,7 +72,7 @@ const companyShowcaseSections = [
       ['/company-showcase/factory-automation.jpg', 'Automated Manufacturing'],
       ['/company-showcase/factory-exterior.jpg', 'Factory & Export Area'],
       ['/company-showcase/factory-escalator-line.jpg', 'Escalator Production'],
-      ['/company-showcase/factory-cabin-complete.jpg', 'Cabin Assembly'],
+      ['/company-showcase/factory-cabin-pair.jpg', 'Cabin Assembly'],
       ['/company-showcase/factory-production-line.jpg', 'Modern Production Line'],
     ],
   },

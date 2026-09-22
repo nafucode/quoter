@@ -251,7 +251,7 @@ export async function generateWordBlob(state: {
         '/company-showcase/factory-automation.jpg',
         '/company-showcase/factory-exterior.jpg',
         '/company-showcase/factory-escalator-line.jpg',
-        '/company-showcase/factory-cabin-complete.jpg',
+        '/company-showcase/factory-cabin-pair.jpg',
         '/company-showcase/factory-production-line.jpg',
         '/company-showcase/shipping-yard.jpg',
         '/company-showcase/container-loading.jpg',
