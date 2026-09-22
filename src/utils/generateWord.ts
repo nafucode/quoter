@@ -246,10 +246,10 @@ export async function generateWordBlob(state: {
   const bannerImg = await fetchImgData('/xinfuji-banner-quote.png');
 
   const showcaseImages = showCompanyShowcase
-    ? await Promise.all([
+      ? await Promise.all([
+        '/company-showcase/factory-exterior.jpg',
         '/company-showcase/factory-interior.jpg',
         '/company-showcase/factory-automation.jpg',
-        '/company-showcase/factory-exterior.jpg',
         '/company-showcase/factory-escalator-line.jpg',
         '/company-showcase/factory-cabin-pair.jpg',
         '/company-showcase/factory-production-line.jpg',
@@ -995,7 +995,7 @@ export async function generateWordBlob(state: {
     const showcaseSections = [
       {
         number: '01', title: 'FACTORY & MANUFACTURING', chinese: '工厂与制造', start: 0,
-        captions: ['Production Facility', 'Automated Manufacturing', 'Factory & Export Area', 'Escalator Production', 'Cabin Assembly', 'Modern Production Line'],
+        captions: ['Factory Panorama', 'Production Facility', 'Automated Manufacturing', 'Escalator Production', 'Cabin Assembly', 'Modern Production Line'],
       },
       {
         number: '02', title: 'GLOBAL DELIVERY', chinese: '全球发运', start: 6,

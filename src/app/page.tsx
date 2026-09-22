@@ -68,9 +68,9 @@ const companyShowcaseSections = [
   {
     number: '01', title: 'FACTORY & MANUFACTURING', chinese: '工厂与制造',
     images: [
+      ['/company-showcase/factory-exterior.jpg', 'Factory Panorama'],
       ['/company-showcase/factory-interior.jpg', 'Production Facility'],
       ['/company-showcase/factory-automation.jpg', 'Automated Manufacturing'],
-      ['/company-showcase/factory-exterior.jpg', 'Factory & Export Area'],
       ['/company-showcase/factory-escalator-line.jpg', 'Escalator Production'],
       ['/company-showcase/factory-cabin-pair.jpg', 'Cabin Assembly'],
       ['/company-showcase/factory-production-line.jpg', 'Modern Production Line'],
