@@ -97,7 +97,7 @@ const companyShowcaseSections = [
       ['/company-showcase/project-high-rise-residence.jpg', 'High-Rise Residential Project'],
       ['/company-showcase/project-industrial-park.jpg', 'Vietnam Industrial Park Project'],
       ['/company-showcase/project-alnoor-university-iraq.jpg', 'Al-Noor University, Iraq'],
-      ['/company-showcase/project-nigeria.jpg', 'Nigeria Landmark Project'],
+      ['/company-showcase/project-nigeria.jpg', 'Nigeria Glory Dome Landmark Project'],
     ],
   },
 ] as const;

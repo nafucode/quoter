@@ -1003,7 +1003,7 @@ export async function generateWordBlob(state: {
       },
       {
         number: '03', title: 'TYPICAL PROJECTS', chinese: '典型项目', start: 12,
-        captions: ['Urban Complex Project', 'Alibaba Campus Project', 'CATL Industrial Project', 'Cambodia State Guesthouse', 'High-Rise Residential Project', 'Vietnam Industrial Park Project', 'Al-Noor University, Iraq', 'Nigeria Landmark Project'],
+        captions: ['Urban Complex Project', 'Alibaba Campus Project', 'CATL Industrial Project', 'Cambodia State Guesthouse', 'High-Rise Residential Project', 'Vietnam Industrial Park Project', 'Al-Noor University, Iraq', 'Nigeria Glory Dome Landmark Project'],
       },
     ];
 
