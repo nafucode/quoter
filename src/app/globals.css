@@ -37,6 +37,9 @@ body {
 .company-showcase-grid figure { position: relative; overflow: hidden; height: 112px; margin: 0; background: #e5e7eb; }
 .company-showcase-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .company-showcase-grid figcaption { position: absolute; right: 0; bottom: 0; left: 0; padding: 16px 8px 6px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.72)); font-size: 9px; font-weight: 700; }
+.company-showcase-projects .company-showcase-grid { grid-template-columns: repeat(6, 1fr); }
+.company-showcase-projects .company-showcase-grid figure { grid-column: span 2; }
+.company-showcase-projects .company-showcase-grid figure:nth-last-child(-n + 2) { grid-column: span 3; }
 
 @media (max-width: 760px) {
   .company-showcase-page { min-height: 0; padding: 24px 18px; }

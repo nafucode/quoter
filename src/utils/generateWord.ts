@@ -259,12 +259,14 @@ export async function generateWordBlob(state: {
         '/company-showcase/shipping-containers.jpg',
         '/company-showcase/shipping-wrapped-escalator.jpg',
         '/company-showcase/shipping-forklift.jpg',
-        '/company-showcase/partner-office.jpg',
-        '/company-showcase/partner-factory-visit.jpg',
-        '/company-showcase/partner-egypt-expo.jpg',
-        '/company-showcase/partner-malaysia-expo.jpg',
-        '/company-showcase/partner-indonesia-visit.jpg',
-        '/company-showcase/partner-nigeria-expo.jpg',
+        '/company-showcase/project-urban-complex.jpg',
+        '/company-showcase/project-alibaba-campus.jpg',
+        '/company-showcase/project-catl-industrial.jpg',
+        '/company-showcase/project-thailand-public-building.jpg',
+        '/company-showcase/project-high-rise-residence.jpg',
+        '/company-showcase/project-industrial-park.jpg',
+        '/company-showcase/project-alnoor-university-iraq.jpg',
+        '/company-showcase/project-nigeria.jpg',
       ].map(fetchImgData))
     : [];
 
@@ -971,13 +973,18 @@ export async function generateWordBlob(state: {
   }
 
   if (showCompanyShowcase) {
-    const showcaseCell = (img: ImgData | null, caption: string) =>
+    const showcaseCell = (
+      img: ImgData | null,
+      caption: string,
+      cellWidth = Math.floor(CONTENT_W / 3),
+      imageWidth = 188,
+    ) =>
       new TableCell({
         borders: NO_BORDERS,
-        width: { size: Math.floor(CONTENT_W / 3), type: WidthType.DXA },
+        width: { size: cellWidth, type: WidthType.DXA },
         margins: { top: 25, bottom: 25, left: 30, right: 30 },
         children: [
-          imgDataToPara(img, 188, 82),
+          imgDataToPara(img, imageWidth, 82),
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { before: 15, after: 0 },
@@ -995,8 +1002,8 @@ export async function generateWordBlob(state: {
         captions: ['Export Shipment', 'Container Loading', 'Ready for Dispatch', 'International Shipping', 'Shipment Preparation', 'Factory Dispatch'],
       },
       {
-        number: '03', title: 'GLOBAL PARTNERS', chinese: '全球合作伙伴', start: 12,
-        captions: ['Partner Meeting', 'Factory Visit', 'Egypt Expo', 'Malaysia Expo', 'Indonesia Visit', 'Nigeria Expo'],
+        number: '03', title: 'TYPICAL PROJECTS', chinese: '典型项目', start: 12,
+        captions: ['Urban Complex Project', 'Alibaba Campus Project', 'CATL Industrial Project', 'Thailand Public Building', 'High-Rise Residential Project', 'Industrial Park Project', 'Al-Noor University, Iraq', 'Nigeria Landmark Project'],
       },
     ];
 
@@ -1008,11 +1015,11 @@ export async function generateWordBlob(state: {
     children.push(para([bold('XINFUJI ELEVATOR & ESCALATOR', 15)], { spacingAfter: 35 }));
     children.push(new Paragraph({
       spacing: { after: 15 },
-      children: [new TextRun({ text: 'Manufacturing Strength & Global Delivery', bold: true, size: 28, font: 'Arial', color: '173F75' })],
+      children: [new TextRun({ text: 'Manufacturing, Global Delivery & Projects', bold: true, size: 28, font: 'Arial', color: '173F75' })],
     }));
     children.push(new Paragraph({
       spacing: { after: 45 },
-      children: [new TextRun({ text: '制造实力与全球交付', size: 16, font: 'Arial', color: '64748B' })],
+      children: [new TextRun({ text: '制造实力、全球交付与项目案例', size: 16, font: 'Arial', color: '64748B' })],
     }));
 
     showcaseSections.forEach((section) => {
@@ -1024,15 +1031,42 @@ export async function generateWordBlob(state: {
           new TextRun({ text: `  ${section.chinese}`, size: 14, font: 'Arial', color: '64748B' }),
         ],
       }));
-      children.push(new Table({
-        width: { size: CONTENT_W, type: WidthType.DXA },
-        columnWidths: [Math.floor(CONTENT_W / 3), Math.floor(CONTENT_W / 3), CONTENT_W - Math.floor(CONTENT_W / 3) * 2],
-        rows: [0, 3].map((offset) => new TableRow({ children: [
-          showcaseCell(showcaseImages[section.start + offset], section.captions[offset]),
-          showcaseCell(showcaseImages[section.start + offset + 1], section.captions[offset + 1]),
-          showcaseCell(showcaseImages[section.start + offset + 2], section.captions[offset + 2]),
-        ] })),
-      }));
+      const completeRowCount = Math.floor(section.captions.length / 3);
+      if (completeRowCount > 0) {
+        children.push(new Table({
+          width: { size: CONTENT_W, type: WidthType.DXA },
+          columnWidths: [Math.floor(CONTENT_W / 3), Math.floor(CONTENT_W / 3), CONTENT_W - Math.floor(CONTENT_W / 3) * 2],
+          rows: Array.from({ length: completeRowCount }, (_, rowIndex) => {
+            const offset = rowIndex * 3;
+            return new TableRow({
+              children: [0, 1, 2].map((columnIndex) => {
+                const caption = section.captions[offset + columnIndex];
+                return showcaseCell(showcaseImages[section.start + offset + columnIndex], caption);
+              }),
+            });
+          }),
+        }));
+      }
+
+      const remainderStart = completeRowCount * 3;
+      const remainingCaptions = section.captions.slice(remainderStart);
+      if (remainingCaptions.length > 0) {
+        const cellWidth = Math.floor(CONTENT_W / remainingCaptions.length);
+        const imageWidth = remainingCaptions.length === 2 ? 285 : 570;
+        children.push(new Table({
+          width: { size: CONTENT_W, type: WidthType.DXA },
+          columnWidths: remainingCaptions.map((_, index) =>
+            index === remainingCaptions.length - 1
+              ? CONTENT_W - cellWidth * (remainingCaptions.length - 1)
+              : cellWidth,
+          ),
+          rows: [new TableRow({
+            children: remainingCaptions.map((caption, index) =>
+              showcaseCell(showcaseImages[section.start + remainderStart + index], caption, cellWidth, imageWidth),
+            ),
+          })],
+        }));
+      }
     });
   }
 

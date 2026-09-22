@@ -88,14 +88,16 @@ const companyShowcaseSections = [
     ],
   },
   {
-    number: '03', title: 'GLOBAL PARTNERS', chinese: '全球合作伙伴',
+    number: '03', title: 'TYPICAL PROJECTS', chinese: '典型项目',
     images: [
-      ['/company-showcase/partner-office.jpg', 'Partner Meeting'],
-      ['/company-showcase/partner-factory-visit.jpg', 'Factory Visit'],
-      ['/company-showcase/partner-egypt-expo.jpg', 'Egypt Expo'],
-      ['/company-showcase/partner-malaysia-expo.jpg', 'Malaysia Expo'],
-      ['/company-showcase/partner-indonesia-visit.jpg', 'Indonesia Visit'],
-      ['/company-showcase/partner-nigeria-expo.jpg', 'Nigeria Expo'],
+      ['/company-showcase/project-urban-complex.jpg', 'Urban Complex Project'],
+      ['/company-showcase/project-alibaba-campus.jpg', 'Alibaba Campus Project'],
+      ['/company-showcase/project-catl-industrial.jpg', 'CATL Industrial Project'],
+      ['/company-showcase/project-thailand-public-building.jpg', 'Thailand Public Building'],
+      ['/company-showcase/project-high-rise-residence.jpg', 'High-Rise Residential Project'],
+      ['/company-showcase/project-industrial-park.jpg', 'Industrial Park Project'],
+      ['/company-showcase/project-alnoor-university-iraq.jpg', 'Al-Noor University, Iraq'],
+      ['/company-showcase/project-nigeria.jpg', 'Nigeria Landmark Project'],
     ],
   },
 ] as const;
@@ -2018,11 +2020,14 @@ const Quote = () => {
                   <section className="break-before-page company-showcase-page">
                     <div className="company-showcase-heading">
                       <p>XINFUJI ELEVATOR &amp; ESCALATOR</p>
-                      <h2>Manufacturing Strength &amp; Global Delivery</h2>
-                      <span>制造实力与全球交付</span>
+                      <h2>Manufacturing, Global Delivery &amp; Projects</h2>
+                      <span>制造实力、全球交付与项目案例</span>
                     </div>
                     {companyShowcaseSections.map((section) => (
-                      <div key={section.number} className="company-showcase-section">
+                      <div
+                        key={section.number}
+                        className={`company-showcase-section${section.number === '03' ? ' company-showcase-projects' : ''}`}
+                      >
                         <div className="company-showcase-section-title">
                           <b>{section.number}</b>
                           <strong>{section.title}</strong>
