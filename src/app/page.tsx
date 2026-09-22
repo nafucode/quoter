@@ -948,26 +948,28 @@ const Quote = () => {
                   Technical Proposal 参数方案
                 </button>
               </div>
-              {isProposal && (
-                <label className="inline-flex min-h-8 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-700">
+              <div className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap">
+                {isProposal && (
+                  <label className="inline-flex min-h-7 items-center gap-1.5 rounded-md border border-gray-300 bg-white px-2 py-1 text-[11px] font-medium text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={showProposalCommercial}
+                      onChange={(e) => setField('showProposalCommercial', e.target.checked)}
+                      className="h-3.5 w-3.5 accent-slate-700"
+                    />
+                    显示价格与商务条款
+                  </label>
+                )}
+                <label className="inline-flex min-h-7 items-center gap-1.5 rounded-md border border-gray-300 bg-white px-2 py-1 text-[11px] font-medium text-gray-700">
                   <input
                     type="checkbox"
-                    checked={showProposalCommercial}
-                    onChange={(e) => setField('showProposalCommercial', e.target.checked)}
-                    className="h-4 w-4 accent-slate-700"
+                    checked={showCompanyShowcase}
+                    onChange={(e) => setField('showCompanyShowcase', e.target.checked)}
+                    className="h-3.5 w-3.5 accent-slate-700"
                   />
-                  显示价格与商务条款
+                  显示企业展示
                 </label>
-              )}
-              <label className="inline-flex min-h-8 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={showCompanyShowcase}
-                  onChange={(e) => setField('showCompanyShowcase', e.target.checked)}
-                  className="h-4 w-4 accent-slate-700"
-                />
-                显示企业展示页
-              </label>
+              </div>
             </div>
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <h2 className="text-xl font-semibold">{isProposal ? '参数方案详情' : '报价详情'}</h2>
