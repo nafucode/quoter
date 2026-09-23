@@ -63,10 +63,13 @@ export function renderCompanyShowcase(language: Lang): Promise<string> {
         for (const [column, [, caption]] of row.entries()) {
           const image = images[imageIndex++];
           const x = margin + column * (cellWidth + gap);
-          const scale = Math.min(cellWidth / image.naturalWidth, imageHeight / image.naturalHeight);
-          const w = image.naturalWidth * scale;
-          const h = image.naturalHeight * scale;
-          ctx.drawImage(image, x + (cellWidth - w) / 2, y + (imageHeight - h) / 2, w, h);
+          // Apply the intended cover crop once; PDF prints the finished page unchanged.
+          const scale = Math.max(cellWidth / image.naturalWidth, imageHeight / image.naturalHeight);
+          const sourceWidth = cellWidth / scale;
+          const sourceHeight = imageHeight / scale;
+          ctx.drawImage(image,
+            (image.naturalWidth - sourceWidth) / 2, (image.naturalHeight - sourceHeight) / 2,
+            sourceWidth, sourceHeight, x, y, cellWidth, imageHeight);
           captionHeight = Math.max(captionHeight, text(caption, x + cellWidth / 2, y + imageHeight + 10, cellWidth - 12, 20, '#475569', true));
         }
         y += imageHeight + 10 + Math.max(32, captionHeight) + 10;
