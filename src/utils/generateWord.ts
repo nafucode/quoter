@@ -13,6 +13,7 @@ import { translateValueToFr } from '@/data/frValueMap';
 import { translateValueToVi } from '@/data/viValueMap';
 import { translateValueToKm } from '@/data/kmValueMap';
 import { translateValueToAr } from '@/data/arValueMap';
+import { getCompanyShowcaseContent } from '@/data/companyShowcase';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -237,6 +238,7 @@ export async function generateWordBlob(state: {
   const showPartList = state.showPartList ?? true;
   const showFunctionList = state.showFunctionList ?? true;
   const showCompanyShowcase = Boolean(state.showCompanyShowcase);
+  const companyShowcaseContent = getCompanyShowcaseContent(state.language);
   const isNoneText = (value: unknown) => String(value ?? '').trim().toLowerCase() === 'none';
   const shouldShowHandrailInQuote = (elev: any) =>
     !isNoneText(elev?.carHandrail) || elev?.showNoneHandrailInQuote !== false;
@@ -246,28 +248,9 @@ export async function generateWordBlob(state: {
   const bannerImg = await fetchImgData('/xinfuji-banner-quote.png');
 
   const showcaseImages = showCompanyShowcase
-    ? await Promise.all([
-        '/company-showcase/factory-exterior.jpg',
-        '/company-showcase/factory-interior.jpg',
-        '/company-showcase/factory-automation.jpg',
-        '/company-showcase/factory-escalator-line.jpg',
-        '/company-showcase/factory-cabin-pair.jpg',
-        '/company-showcase/factory-production-line.jpg',
-        '/company-showcase/shipping-yard.jpg',
-        '/company-showcase/container-loading.jpg',
-        '/company-showcase/export-dispatch.jpg',
-        '/company-showcase/shipping-containers.jpg',
-        '/company-showcase/shipping-wrapped-escalator.jpg',
-        '/company-showcase/shipping-forklift.jpg',
-        '/company-showcase/project-urban-complex.jpg',
-        '/company-showcase/project-alibaba-campus.jpg',
-        '/company-showcase/project-catl-industrial.jpg',
-        '/company-showcase/project-thailand-public-building.jpg',
-        '/company-showcase/project-high-rise-residence.jpg',
-        '/company-showcase/project-industrial-park.jpg',
-        '/company-showcase/project-alnoor-university-iraq.jpg',
-        '/company-showcase/project-nigeria.jpg',
-      ].map(fetchImgData))
+    ? await Promise.all(
+        companyShowcaseContent.sections.flatMap((section) => section.images.map(([src]) => src)).map(fetchImgData),
+      )
     : [];
 
   const elevatorImgCache = await Promise.all(
@@ -992,20 +975,17 @@ export async function generateWordBlob(state: {
           }),
         ],
       });
-    const showcaseSections = [
-      {
-        number: '01', title: 'FACTORY & MANUFACTURING', chinese: '工厂与制造', start: 0,
-        captions: ['Factory Panorama', 'Production Facility', 'Automated Manufacturing', 'Escalator Production', 'Cabin Assembly', 'Modern Production Line'],
-      },
-      {
-        number: '02', title: 'GLOBAL DELIVERY', chinese: '全球发运', start: 6,
-        captions: ['Export Shipment', 'Container Loading', 'Ready for Dispatch', 'International Shipping', 'Shipment Preparation', 'Factory Dispatch'],
-      },
-      {
-        number: '03', title: 'TYPICAL PROJECTS', chinese: '典型项目', start: 12,
-        captions: ['Urban Complex Project', 'Alibaba Campus Project', 'CATL Industrial Project', 'Cambodia State Guesthouse', 'High-Rise Residential Project', 'Vietnam Industrial Park Project', 'Al-Noor University, Iraq', 'Nigeria Glory Dome Landmark Project'],
-      },
-    ];
+    let showcaseStart = 0;
+    const showcaseSections = companyShowcaseContent.sections.map((section) => {
+      const start = showcaseStart;
+      showcaseStart += section.images.length;
+      return {
+        number: section.number,
+        title: section.title,
+        start,
+        captions: section.images.map(([, caption]) => caption),
+      };
+    });
 
     children.push(para([], { spacingAfter: 200 }));
     children.push(
@@ -1014,12 +994,8 @@ export async function generateWordBlob(state: {
     children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
     children.push(para([bold('XINFUJI ELEVATOR & ESCALATOR', 15)], { spacingAfter: 35 }));
     children.push(new Paragraph({
-      spacing: { after: 15 },
-      children: [new TextRun({ text: 'Manufacturing, Global Delivery & Projects', bold: true, size: 28, font: 'Arial', color: '173F75' })],
-    }));
-    children.push(new Paragraph({
       spacing: { after: 45 },
-      children: [new TextRun({ text: '制造实力、全球交付与项目案例', size: 16, font: 'Arial', color: '64748B' })],
+      children: [new TextRun({ text: companyShowcaseContent.heading, bold: true, size: 28, font: 'Arial', color: '173F75' })],
     }));
 
     showcaseSections.forEach((section) => {
@@ -1028,7 +1004,6 @@ export async function generateWordBlob(state: {
         children: [
           new TextRun({ text: `${section.number}  `, bold: true, size: 17, font: 'Arial', color: 'B58A42' }),
           new TextRun({ text: section.title, bold: true, size: 16, font: 'Arial', color: '173F75' }),
-          new TextRun({ text: `  ${section.chinese}`, size: 14, font: 'Arial', color: '64748B' }),
         ],
       }));
       const completeRowCount = Math.floor(section.captions.length / 3);

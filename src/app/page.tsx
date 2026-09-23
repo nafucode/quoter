@@ -17,6 +17,7 @@ import { standardFeatures } from '@/data/standardFeatures';
 import { translateStandardFeature } from '@/data/standardFeatureTranslations';
 import { countryGroups } from '@/data/countryOptions';
 import { countryPorts } from '@/data/countryPorts';
+import { getCompanyShowcaseContent } from '@/data/companyShowcase';
 
 const warrantyTextOptions = [
   {
@@ -63,44 +64,6 @@ const normalizeCompanyOptions = (options: unknown[]): CompanyOption[] =>
 const DEFAULT_FREIGHT_PLACEHOLDER = 'e.g., Port of Shanghai';
 const EXW_PICKUP_DESTINATION = 'Pickup from factory arranged by the customer. 客户安排工厂自提。';
 const NIGERIA_YY_CARGO_DESTINATION = 'To YY cargo Yiwu Warehouse China';
-
-const companyShowcaseSections = [
-  {
-    number: '01', title: 'FACTORY & MANUFACTURING', chinese: '工厂与制造',
-    images: [
-      ['/company-showcase/factory-exterior.jpg', 'Factory Panorama'],
-      ['/company-showcase/factory-interior.jpg', 'Production Facility'],
-      ['/company-showcase/factory-automation.jpg', 'Automated Manufacturing'],
-      ['/company-showcase/factory-escalator-line.jpg', 'Escalator Production'],
-      ['/company-showcase/factory-cabin-pair.jpg', 'Cabin Assembly'],
-      ['/company-showcase/factory-production-line.jpg', 'Modern Production Line'],
-    ],
-  },
-  {
-    number: '02', title: 'GLOBAL DELIVERY', chinese: '全球发运',
-    images: [
-      ['/company-showcase/shipping-yard.jpg', 'Export Shipment'],
-      ['/company-showcase/container-loading.jpg', 'Container Loading'],
-      ['/company-showcase/export-dispatch.jpg', 'Ready for Dispatch'],
-      ['/company-showcase/shipping-containers.jpg', 'International Shipping'],
-      ['/company-showcase/shipping-wrapped-escalator.jpg', 'Shipment Preparation'],
-      ['/company-showcase/shipping-forklift.jpg', 'Factory Dispatch'],
-    ],
-  },
-  {
-    number: '03', title: 'TYPICAL PROJECTS', chinese: '典型项目',
-    images: [
-      ['/company-showcase/project-urban-complex.jpg', 'Urban Complex Project'],
-      ['/company-showcase/project-alibaba-campus.jpg', 'Alibaba Campus Project'],
-      ['/company-showcase/project-catl-industrial.jpg', 'CATL Industrial Project'],
-      ['/company-showcase/project-thailand-public-building.jpg', 'Cambodia State Guesthouse'],
-      ['/company-showcase/project-high-rise-residence.jpg', 'High-Rise Residential Project'],
-      ['/company-showcase/project-industrial-park.jpg', 'Vietnam Industrial Park Project'],
-      ['/company-showcase/project-alnoor-university-iraq.jpg', 'Al-Noor University, Iraq'],
-      ['/company-showcase/project-nigeria.jpg', 'Nigeria Glory Dome Landmark Project'],
-    ],
-  },
-] as const;
 
 const formatFreightText = (dest: string, freight: (dest: string) => string) =>
   dest.trim().toLowerCase().startsWith('to ')
@@ -246,6 +209,7 @@ const Quote = () => {
   ];
 
   const t = getTranslations(language);
+  const companyShowcaseContent = getCompanyShowcaseContent(language);
   const selectedCertificationStandard = certificationStandard || 'CE Certification';
   const shouldShowCertificationStandard = showCertificationStandard ?? false;
 
@@ -2020,10 +1984,9 @@ const Quote = () => {
                   <section className="break-before-page company-showcase-page">
                     <div className="company-showcase-heading">
                       <p>XINFUJI ELEVATOR &amp; ESCALATOR</p>
-                      <h2>Manufacturing, Global Delivery &amp; Projects</h2>
-                      <span>制造实力、全球交付与项目案例</span>
+                      <h2>{companyShowcaseContent.heading}</h2>
                     </div>
-                    {companyShowcaseSections.map((section) => (
+                    {companyShowcaseContent.sections.map((section) => (
                       <div
                         key={section.number}
                         className={`company-showcase-section${section.number === '03' ? ' company-showcase-projects' : ''}`}
@@ -2031,7 +1994,6 @@ const Quote = () => {
                         <div className="company-showcase-section-title">
                           <b>{section.number}</b>
                           <strong>{section.title}</strong>
-                          <span>{section.chinese}</span>
                         </div>
                         <div className="company-showcase-grid">
                           {section.images.map(([src, caption]) => (
