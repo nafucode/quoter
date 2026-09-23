@@ -80,6 +80,6 @@ body {
   .company-showcase-section { margin-top: 1.8mm; }
   .company-showcase-section-title { margin-bottom: 1mm; }
   .company-showcase-grid { gap: 1.2mm; }
-  .company-showcase-grid figure { height: 24mm; break-inside: avoid; }
+  .company-showcase-grid figure { height: 27mm; break-inside: avoid; }
   .company-showcase-grid img { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }

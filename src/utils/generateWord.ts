@@ -967,7 +967,7 @@ export async function generateWordBlob(state: {
         width: { size: cellWidth, type: WidthType.DXA },
         margins: { top: 10, bottom: 10, left: 30, right: 30 },
         children: [
-          imgDataToPara(img, imageWidth, 70),
+          imgDataToPara(img, imageWidth, 82),
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { before: 5, after: 0 },
