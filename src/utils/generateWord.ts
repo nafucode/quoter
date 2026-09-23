@@ -965,13 +965,13 @@ export async function generateWordBlob(state: {
       new TableCell({
         borders: NO_BORDERS,
         width: { size: cellWidth, type: WidthType.DXA },
-        margins: { top: 25, bottom: 25, left: 30, right: 30 },
+        margins: { top: 10, bottom: 10, left: 30, right: 30 },
         children: [
-          imgDataToPara(img, imageWidth, 82),
+          imgDataToPara(img, imageWidth, 70),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { before: 15, after: 0 },
-            children: [new TextRun({ text: caption, bold: true, size: 13, font: 'Arial', color: '475569' })],
+            spacing: { before: 5, after: 0 },
+            children: [new TextRun({ text: caption, bold: true, size: 12, font: 'Arial', color: '475569' })],
           }),
         ],
       });
@@ -992,15 +992,15 @@ export async function generateWordBlob(state: {
       para([bold(`${t.quotationDate}: `), plain(state.quotationDate)], { align: AlignmentType.RIGHT }),
     );
     children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
-    children.push(para([bold('XINFUJI ELEVATOR & ESCALATOR', 15)], { spacingAfter: 35 }));
+    children.push(para([bold('XINFUJI ELEVATOR & ESCALATOR', 15)], { spacingAfter: 20 }));
     children.push(new Paragraph({
-      spacing: { after: 45 },
-      children: [new TextRun({ text: companyShowcaseContent.heading, bold: true, size: 28, font: 'Arial', color: '173F75' })],
+      spacing: { after: 25 },
+      children: [new TextRun({ text: companyShowcaseContent.heading, bold: true, size: 26, font: 'Arial', color: '173F75' })],
     }));
 
     showcaseSections.forEach((section) => {
       children.push(new Paragraph({
-        spacing: { before: 45, after: 20 },
+        spacing: { before: 25, after: 10 },
         children: [
           new TextRun({ text: `${section.number}  `, bold: true, size: 17, font: 'Arial', color: 'B58A42' }),
           new TextRun({ text: section.title, bold: true, size: 16, font: 'Arial', color: '173F75' }),
@@ -1009,11 +1009,13 @@ export async function generateWordBlob(state: {
       const completeRowCount = Math.floor(section.captions.length / 3);
       if (completeRowCount > 0) {
         children.push(new Table({
+          borders: NO_BORDERS,
           width: { size: CONTENT_W, type: WidthType.DXA },
           columnWidths: [Math.floor(CONTENT_W / 3), Math.floor(CONTENT_W / 3), CONTENT_W - Math.floor(CONTENT_W / 3) * 2],
           rows: Array.from({ length: completeRowCount }, (_, rowIndex) => {
             const offset = rowIndex * 3;
             return new TableRow({
+              cantSplit: true,
               children: [0, 1, 2].map((columnIndex) => {
                 const caption = section.captions[offset + columnIndex];
                 return showcaseCell(showcaseImages[section.start + offset + columnIndex], caption);
@@ -1029,6 +1031,7 @@ export async function generateWordBlob(state: {
         const cellWidth = Math.floor(CONTENT_W / remainingCaptions.length);
         const imageWidth = remainingCaptions.length === 2 ? 285 : 570;
         children.push(new Table({
+          borders: NO_BORDERS,
           width: { size: CONTENT_W, type: WidthType.DXA },
           columnWidths: remainingCaptions.map((_, index) =>
             index === remainingCaptions.length - 1
@@ -1036,6 +1039,7 @@ export async function generateWordBlob(state: {
               : cellWidth,
           ),
           rows: [new TableRow({
+            cantSplit: true,
             children: remainingCaptions.map((caption, index) =>
               showcaseCell(showcaseImages[section.start + remainderStart + index], caption, cellWidth, imageWidth),
             ),

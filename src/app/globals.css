@@ -68,14 +68,18 @@ body {
     color: darkblue !important;
   }
   .company-showcase-page {
-    min-height: 247mm;
-    max-height: 247mm;
-    overflow: hidden;
-    padding: 8mm 6mm 5mm;
+    box-sizing: border-box;
+    height: 247mm;
+    min-height: 0;
+    overflow: visible;
+    padding: 6mm 6mm 4mm;
     break-after: page;
   }
-  .company-showcase-heading { padding-bottom: 2.5mm; margin-bottom: 2.5mm; }
-  .company-showcase-section { margin-top: 2.5mm; }
-  .company-showcase-grid figure { height: 27mm; }
+  .company-showcase-heading { padding-bottom: 1.8mm; margin-bottom: 1.8mm; }
+  .company-showcase-heading h2 { font-size: 24px; }
+  .company-showcase-section { margin-top: 1.8mm; }
+  .company-showcase-section-title { margin-bottom: 1mm; }
+  .company-showcase-grid { gap: 1.2mm; }
+  .company-showcase-grid figure { height: 24mm; break-inside: avoid; }
   .company-showcase-grid img { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }
