@@ -18,6 +18,13 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.company-showcase-raster-page { background: #fff; }
+.company-showcase-raster-page > img { display: block; width: 100%; height: auto; aspect-ratio: 1600 / 2263; object-fit: contain; }
+@media print {
+  .company-showcase-raster-page { break-before: page; page-break-before: always; break-inside: avoid; page-break-inside: avoid; }
+  .company-showcase-raster-page > img { width: 100%; height: auto; max-height: 240mm; object-fit: contain; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+
 .company-showcase-page {
   min-height: 1040px;
   padding: 34px 36px 28px;
@@ -32,9 +39,9 @@ body {
 .company-showcase-section-title b { color: #b58a42; font-size: 16px; }
 .company-showcase-section-title strong { font-size: 11px; letter-spacing: .04em; }
 .company-showcase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.company-showcase-grid figure { position: relative; overflow: hidden; height: 112px; margin: 0; background: #e5e7eb; }
-.company-showcase-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.company-showcase-grid figcaption { position: absolute; right: 0; bottom: 0; left: 0; padding: 16px 8px 6px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.72)); font-size: 9px; font-weight: 700; }
+.company-showcase-grid figure { display: grid; grid-template-rows: minmax(0, 1fr) 28px; min-width: 0; height: 140px; margin: 0; background: #fff; }
+.company-showcase-grid img { width: 100%; height: 100%; min-height: 0; object-fit: contain; object-position: center; display: block; }
+.company-showcase-grid figcaption { position: static; padding: 3px 2px 0; color: #475569; background: none; font-size: 9px; line-height: 1.2; font-weight: 700; text-align: center; overflow-wrap: anywhere; }
 .company-showcase-projects .company-showcase-grid { grid-template-columns: repeat(6, 1fr); }
 .company-showcase-projects .company-showcase-grid figure { grid-column: span 2; }
 .company-showcase-projects .company-showcase-grid figure:nth-last-child(-n + 2) { grid-column: span 3; }
@@ -42,7 +49,7 @@ body {
 @media (max-width: 760px) {
   .company-showcase-page { min-height: 0; padding: 24px 18px; }
   .company-showcase-grid { grid-template-columns: repeat(3, 1fr); }
-  .company-showcase-grid figure { height: 108px; }
+  .company-showcase-grid figure { height: 136px; }
 }
 
 @media print {
@@ -78,8 +85,8 @@ body {
   .company-showcase-heading { padding-bottom: 1.8mm; margin-bottom: 1.8mm; }
   .company-showcase-heading h2 { font-size: 24px; }
   .company-showcase-section { margin-top: 1.8mm; }
-  .company-showcase-section-title { margin-bottom: 1mm; }
+  .company-showcase-section-title { margin-bottom: 1mm; line-height: 1.2; }
   .company-showcase-grid { gap: 1.2mm; }
-  .company-showcase-grid figure { height: 27mm; break-inside: avoid; }
+  .company-showcase-grid figure { height: 25mm; grid-template-rows: 19mm 6mm; break-inside: avoid; }
   .company-showcase-grid img { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }

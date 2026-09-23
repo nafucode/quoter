@@ -17,7 +17,7 @@ import { standardFeatures } from '@/data/standardFeatures';
 import { translateStandardFeature } from '@/data/standardFeatureTranslations';
 import { countryGroups } from '@/data/countryOptions';
 import { countryPorts } from '@/data/countryPorts';
-import { getCompanyShowcaseContent } from '@/data/companyShowcase';
+import CompanyShowcase, { type CompanyShowcaseHandle } from '@/components/CompanyShowcase';
 
 const warrantyTextOptions = [
   {
@@ -212,7 +212,7 @@ const Quote = () => {
   ];
 
   const t = getTranslations(language);
-  const companyShowcaseContent = getCompanyShowcaseContent(language);
+  const companyShowcaseRef = useRef<CompanyShowcaseHandle>(null);
   const selectedCertificationStandard = certificationStandard || 'CE Certification';
   const shouldShowCertificationStandard = showCertificationStandard ?? false;
 
@@ -526,12 +526,21 @@ const Quote = () => {
     return `${mode === 'proposal' ? 'Technical-Proposal' : 'Quotation'}-${sanitize(company)}-${sanitize(project)}`;
   };
 
-  const performGeneratePDF = () => {
+  const performGeneratePDF = async () => {
     // When embedded as iframe in SEO workbench, window.print() is unreliable.
     // Open in a new tab so the user can print from a clean context.
     if (window !== window.top) {
       window.open(window.location.href, '_blank');
       return;
+    }
+    if (showCompanyShowcase) {
+      try {
+        if (!companyShowcaseRef.current) throw new Error('Showcase unavailable');
+        await companyShowcaseRef.current.prepare();
+      } catch {
+        alert('企业展示图片生成失败，请刷新重试，避免导出不完整的 PDF。');
+        return;
+      }
     }
     // Set document.title so the browser uses it as the default PDF filename.
     const pdfTitle = buildQuotationFileTitle(companyName, projectName, documentMode);
@@ -2004,31 +2013,7 @@ const Quote = () => {
                 )}
 
                 {showCompanyShowcase && (
-                  <section className="break-before-page company-showcase-page">
-                    <div className="company-showcase-heading">
-                      <p>XINFUJI ELEVATOR &amp; ESCALATOR</p>
-                      <h2>{companyShowcaseContent.heading}</h2>
-                    </div>
-                    {companyShowcaseContent.sections.map((section) => (
-                      <div
-                        key={section.number}
-                        className={`company-showcase-section${section.number === '03' ? ' company-showcase-projects' : ''}`}
-                      >
-                        <div className="company-showcase-section-title">
-                          <b>{section.number}</b>
-                          <strong>{section.title}</strong>
-                        </div>
-                        <div className="company-showcase-grid">
-                          {section.images.map(([src, caption]) => (
-                            <figure key={src}>
-                              <img src={src} alt={caption} />
-                              <figcaption>{caption}</figcaption>
-                            </figure>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </section>
+                  <CompanyShowcase ref={companyShowcaseRef} language={language} />
                 )}
               </div>
               <div className="hidden print:block print-footer">
