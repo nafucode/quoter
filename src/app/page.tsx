@@ -173,6 +173,9 @@ const Quote = () => {
     certificationStandard,
     showCertificationStandard,
     exchangeRateBasis,
+    exchangeRateBasisMarketRate,
+    exchangeRateBasisSource,
+    exchangeRateBasisUpdatedAt,
     shaftFrame,
     temperedGlass,
     showPartList,
@@ -750,7 +753,7 @@ const Quote = () => {
     const frameRateRmb = shaftFrameCalc.frameType === 'steel' ? 1300 : 1800;
     const frameCostRmb = frameRateRmb * chargeHeight;
     const totalRmb = glassCostRmb + frameCostRmb;
-    const usdRate = Number(exchangeRateBasis) || 6.8;
+    const usdRate = Number(exchangeRateBasis) || 6.65;
     const glassCostUsd = Math.round(glassCostRmb / usdRate);
     const frameCostUsd = Math.round(frameCostRmb / usdRate);
     const totalUsd = Math.round(totalRmb / usdRate);
@@ -1260,10 +1263,30 @@ const Quote = () => {
                 <label className="block text-sm font-medium text-gray-700">Exchange Rate Basis (vs. RMB)<span className="block text-xs text-gray-500">汇率基准 (对人民币)</span></label>
                 <input
                   type="number"
+                  step="0.01"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={exchangeRateBasis}
                   onChange={(e) => setField('exchangeRateBasis', e.target.value)}
                 />
+                <p className="mt-1 text-xs leading-5 text-gray-500">
+                  自动参考：
+                  <a
+                    href="https://www.boc.cn/sourcedb/whpj/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-600 hover:underline"
+                  >
+                    {exchangeRateBasisSource}
+                  </a>
+                  {exchangeRateBasisMarketRate
+                    ? `（现汇买入价 ${exchangeRateBasisMarketRate.toFixed(4)}`
+                    : ''}
+                  {exchangeRateBasisMarketRate && exchangeRateBasisUpdatedAt
+                    ? `，更新 ${exchangeRateBasisUpdatedAt}）`
+                    : exchangeRateBasisMarketRate
+                      ? '）'
+                      : ''}
+                </p>
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Remarks<span className="block text-xs text-gray-500">备注（项目特殊要求）</span></label>

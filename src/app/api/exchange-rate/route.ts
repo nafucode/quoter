@@ -2,6 +2,64 @@ import { NextResponse } from 'next/server';
 
 const NGN_MARKUP = 50;
 const NGN_FALLBACK_MARKET_RATE = 1410;
+const USD_RMB_ADJUSTMENT = 0.04;
+const USD_RMB_FALLBACK = 6.65;
+
+const stripHtml = (value: string) =>
+  value
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;|&#160;/gi, ' ')
+    .trim();
+
+export const parseBocUsdSpotBuyingRate = (html: string) => {
+  const rowMatch = html.match(/<tr[^>]*data-currency=["']美元["'][^>]*>([\s\S]*?)<\/tr>/i);
+  if (!rowMatch?.[1]) return null;
+
+  const cells = Array.from(rowMatch[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)).map((match) =>
+    stripHtml(match[1]),
+  );
+  const spotBuyingRate = Number(cells[1]);
+
+  if (!Number.isFinite(spotBuyingRate) || spotBuyingRate <= 0) return null;
+  return {
+    rate: Number((spotBuyingRate / 100).toFixed(4)),
+    updatedAt: cells[6] || '',
+  };
+};
+
+const fetchUsdRmbBasis = async () => {
+  try {
+    const response = await fetch('https://www.boc.cn/sourcedb/whpj/', {
+      headers: {
+        'user-agent': 'Mozilla/5.0 (compatible; XinfujiQuoter/1.0)',
+      },
+      next: { revalidate: 60 * 30 },
+    });
+
+    if (response.ok) {
+      const parsed = parseBocUsdSpotBuyingRate(await response.text());
+      if (parsed) {
+        return {
+          usdRmbBasis: Math.floor((parsed.rate - USD_RMB_ADJUSTMENT + Number.EPSILON) * 100) / 100,
+          usdRmbMarketRate: parsed.rate,
+          usdRmbAdjustment: USD_RMB_ADJUSTMENT,
+          usdRmbUpdatedAt: parsed.updatedAt,
+          usdRmbSource: '中国银行美元现汇买入价 - 0.04',
+        };
+      }
+    }
+  } catch {
+    // Fall through to the stable default below.
+  }
+
+  return {
+    usdRmbBasis: USD_RMB_FALLBACK,
+    usdRmbMarketRate: null,
+    usdRmbAdjustment: USD_RMB_ADJUSTMENT,
+    usdRmbUpdatedAt: '',
+    usdRmbSource: '默认汇率（中国银行数据暂不可用）',
+  };
+};
 
 const parseNgnMarketRate = (html: string) => {
   const patterns = [
@@ -57,13 +115,14 @@ const fetchNgnRate = async () => {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const currency = (searchParams.get('currency') || 'USD').toUpperCase();
+  const usdRmb = await fetchUsdRmbBasis();
 
   if (!currency || currency === '-' || currency === 'USD') {
-    return NextResponse.json({ rate: 1, source: 'USD base' });
+    return NextResponse.json({ rate: 1, source: 'USD base', ...usdRmb });
   }
 
   if (currency === 'NGN') {
-    return NextResponse.json(await fetchNgnRate());
+    return NextResponse.json({ ...(await fetchNgnRate()), ...usdRmb });
   }
 
   const response = await fetch('https://open.er-api.com/v6/latest/USD', {
@@ -76,5 +135,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: `Rate not found for ${currency}` }, { status: 404 });
   }
 
-  return NextResponse.json({ rate, source: 'open.er-api.com' });
+  return NextResponse.json({ rate, source: 'open.er-api.com', ...usdRmb });
 }

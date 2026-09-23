@@ -11,6 +11,8 @@ const buildDefaultWarrantyText = (months: number | string = 12) =>
   `${months || 12} months from the date the goods depart from the port of shipment.`;
 const todayDate = () => new Date().toLocaleDateString('en-CA');
 const DEFAULT_FREIGHT_DESTINATION = 'SHANGHAI PORT';
+const DEFAULT_EXCHANGE_RATE_BASIS = 6.65;
+const DEFAULT_EXCHANGE_RATE_BASIS_SOURCE = '中国银行美元现汇买入价 - 0.04';
 const LEGACY_CAR_WALL_TEXTS = new Set([
   'Hairline Stainless Steel',
   'Hairline Stainless Steel 304 1',
@@ -88,6 +90,10 @@ const normalizeQuoteState = (state: any) => {
     showCompanyShowcase: state.showCompanyShowcase ?? false,
     warrantyText: state.warrantyText || buildDefaultWarrantyText(state.warrantyMonths),
     quoteRemarks: state.quoteRemarks ?? '',
+    exchangeRateBasis: state.exchangeRateBasis ?? DEFAULT_EXCHANGE_RATE_BASIS,
+    exchangeRateBasisMarketRate: state.exchangeRateBasisMarketRate ?? null,
+    exchangeRateBasisSource: state.exchangeRateBasisSource ?? DEFAULT_EXCHANGE_RATE_BASIS_SOURCE,
+    exchangeRateBasisUpdatedAt: state.exchangeRateBasisUpdatedAt ?? '',
     shaftFrame: normalizeOptionalItem(state.shaftFrame, initialState.shaftFrame),
     temperedGlass: normalizeOptionalItem(state.temperedGlass, initialState.temperedGlass),
     elevators: Array.isArray(state.elevators)
@@ -137,6 +143,9 @@ interface QuoteState {
   certificationStandard: string;
   showCertificationStandard: boolean;
   exchangeRateBasis: number | string;
+  exchangeRateBasisMarketRate: number | null;
+  exchangeRateBasisSource: string;
+  exchangeRateBasisUpdatedAt: string;
   shaftFrame: OptionalItem;
   temperedGlass: OptionalItem;
   showPartList: boolean;
@@ -181,7 +190,10 @@ const initialState = {
   quoteRemarks: '',
   certificationStandard: 'CE Certification',
   showCertificationStandard: false,
-  exchangeRateBasis: 6.8,
+  exchangeRateBasis: DEFAULT_EXCHANGE_RATE_BASIS,
+  exchangeRateBasisMarketRate: null,
+  exchangeRateBasisSource: DEFAULT_EXCHANGE_RATE_BASIS_SOURCE,
+  exchangeRateBasisUpdatedAt: '',
   shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', qty: 1, price: 0 },
   temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', qty: 1, price: 0 },
   showPartList: true,
@@ -260,18 +272,30 @@ export const useQuoteStore = create<QuoteState>()(
 
       fetchExchangeRate: async () => {
         const { targetCurrency } = get();
-        if (targetCurrency && targetCurrency !== 'USD' && targetCurrency !== '-') {
-          try {
-            const response = await fetch(`/api/exchange-rate?currency=${encodeURIComponent(targetCurrency)}`);
-            const data = await response.json();
-            if (data.rate) {
-              set({ exchangeRate: data.rate });
-            }
-          } catch (error) {
-            console.error("Error fetching exchange rate:", error);
+        const currency = targetCurrency && targetCurrency !== '-' ? targetCurrency : 'USD';
+
+        try {
+          const response = await fetch(`/api/exchange-rate?currency=${encodeURIComponent(currency)}`);
+          if (!response.ok) throw new Error(`Exchange rate request failed: ${response.status}`);
+
+          const data = await response.json();
+          const nextState: Partial<QuoteState> = {
+            exchangeRate: currency === 'USD' ? 1 : data.rate,
+          };
+
+          if (Number.isFinite(data.usdRmbBasis) && data.usdRmbBasis > 0) {
+            nextState.exchangeRateBasis = data.usdRmbBasis;
+            nextState.exchangeRateBasisMarketRate = Number.isFinite(data.usdRmbMarketRate)
+              ? data.usdRmbMarketRate
+              : null;
+            nextState.exchangeRateBasisSource = data.usdRmbSource || DEFAULT_EXCHANGE_RATE_BASIS_SOURCE;
+            nextState.exchangeRateBasisUpdatedAt = data.usdRmbUpdatedAt || '';
           }
-        } else {
-          set({ exchangeRate: 1 });
+
+          set(nextState);
+        } catch (error) {
+          console.error('Error fetching exchange rate:', error);
+          if (currency === 'USD') set({ exchangeRate: 1 });
         }
       },
 
@@ -280,7 +304,7 @@ export const useQuoteStore = create<QuoteState>()(
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
-      version: 8,
+      version: 9,
       partialize: (state) => {
         const { quotationDate, ...persistedState } = state;
         return persistedState;
@@ -319,6 +343,9 @@ export const useQuoteStore = create<QuoteState>()(
           };
         }
         if (version < 8) {
+          nextState = normalizeQuoteState(nextState);
+        }
+        if (version < 9) {
           nextState = normalizeQuoteState(nextState);
         }
         return nextState;
