@@ -23,7 +23,7 @@ export function renderCompanyShowcase(language: Lang): Promise<string> {
     if (!ctx) throw new Error('Canvas unavailable');
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    const margin = 56;
+    const margin = 40;
     const width = canvas.width - margin * 2;
 
     function text(value: string, x: number, y: number, maxWidth: number, size: number, color: string, centered = false) {
@@ -58,7 +58,7 @@ export function renderCompanyShowcase(language: Lang): Promise<string> {
         const row = section.images.slice(start, start + 3);
         const gap = 16;
         const cellWidth = (width - gap * (row.length - 1)) / row.length;
-        const imageHeight = 170;
+        const imageHeight = 195;
         let captionHeight = 0;
         for (const [column, [, caption]] of row.entries()) {
           const image = images[imageIndex++];
@@ -69,9 +69,9 @@ export function renderCompanyShowcase(language: Lang): Promise<string> {
           ctx.drawImage(image, x + (cellWidth - w) / 2, y + (imageHeight - h) / 2, w, h);
           captionHeight = Math.max(captionHeight, text(caption, x + cellWidth / 2, y + imageHeight + 10, cellWidth - 12, 20, '#475569', true));
         }
-        y += imageHeight + 10 + Math.max(52, captionHeight) + 14;
+        y += imageHeight + 10 + Math.max(32, captionHeight) + 10;
       }
-      y += 16;
+      y += 12;
     }
     if (y > canvas.height - 24) throw new Error('Showcase content exceeds one page');
     return canvas.toDataURL('image/png');
