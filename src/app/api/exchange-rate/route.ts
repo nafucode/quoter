@@ -27,7 +27,37 @@ export const parseBocUsdSpotBuyingRate = (html: string) => {
   };
 };
 
-const fetchUsdRmbBasis = async () => {
+const fetchUsdRmbBasis = async (bank: string) => {
+  if (bank === 'szrcb') {
+    try {
+      const response = await fetch('https://www.szrcb.com/eportal/ui?moduleId=5&portal.url=/portlet/integrate!forex.portlet', {
+        signal: AbortSignal.timeout(10000),
+        next: { revalidate: 300 },
+      });
+      if (!response.ok) throw new Error('Bank request failed');
+      const payload = await response.json();
+      const row = payload.code === 0 && Array.isArray(payload.data)
+        ? payload.data.find((item: { Ccy?: number; CcyNm?: string }) => Number(item.Ccy) === 14 && item.CcyNm === '美元')
+        : null;
+      const rate = Number((Number(row?.SpotExgBuyPrc) / 100).toFixed(4));
+      if (!Number.isFinite(rate) || rate <= USD_RMB_ADJUSTMENT) throw new Error('Invalid bank rate');
+      return {
+        usdRmbBasis: Number((rate - USD_RMB_ADJUSTMENT).toFixed(4)),
+        usdRmbMarketRate: rate,
+        usdRmbAdjustment: USD_RMB_ADJUSTMENT,
+        usdRmbUpdatedAt: '',
+        usdRmbSource: '苏州农商行美元汇买价 - 0.05',
+      };
+    } catch {
+      return {
+        usdRmbBasis: null,
+        usdRmbMarketRate: null,
+        usdRmbAdjustment: USD_RMB_ADJUSTMENT,
+        usdRmbUpdatedAt: '',
+        usdRmbSource: '苏州农商行数据暂不可用，保留当前汇率',
+      };
+    }
+  }
   try {
     const response = await fetch('https://www.boc.cn/sourcedb/whpj/', {
       headers: {
@@ -40,7 +70,7 @@ const fetchUsdRmbBasis = async () => {
       const parsed = parseBocUsdSpotBuyingRate(await response.text());
       if (parsed) {
         return {
-          usdRmbBasis: Math.floor((parsed.rate - USD_RMB_ADJUSTMENT + Number.EPSILON) * 100) / 100,
+          usdRmbBasis: Number((parsed.rate - USD_RMB_ADJUSTMENT).toFixed(4)),
           usdRmbMarketRate: parsed.rate,
           usdRmbAdjustment: USD_RMB_ADJUSTMENT,
           usdRmbUpdatedAt: parsed.updatedAt,
@@ -115,7 +145,8 @@ const fetchNgnRate = async () => {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const currency = (searchParams.get('currency') || 'USD').toUpperCase();
-  const usdRmb = await fetchUsdRmbBasis();
+  const bank = searchParams.get('bank') === 'boc' ? 'boc' : 'szrcb';
+  const usdRmb = await fetchUsdRmbBasis(bank);
 
   if (!currency || currency === '-' || currency === 'USD') {
     return NextResponse.json({ rate: 1, source: 'USD base', ...usdRmb });

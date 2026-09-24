@@ -173,6 +173,7 @@ const Quote = () => {
     certificationStandard,
     showCertificationStandard,
     exchangeRateBasis,
+    exchangeRateBank,
     exchangeRateBasisMarketRate,
     exchangeRateBasisSource,
     exchangeRateBasisUpdatedAt,
@@ -706,7 +707,7 @@ const Quote = () => {
 
   useEffect(() => {
     fetchExchangeRate();
-  }, [targetCurrency, fetchExchangeRate]);
+  }, [targetCurrency, exchangeRateBank, fetchExchangeRate]);
 
   const isExw = quotationType === 'EXW';
   const isDefaultExwNoChargeDestination =
@@ -1270,9 +1271,18 @@ const Quote = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Exchange Rate Basis (vs. RMB)<span className="block text-xs text-gray-500">汇率基准 (对人民币)</span></label>
+                <select
+                  aria-label="汇率参考银行"
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                  value={exchangeRateBank}
+                  onChange={(e) => setField('exchangeRateBank', e.target.value)}
+                >
+                  <option value="szrcb">苏州农商行汇买价 - 0.05（默认）</option>
+                  <option value="boc">中国银行现汇买入价 - 0.05</option>
+                </select>
                 <input
                   type="number"
-                  step="0.01"
+                  step="0.0001"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={exchangeRateBasis}
                   onChange={(e) => setField('exchangeRateBasis', e.target.value)}
@@ -1280,7 +1290,7 @@ const Quote = () => {
                 <p className="mt-1 text-xs leading-5 text-gray-500">
                   自动参考：
                   <a
-                    href="https://www.boc.cn/sourcedb/whpj/"
+                    href={exchangeRateBank === 'boc' ? 'https://www.boc.cn/sourcedb/whpj/' : 'https://www.szrcb.com/szrcb/bjfw/whpj/index.shtml'}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-indigo-600 hover:underline"

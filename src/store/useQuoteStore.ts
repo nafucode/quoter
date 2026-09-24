@@ -12,7 +12,7 @@ const buildDefaultWarrantyText = (months: number | string = 12) =>
 const todayDate = () => new Date().toLocaleDateString('en-CA');
 const DEFAULT_FREIGHT_DESTINATION = 'SHANGHAI PORT';
 const DEFAULT_EXCHANGE_RATE_BASIS = 6.65;
-const DEFAULT_EXCHANGE_RATE_BASIS_SOURCE = '中国银行美元现汇买入价 - 0.05';
+const DEFAULT_EXCHANGE_RATE_BASIS_SOURCE = '苏州农商行美元汇买价 - 0.05';
 const LEGACY_CAR_WALL_TEXTS = new Set([
   'Hairline Stainless Steel',
   'Hairline Stainless Steel 304 1',
@@ -91,6 +91,7 @@ const normalizeQuoteState = (state: any) => {
     warrantyText: state.warrantyText || buildDefaultWarrantyText(state.warrantyMonths),
     quoteRemarks: state.quoteRemarks ?? '',
     exchangeRateBasis: state.exchangeRateBasis ?? DEFAULT_EXCHANGE_RATE_BASIS,
+    exchangeRateBank: state.exchangeRateBank === 'boc' ? 'boc' : 'szrcb',
     exchangeRateBasisMarketRate: state.exchangeRateBasisMarketRate ?? null,
     exchangeRateBasisSource: state.exchangeRateBasisSource ?? DEFAULT_EXCHANGE_RATE_BASIS_SOURCE,
     exchangeRateBasisUpdatedAt: state.exchangeRateBasisUpdatedAt ?? '',
@@ -143,6 +144,7 @@ interface QuoteState {
   certificationStandard: string;
   showCertificationStandard: boolean;
   exchangeRateBasis: number | string;
+  exchangeRateBank: 'szrcb' | 'boc';
   exchangeRateBasisMarketRate: number | null;
   exchangeRateBasisSource: string;
   exchangeRateBasisUpdatedAt: string;
@@ -191,6 +193,7 @@ const initialState = {
   certificationStandard: 'CE Certification',
   showCertificationStandard: false,
   exchangeRateBasis: DEFAULT_EXCHANGE_RATE_BASIS,
+  exchangeRateBank: 'szrcb' as const,
   exchangeRateBasisMarketRate: null,
   exchangeRateBasisSource: DEFAULT_EXCHANGE_RATE_BASIS_SOURCE,
   exchangeRateBasisUpdatedAt: '',
@@ -271,25 +274,24 @@ export const useQuoteStore = create<QuoteState>()(
       resetToDefaults: () => set({ ...initialState, quotationDate: todayDate() }),
 
       fetchExchangeRate: async () => {
-        const { targetCurrency } = get();
+        const { targetCurrency, exchangeRateBank } = get();
         const currency = targetCurrency && targetCurrency !== '-' ? targetCurrency : 'USD';
 
         try {
-          const response = await fetch(`/api/exchange-rate?currency=${encodeURIComponent(currency)}`);
+          const response = await fetch(`/api/exchange-rate?currency=${encodeURIComponent(currency)}&bank=${exchangeRateBank}`);
           if (!response.ok) throw new Error(`Exchange rate request failed: ${response.status}`);
 
           const data = await response.json();
+          if (get().exchangeRateBank !== exchangeRateBank || get().targetCurrency !== targetCurrency) return;
           const nextState: Partial<QuoteState> = {
             exchangeRate: currency === 'USD' ? 1 : data.rate,
+            exchangeRateBasisSource: data.usdRmbSource || DEFAULT_EXCHANGE_RATE_BASIS_SOURCE,
+            exchangeRateBasisMarketRate: Number.isFinite(data.usdRmbMarketRate) ? data.usdRmbMarketRate : null,
+            exchangeRateBasisUpdatedAt: data.usdRmbUpdatedAt || '',
           };
 
           if (Number.isFinite(data.usdRmbBasis) && data.usdRmbBasis > 0) {
             nextState.exchangeRateBasis = data.usdRmbBasis;
-            nextState.exchangeRateBasisMarketRate = Number.isFinite(data.usdRmbMarketRate)
-              ? data.usdRmbMarketRate
-              : null;
-            nextState.exchangeRateBasisSource = data.usdRmbSource || DEFAULT_EXCHANGE_RATE_BASIS_SOURCE;
-            nextState.exchangeRateBasisUpdatedAt = data.usdRmbUpdatedAt || '';
           }
 
           set(nextState);
@@ -304,7 +306,7 @@ export const useQuoteStore = create<QuoteState>()(
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
-      version: 9,
+      version: 10,
       partialize: (state) => {
         const { quotationDate, ...persistedState } = state;
         return persistedState;
@@ -346,6 +348,9 @@ export const useQuoteStore = create<QuoteState>()(
           nextState = normalizeQuoteState(nextState);
         }
         if (version < 9) {
+          nextState = normalizeQuoteState(nextState);
+        }
+        if (version < 10) {
           nextState = normalizeQuoteState(nextState);
         }
         return nextState;
