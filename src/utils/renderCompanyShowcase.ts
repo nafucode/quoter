@@ -62,15 +62,18 @@ export function renderCompanyShowcase(language: Lang): Promise<string> {
         // Use the remaining page space for the two wide project photos, reserving room for captions.
         const imageHeight = isLastProjectRow ? Math.min(310, canvas.height - y - 120) : 195;
         let captionHeight = 0;
-        for (const [column, [, caption]] of row.entries()) {
+        for (const [column, [src, caption]] of row.entries()) {
           const image = images[imageIndex++];
           const x = margin + column * (cellWidth + gap);
           // Apply the intended cover crop once; PDF prints the finished page unchanged.
           const scale = Math.max(cellWidth / image.naturalWidth, imageHeight / image.naturalHeight);
           const sourceWidth = cellWidth / scale;
           const sourceHeight = imageHeight / scale;
+          const sourceY = src.endsWith('/container-loading.jpg')
+            ? image.naturalHeight - sourceHeight
+            : (image.naturalHeight - sourceHeight) / 2;
           ctx.drawImage(image,
-            (image.naturalWidth - sourceWidth) / 2, (image.naturalHeight - sourceHeight) / 2,
+            (image.naturalWidth - sourceWidth) / 2, sourceY,
             sourceWidth, sourceHeight, x, y, cellWidth, imageHeight);
           captionHeight = Math.max(captionHeight, text(caption, x + cellWidth / 2, y + imageHeight + 10, cellWidth - 12, 20, '#475569', true));
         }
