@@ -1282,7 +1282,7 @@ const Quote = () => {
                 </select>
                 <input
                   type="number"
-                  step="0.0001"
+                  step="0.01"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={exchangeRateBasis}
                   onChange={(e) => setField('exchangeRateBasis', e.target.value)}
@@ -1298,7 +1298,7 @@ const Quote = () => {
                     {exchangeRateBasisSource}
                   </a>
                   {exchangeRateBasisMarketRate
-                    ? `（现汇买入价 ${exchangeRateBasisMarketRate.toFixed(4)}`
+                    ? `（现汇买入价 ${exchangeRateBasisMarketRate.toFixed(2)}`
                     : ''}
                   {exchangeRateBasisMarketRate && exchangeRateBasisUpdatedAt
                     ? `，更新 ${exchangeRateBasisUpdatedAt}）`

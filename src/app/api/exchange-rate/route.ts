@@ -42,7 +42,7 @@ const fetchUsdRmbBasis = async (bank: string) => {
       const rate = Number((Number(row?.SpotExgBuyPrc) / 100).toFixed(4));
       if (!Number.isFinite(rate) || rate <= USD_RMB_ADJUSTMENT) throw new Error('Invalid bank rate');
       return {
-        usdRmbBasis: Number((rate - USD_RMB_ADJUSTMENT).toFixed(4)),
+        usdRmbBasis: Number((rate - USD_RMB_ADJUSTMENT).toFixed(2)),
         usdRmbMarketRate: rate,
         usdRmbAdjustment: USD_RMB_ADJUSTMENT,
         usdRmbUpdatedAt: '',
@@ -70,7 +70,7 @@ const fetchUsdRmbBasis = async (bank: string) => {
       const parsed = parseBocUsdSpotBuyingRate(await response.text());
       if (parsed) {
         return {
-          usdRmbBasis: Number((parsed.rate - USD_RMB_ADJUSTMENT).toFixed(4)),
+          usdRmbBasis: Number((parsed.rate - USD_RMB_ADJUSTMENT).toFixed(2)),
           usdRmbMarketRate: parsed.rate,
           usdRmbAdjustment: USD_RMB_ADJUSTMENT,
           usdRmbUpdatedAt: parsed.updatedAt,
