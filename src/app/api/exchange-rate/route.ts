@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 const NGN_MARKUP = 50;
 const NGN_FALLBACK_MARKET_RATE = 1410;
-const USD_RMB_ADJUSTMENT = 0.04;
+const USD_RMB_ADJUSTMENT = 0.05;
 const USD_RMB_FALLBACK = 6.65;
 
 const stripHtml = (value: string) =>
@@ -44,7 +44,7 @@ const fetchUsdRmbBasis = async () => {
           usdRmbMarketRate: parsed.rate,
           usdRmbAdjustment: USD_RMB_ADJUSTMENT,
           usdRmbUpdatedAt: parsed.updatedAt,
-          usdRmbSource: '中国银行美元现汇买入价 - 0.04',
+          usdRmbSource: '中国银行美元现汇买入价 - 0.05',
         };
       }
     }

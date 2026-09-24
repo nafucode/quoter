@@ -12,7 +12,7 @@ const buildDefaultWarrantyText = (months: number | string = 12) =>
 const todayDate = () => new Date().toLocaleDateString('en-CA');
 const DEFAULT_FREIGHT_DESTINATION = 'SHANGHAI PORT';
 const DEFAULT_EXCHANGE_RATE_BASIS = 6.65;
-const DEFAULT_EXCHANGE_RATE_BASIS_SOURCE = '中国银行美元现汇买入价 - 0.04';
+const DEFAULT_EXCHANGE_RATE_BASIS_SOURCE = '中国银行美元现汇买入价 - 0.05';
 const LEGACY_CAR_WALL_TEXTS = new Set([
   'Hairline Stainless Steel',
   'Hairline Stainless Steel 304 1',
