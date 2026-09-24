@@ -58,7 +58,9 @@ export function renderCompanyShowcase(language: Lang): Promise<string> {
         const row = section.images.slice(start, start + 3);
         const gap = 16;
         const cellWidth = (width - gap * (row.length - 1)) / row.length;
-        const imageHeight = 195;
+        const isLastProjectRow = section.number === '03' && start + row.length === section.images.length;
+        // Use the remaining page space for the two wide project photos, reserving room for captions.
+        const imageHeight = isLastProjectRow ? Math.min(310, canvas.height - y - 120) : 195;
         let captionHeight = 0;
         for (const [column, [, caption]] of row.entries()) {
           const image = images[imageIndex++];
