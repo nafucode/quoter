@@ -159,6 +159,8 @@ interface QuoteState {
   setField: (field: keyof Omit<QuoteState, 'elevators' | 'nextId' | 'setField' | 'addElevator' | 'removeElevator' | 'updateElevator' | 'toggleElevatorCollapse' | 'resetToDefaults' | 'fetchExchangeRate' | 'importState' | 'updatePartListItem' | 'setPartListTemplate'>, value: any) => void;
   addElevator: () => void;
   removeElevator: (id: number) => void;
+  moveElevator: (id: number, direction: -1 | 1) => void;
+  duplicateElevator: (id: number) => void;
   updateElevator: (id: number, name: string, value: any) => void;
   toggleElevatorCollapse: (id: number) => void;
   updatePartListItem: (id: string, field: 'no' | 'category' | 'label' | 'brand' | 'origin', value: string) => void;
@@ -242,6 +244,33 @@ export const useQuoteStore = create<QuoteState>()(
           elevators: [...state.elevators, newElevator],
           nextId: state.nextId + 1,
         };
+      }),
+
+      moveElevator: (id, direction) => set((state) => {
+        const index = state.elevators.findIndex(elevator => elevator.id === id);
+        const target = index + direction;
+        if (index < 0 || target < 0 || target >= state.elevators.length) return state;
+        const elevators = [...state.elevators];
+        [elevators[index], elevators[target]] = [elevators[target], elevators[index]];
+        return { elevators };
+      }),
+
+      duplicateElevator: (id) => set((state) => {
+        const index = state.elevators.findIndex(elevator => elevator.id === id);
+        if (index < 0) return state;
+        const nextId = Math.max(state.nextId, ...state.elevators.map(elevator => elevator.id + 1));
+        const source = state.elevators[index];
+        const duplicate = {
+          ...structuredClone(source),
+          id: nextId,
+          title: !source.title || /^Elevator #L\d+$/.test(source.title)
+            ? `Elevator #L${nextId}`
+            : `${source.title} (Copy)`,
+          isCollapsed: true,
+        };
+        const elevators = [...state.elevators];
+        elevators.splice(index + 1, 0, duplicate);
+        return { elevators, nextId: nextId + 1 };
       }),
 
       removeElevator: (id) => set((state) => ({

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { ArrowUp, ArrowDown, Copy } from 'lucide-react';
 import { useQuoteStore } from '@/store/useQuoteStore';
 import StylePicker from './StylePicker';
 import HybridInput from './HybridInput';
@@ -62,7 +63,8 @@ const buildServingFloors = (floorsStops: string | number, country = '') => {
 };
 
 const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', country = '', showCommercialFields = false }: { elevator: any, onSectionFocus: (section: string) => void, documentMode?: 'quotation' | 'proposal', country?: string, showCommercialFields?: boolean }) => {
-  const { updateElevator, removeElevator, toggleElevatorCollapse } = useQuoteStore();
+  const { elevators, updateElevator, removeElevator, toggleElevatorCollapse, moveElevator, duplicateElevator } = useQuoteStore();
+  const elevatorIndex = elevators.findIndex(item => item.id === elevator.id);
   const [pickerState, setPickerState] = useState({ isOpen: false, type: '' });
   const [isDoorOpeningMenuOpen, setIsDoorOpeningMenuOpen] = useState(false);
   const proposalCabinCount = Math.min(3, Math.max(1, Number(elevator.proposalCabinCount) || (elevator.showThreeCabinsInProposal ? 3 : 1)));
@@ -259,13 +261,22 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
   return (
     <div className="border-t mt-4 pt-4">
       {pickerState.isOpen && <StylePicker {...getPickerProps()} onSelect={handleStyleSelect} onClose={() => setPickerState({ isOpen: false, type: '' })} />}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-2">
         <input
           value={elevator.title || `Elevator #L${elevator.id}`}
           onChange={(e) => updateElevator(elevator.id, 'title', e.target.value)}
           className="w-full max-w-xs rounded-md border border-transparent bg-transparent px-2 py-1 text-lg font-semibold focus:border-blue-400 focus:bg-white focus:outline-none"
         />
-        <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" title="上移" aria-label="上移" disabled={elevatorIndex <= 0} onClick={() => moveElevator(elevator.id, -1)} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed">
+            <ArrowUp size={18} aria-hidden="true" />
+          </button>
+          <button type="button" title="下移" aria-label="下移" disabled={elevatorIndex < 0 || elevatorIndex === elevators.length - 1} onClick={() => moveElevator(elevator.id, 1)} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed">
+            <ArrowDown size={18} aria-hidden="true" />
+          </button>
+          <button type="button" title="复制此台报价" aria-label="复制此台报价" onClick={() => duplicateElevator(elevator.id)} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-300 hover:bg-gray-100">
+            <Copy size={18} aria-hidden="true" />
+          </button>
           <button onClick={() => toggleElevatorCollapse(elevator.id)} className="px-3 py-1 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600 mr-2">
             {elevator.isCollapsed ? 'Expand' : 'Collapse'}
           </button>
