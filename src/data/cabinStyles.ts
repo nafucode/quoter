@@ -1,12 +1,5 @@
 export const cabinStyleGroups = [
   {
-    groupName: '餐梯 / Dumbwaiter',
-    styles: [
-      { id: 'DW-WINDOW', name: '餐梯-窗口式 / Window Type', previewImage: '/cabin-styles/dumbwaiter-window.png' },
-      { id: 'DW-FLOOR', name: '餐梯-落地式 / Floor Type', previewImage: '/cabin-styles/dumbwaiter-floor.png' },
-    ],
-  },
-  {
     groupName: '家用梯样册 (FJ-V)',
     styles: [
       { id: 'FJ-V01', name: 'FJ-V01', previewImage: '/cabin-styles/FJ-V01.jpg' },
@@ -135,5 +128,12 @@ export const cabinStyleGroups = [
       { id: 'FJ-OLV47', name: 'FJ-OLV47', previewImage: '/cabin-styles/FJ-OLV47.png' },
       { id: 'FJ-OLV48', name: 'FJ-OLV48', previewImage: '/cabin-styles/FJ-OLV48.png' },
     ]
+  },
+  {
+    groupName: '餐梯 / Dumbwaiter',
+    styles: [
+      { id: 'DW-WINDOW', name: '餐梯-窗口式 / Window Type', previewImage: '/cabin-styles/dumbwaiter-window.png' },
+      { id: 'DW-FLOOR', name: '餐梯-落地式 / Floor Type', previewImage: '/cabin-styles/dumbwaiter-floor.png' },
+    ],
   },
 ];
