@@ -1,4 +1,4 @@
-// Transcribed from the complete rows in the supplied reference images.
+// Configuration supplied by the user; remarks distinguish optional equipment.
 export const dumbwaiterParts = [
   ['Control Board', 'X-MINI-5V', 'Wuxi Elevator Components Co., Ltd.', 'Wuxi, Jiangsu'],
   ['Control Cabinet', '350mm × 450mm × 180mm', 'Wuxi Shuanglu Electric Machinery Co., Ltd.', 'Wuxi, Jiangsu'],
@@ -10,6 +10,12 @@ export const dumbwaiterParts = [
   ['Guide Rails', 'TK3A', 'Huzhou Oulia Mechanical & Electrical Technology Co., Ltd.', 'Huzhou, Zhejiang'],
   ['Traction Machine', 'BYJ110', 'Changshu Boshen Industrial Co., Ltd.', 'Changshu, Jiangsu'],
   ['Car', '1.2mm thick 304 stainless steel', 'Zhejiang Geli Elevator Co., Ltd.', 'Huzhou, Zhejiang'],
+  ['Hall Door', '1.2mm thick 304 stainless steel', 'Zhejiang Geli Elevator Co., Ltd.', 'Huzhou, Zhejiang'],
+  ['Car Door', '1.2mm thick 304 stainless steel', 'Zhejiang Geli Elevator Co., Ltd.', 'Huzhou, Zhejiang'],
+  ['Traction Steel Rope', 'Φ8.0', 'Jiangsu Hongshan Steel Cable Co., Ltd.', 'Nantong, Jiangsu'],
+  ['Buffer', 'ZDH-A-3', 'Jiangyin Yongcheng Rubber & Plastic Products Co., Ltd.', 'Jiangyin, Jiangsu'],
+  ['Safety Gear', 'Langfang Chengxiang', 'Langfang Chengxiang Elevator Accessories Co., Ltd.', 'Langfang, Hebei', 'Optional'],
+  ['Governor', 'Langfang Chengxiang', 'Langfang Chengxiang Elevator Accessories Co., Ltd.', 'Langfang, Hebei', 'Optional'],
 ] as const;
 
 export const dumbwaiterFunctions = [
@@ -34,9 +40,9 @@ export const dumbwaiterConfigurationTitle = 'Dumbwaiter Lift - Main Components &
 
 export function dumbwaiterConfigurationRows(parts: boolean, functions: boolean) {
   return [
-    ...(parts ? dumbwaiterParts.map(([name, model, manufacturer, origin], index) => ({
+    ...(parts ? dumbwaiterParts.map(([name, model, manufacturer, origin, remarks], index) => ({
       section: 'Main Components', number: index + 1, name,
-      details: `Model / Specification: ${model}\nManufacturer: ${manufacturer}\nOrigin: ${origin}`,
+      details: `Model / Specification: ${model}\nManufacturer: ${manufacturer}\nOrigin: ${origin}${remarks ? `\nRemarks: ${remarks}` : ''}`,
     })) : []),
     ...(functions ? dumbwaiterFunctions.map(([name, details], index) => ({
       section: 'Basic Functions', number: index + 1, name, details,
