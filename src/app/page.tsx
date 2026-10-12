@@ -1,6 +1,7 @@
 
 "use client";
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { Fragment, useState, useMemo, useEffect, useRef } from 'react';
+import { optionalItemOwner } from '@/utils/optionalItemOwner';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
@@ -1361,6 +1362,14 @@ const Quote = () => {
               </div>
               {shaftFrame.enabled && (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
+                  <label className="sm:col-span-3 text-xs font-medium text-gray-600">
+                    所属电梯 / Elevator
+                    <select value={optionalItemOwner(shaftFrame, elevators) ?? ''}
+                      onChange={(e) => setField('shaftFrame', { ...shaftFrame, elevatorId: Number(e.target.value) })}
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm">
+                      {elevators.map((elevator) => <option key={elevator.id} value={elevator.id}>{elevator.title || `Elevator #L${elevator.id}`} - {elevator.description}</option>)}
+                    </select>
+                  </label>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-gray-600">Description<span className="ml-1 text-gray-400">描述</span></label>
                     <input
@@ -1490,6 +1499,14 @@ const Quote = () => {
               </div>
               {temperedGlass.enabled && (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
+                  <label className="sm:col-span-3 text-xs font-medium text-gray-600">
+                    所属电梯 / Elevator
+                    <select value={optionalItemOwner(temperedGlass, elevators) ?? ''}
+                      onChange={(e) => setField('temperedGlass', { ...temperedGlass, elevatorId: Number(e.target.value) })}
+                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm">
+                      {elevators.map((elevator) => <option key={elevator.id} value={elevator.id}>{elevator.title || `Elevator #L${elevator.id}`} - {elevator.description}</option>)}
+                    </select>
+                  </label>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-gray-600">Description<span className="ml-1 text-gray-400">描述</span></label>
                     <input
@@ -1677,6 +1694,7 @@ const Quote = () => {
                     </thead>
                     <tbody>
                       {elevators.map(elevator => (
+                        <Fragment key={elevator.id}>
                         <tr key={elevator.id}>
                           <td className="p-2 border border-gray-400 align-top whitespace-pre-wrap">{elevator.description}</td>
                           <td className="p-2 border border-gray-400 align-top">
@@ -1690,8 +1708,7 @@ const Quote = () => {
                           <td className="p-2 border border-gray-400 align-top text-right">{Number(elevator.unitPrice).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                           <td className="p-2 border border-gray-400 align-top text-right">{(Number(elevator.unitPrice) * Number(elevator.qty)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                         </tr>
-                      ))}
-                      {shaftFrame.enabled && (
+                      {shaftFrame.enabled && optionalItemOwner(shaftFrame, elevators) === elevator.id && (
                         <tr>
                           <td colSpan={2} className="p-2 border border-gray-400">{shaftFrame.text}</td>
                           <td className="p-2 border border-gray-400 text-center">{shaftFrame.qty ?? 1}</td>
@@ -1703,7 +1720,7 @@ const Quote = () => {
                           </td>
                         </tr>
                       )}
-                      {temperedGlass.enabled && (
+                      {temperedGlass.enabled && optionalItemOwner(temperedGlass, elevators) === elevator.id && (
                         <tr>
                           <td colSpan={2} className="p-2 border border-gray-400">{temperedGlass.text}</td>
                           <td className="p-2 border border-gray-400 text-center">{temperedGlass.qty ?? 1}</td>
@@ -1715,6 +1732,8 @@ const Quote = () => {
                           </td>
                         </tr>
                       )}
+                        </Fragment>
+                      ))}
                       {!shouldChargeFreight ? (
                         <tr>
                           <td colSpan={5} className="p-2 text-right font-semibold">{t.exwPickup}</td>

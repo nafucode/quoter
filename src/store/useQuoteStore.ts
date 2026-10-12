@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { elevatorTemplate } from '@/data/elevatorTemplate';
 import { defaultPartList, partListTemplates, PartListRow, PartListTemplate } from '@/data/partListDefaults';
 import { Lang } from '@/data/translations';
+import { optionalItemOwner } from '@/utils/optionalItemOwner';
 
 const LEGACY_BUTTON_TEXT = 'Round standard';
 const DEFAULT_BUTTON_TEXT = 'Round buttons with Braille';
@@ -113,6 +114,7 @@ interface Elevator {
 }
 
 interface OptionalItem {
+  elevatorId?: number;
   enabled: boolean;
   text: string;
   qty: number;
@@ -252,7 +254,11 @@ export const useQuoteStore = create<QuoteState>()(
         if (index < 0 || target < 0 || target >= state.elevators.length) return state;
         const elevators = [...state.elevators];
         [elevators[index], elevators[target]] = [elevators[target], elevators[index]];
-        return { elevators };
+        return {
+          elevators,
+          shaftFrame: { ...state.shaftFrame, elevatorId: optionalItemOwner(state.shaftFrame, state.elevators) },
+          temperedGlass: { ...state.temperedGlass, elevatorId: optionalItemOwner(state.temperedGlass, state.elevators) },
+        };
       }),
 
       duplicateElevator: (id) => set((state) => {

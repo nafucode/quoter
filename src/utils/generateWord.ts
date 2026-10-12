@@ -14,6 +14,7 @@ import { translateValueToVi } from '@/data/viValueMap';
 import { translateValueToKm } from '@/data/kmValueMap';
 import { translateValueToAr } from '@/data/arValueMap';
 import { getCompanyShowcaseContent } from '@/data/companyShowcase';
+import { optionalItemOwner } from '@/utils/optionalItemOwner';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -224,8 +225,8 @@ export async function generateWordBlob(state: {
   quoteRemarks?: string;
   certificationStandard?: string;
   showCertificationStandard?: boolean;
-  shaftFrame: { enabled: boolean; text: string; qty?: number; price: number };
-  temperedGlass: { enabled: boolean; text: string; qty?: number; price: number };
+  shaftFrame: { enabled: boolean; text: string; qty?: number; price: number; elevatorId?: number };
+  temperedGlass: { enabled: boolean; text: string; qty?: number; price: number; elevatorId?: number };
   showPartList?: boolean;
   showFunctionList?: boolean;
   partListTemplate?: string;
@@ -421,10 +422,8 @@ export async function generateWordBlob(state: {
         ],
       }),
     );
-  });
-
-  // Optional rows
-  if (state.shaftFrame.enabled) {
+  // Optional rows follow their selected elevator.
+  if (state.shaftFrame.enabled && optionalItemOwner(state.shaftFrame, state.elevators) === elev.id) {
     const shaftFrameQty = Number(state.shaftFrame.qty) || 1;
     const shaftFrameUnitPrice = Number(state.shaftFrame.price) || 0;
     priceRows.push(
@@ -444,7 +443,7 @@ export async function generateWordBlob(state: {
       }),
     );
   }
-  if (state.temperedGlass.enabled) {
+  if (state.temperedGlass.enabled && optionalItemOwner(state.temperedGlass, state.elevators) === elev.id) {
     const temperedGlassQty = Number(state.temperedGlass.qty) || 1;
     const temperedGlassUnitPrice = Number(state.temperedGlass.price) || 0;
     priceRows.push(
@@ -464,6 +463,8 @@ export async function generateWordBlob(state: {
       }),
     );
   }
+
+  });
 
   // Freight / EXW pickup row
   priceRows.push(
