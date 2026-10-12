@@ -16,6 +16,7 @@ import { translateValueToAr } from '@/data/arValueMap';
 import { getCompanyShowcaseContent } from '@/data/companyShowcase';
 import { optionalItemOwner } from '@/utils/optionalItemOwner';
 import { isDumbwaiter } from '@/utils/isDumbwaiter';
+import { dumbwaiterConfigurationRows, dumbwaiterConfigurationTitle } from '@/data/dumbwaiterConfiguration';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -845,7 +846,26 @@ export async function generateWordBlob(state: {
     children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
   }
 
-  if (showPartList) {
+  const hasDumbwaiter = state.elevators.some(isDumbwaiter);
+  const hasOtherLift = state.elevators.some(elevator => !isDumbwaiter(elevator));
+  if (hasDumbwaiter && (showPartList || showFunctionList)) {
+    children.push(para([bold(dumbwaiterConfigurationTitle, 24)], { spacingAfter: 120 }));
+    const widths = [600, 2700, CONTENT_W - 3300];
+    const rows = dumbwaiterConfigurationRows(showPartList, showFunctionList);
+    children.push(new Table({
+      width: { size: CONTENT_W, type: WidthType.DXA }, columnWidths: widths,
+      rows: [headerRow(['No.', 'Component / Function', 'Specification / Description'].map((text, i) => ({ text, width: widths[i] }))),
+        ...rows.flatMap((row, index) => [
+          ...(index === 0 || rows[index - 1].section !== row.section
+            ? [new TableRow({ children: [cell(row.section, { width: CONTENT_W, colSpan: 3 })] })] : []),
+          new TableRow({ cantSplit: true, children: [cell(String(row.number), { width: widths[0] }), cell(row.name, { width: widths[1] }), cell(row.details, { width: widths[2] })] }),
+        ]),
+      ],
+    }));
+    if (hasOtherLift) children.push(new Paragraph({ children: [new PageBreak()] }));
+  }
+
+  if (showPartList && hasOtherLift) {
     children.push(
       para([bold(t.partListTitle, 24)], { align: AlignmentType.CENTER, spacingAfter: 120 }),
     );
@@ -921,7 +941,7 @@ export async function generateWordBlob(state: {
     );
   }
 
-  if (showFunctionList) {
+  if (showFunctionList && hasOtherLift) {
     if (showPartList) {
       children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
     }

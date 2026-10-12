@@ -3,6 +3,7 @@
 import { Fragment, useState, useMemo, useEffect, useRef } from 'react';
 import { optionalItemOwner } from '@/utils/optionalItemOwner';
 import { isDumbwaiter } from '@/utils/isDumbwaiter';
+import DumbwaiterConfiguration from '@/components/DumbwaiterConfiguration';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
@@ -195,6 +196,8 @@ const Quote = () => {
     setPartListTemplate,
   } = useQuoteStore();
   const isProposal = documentMode === 'proposal';
+  const hasDumbwaiter = elevators.some(isDumbwaiter);
+  const hasOtherLift = elevators.some(elevator => !isDumbwaiter(elevator));
   const showCommercialContent = !isProposal || showProposalCommercial;
 
   const partListGroups = [
@@ -1569,6 +1572,8 @@ const Quote = () => {
             <button onClick={addElevator} className="mt-4 w-full p-2 bg-green-500 text-white rounded-md hover:bg-green-600">+ 添加电梯</button>
 
             {/* Part List Editor */}
+            {hasDumbwaiter && <DumbwaiterConfiguration parts={true} functions={true} />}
+            {hasOtherLift && <>
             <h3 className="text-lg font-semibold mt-6 mb-3 border-t pt-4">Part List<span className="block text-sm font-normal text-gray-500">零部件清单</span></h3>
             <div className="mb-3">
               <label className="block text-sm font-medium text-gray-700">Part List Template<span className="block text-xs text-gray-500">配置表模板</span></label>
@@ -1665,6 +1670,7 @@ const Quote = () => {
               </div>
               ))}
             </div>
+            </>}
           </div>
 
           {/* Right Side - Preview */}
@@ -1979,7 +1985,8 @@ const Quote = () => {
 
                 {(showPartList || showFunctionList) && (
                   <div className="break-before-page">
-                    {showPartList && (
+                    {hasDumbwaiter && <DumbwaiterConfiguration parts={showPartList} functions={showFunctionList} />}
+                    {showPartList && hasOtherLift && (
                       <div className="mt-6 pt-4 border-t">
                         <h3 className="text-lg font-semibold mb-3">{t.partListTitle}</h3>
                         {partListGroups.map((group) => (
@@ -2031,7 +2038,7 @@ const Quote = () => {
                       </div>
                     )}
 
-                    {showFunctionList && (
+                    {showFunctionList && hasOtherLift && (
                       <div className="mt-6 pt-4 border-t break-before-page">
                         <h3 className="text-lg font-semibold mb-3">{t.standardFeaturesTitle}</h3>
                         <table className="w-full text-sm border-collapse printable-table">
