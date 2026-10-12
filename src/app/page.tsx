@@ -2,6 +2,7 @@
 "use client";
 import { Fragment, useState, useMemo, useEffect, useRef } from 'react';
 import { optionalItemOwner } from '@/utils/optionalItemOwner';
+import { isDumbwaiter } from '@/utils/isDumbwaiter';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
@@ -1856,7 +1857,7 @@ const Quote = () => {
                           </div>
                           <div className="break-inside-avoid">
                             <h4 id={`preview-function-spec-${elevator.id}`} className={`text-md font-semibold mt-4 border-b px-2 py-1 ${focusedSection === `function-spec-${elevator.id}` ? 'bg-yellow-200' : 'bg-gray-100'}`}>{t.secFunction}</h4>
-                            {renderSpec(t.specCopLop, elevator.copLop)}
+                            {renderSpec(isDumbwaiter(elevator) ? t.lop : t.specCopLop, elevator.copLop)}
                             {elevator.otherFunctions.map((func: any) =>
                               func.checked && renderSpec(translateValue(func.name), t.specIncluded)
                             )}
@@ -1884,6 +1885,17 @@ const Quote = () => {
                                   </div>
                                 ))}
                             </div>
+                          ) : isDumbwaiter(elevator) ? (
+                            <div className="col-span-3 grid grid-cols-3">
+                              <div className="col-span-2 font-bold text-center border-b border-r border-gray-400 p-1">{t.cabin}</div>
+                              <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.lop}</div>
+                              <div className="col-span-2 border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
+                                {elevator.cabinEffect.cabinImage && <img src={elevator.cabinEffect.cabinImage} alt="Cabin" className="max-h-full max-w-full"/>}
+                              </div>
+                              <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-64">
+                                {elevator.cabinEffect.lopImage && <img src={elevator.cabinEffect.lopImage} alt="LOP" className="max-h-full max-w-full"/>}
+                              </div>
+                            </div>
                           ) : (
                             <>
                               <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cabin}</div>
@@ -1901,7 +1913,13 @@ const Quote = () => {
                             </>
                           )}
 
-                          {isProposal && <>
+                          {isProposal && isDumbwaiter(elevator) && <>
+                            <div className="col-span-3 font-bold text-center border-b border-r border-gray-400 p-1">{t.lop}</div>
+                            <div className="col-span-3 border-b border-r border-gray-400 p-2 flex items-center justify-center h-48">
+                              {elevator.cabinEffect.lopImage && <img src={elevator.cabinEffect.lopImage} alt="LOP" className="max-h-full max-w-full"/>}
+                            </div>
+                          </>}
+                          {isProposal && !isDumbwaiter(elevator) && <>
                             <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.cop}</div>
                             <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.lop}</div>
                             <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.copLogo}</div>
@@ -1933,12 +1951,12 @@ const Quote = () => {
                   </div>
 
                   {/* Row 4: Titles */}
-                  <div className={`font-bold text-center border-b border-r border-gray-400 p-1 ${isProposal ? (shouldShowHandrailInQuote(elevator) ? 'col-span-2' : 'col-span-3') : (!shouldShowHandrailInQuote(elevator) ? 'col-span-2' : '')}`}>{t.landingDoor}</div>
+                  <div className={`font-bold text-center border-b border-r border-gray-400 p-1 ${isProposal || isDumbwaiter(elevator) ? (shouldShowHandrailInQuote(elevator) ? 'col-span-2' : 'col-span-3') : (!shouldShowHandrailInQuote(elevator) ? 'col-span-2' : '')}`}>{t.landingDoor}</div>
                   {shouldShowHandrailInQuote(elevator) && <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.handrail}</div>}
-                  {!isProposal && <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.copLogo}</div>}
+                  {!isProposal && !isDumbwaiter(elevator) && <div className="font-bold text-center border-b border-r border-gray-400 p-1">{t.copLogo}</div>}
 
                   {/* Row 5: Descriptions/Images */}
-                  <div className={`border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 ${isProposal ? (shouldShowHandrailInQuote(elevator) ? 'col-span-2' : 'col-span-3') : (!shouldShowHandrailInQuote(elevator) ? 'col-span-2' : '')}`}>
+                  <div className={`border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 ${isProposal || isDumbwaiter(elevator) ? (shouldShowHandrailInQuote(elevator) ? 'col-span-2' : 'col-span-3') : (!shouldShowHandrailInQuote(elevator) ? 'col-span-2' : '')}`}>
                     {elevator.cabinEffect.landingDoor.type === 'image' && elevator.cabinEffect.landingDoor.value ? <img src={elevator.cabinEffect.landingDoor.value} alt="Landing Door" className="max-h-full max-w-full"/> : elevator.cabinEffect.landingDoor.type === 'text' ? elevator.cabinEffect.landingDoor.value : null}
                   </div>
                   {shouldShowHandrailInQuote(elevator) && (
@@ -1946,7 +1964,7 @@ const Quote = () => {
                       {elevator.cabinEffect.handrail.type === 'image' && elevator.cabinEffect.handrail.value ? <img src={elevator.cabinEffect.handrail.value} alt="Handrail" className="max-h-full max-w-full"/> : elevator.cabinEffect.handrail.type === 'text' ? elevator.cabinEffect.handrail.value : null}
                     </div>
                   )}
-                  {!isProposal && <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 text-center">
+                  {!isProposal && !isDumbwaiter(elevator) && <div className="border-b border-r border-gray-400 p-2 flex items-center justify-center h-48 text-center">
                     {elevator.cabinEffect.copLogo.type === 'image' && elevator.cabinEffect.copLogo.value ? <img src={elevator.cabinEffect.copLogo.value} alt="COP Logo" className="max-h-[70%] max-w-[70%]"/> : elevator.cabinEffect.copLogo.type === 'text' ? elevator.cabinEffect.copLogo.value : null}
                   </div>}
                         </div>

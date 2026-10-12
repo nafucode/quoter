@@ -15,6 +15,7 @@ import { translateValueToKm } from '@/data/kmValueMap';
 import { translateValueToAr } from '@/data/arValueMap';
 import { getCompanyShowcaseContent } from '@/data/companyShowcase';
 import { optionalItemOwner } from '@/utils/optionalItemOwner';
+import { isDumbwaiter } from '@/utils/isDumbwaiter';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -680,13 +681,14 @@ export async function generateWordBlob(state: {
       .map((f: any) => f.name)
       .join(', ');
     specSection(t.secFunction, [
-      [t.specCopLop, elev.copLop ?? ''],
+      [isDumbwaiter(elev) ? t.lop : t.specCopLop, elev.copLop ?? ''],
       [t.specIncluded, functionsList],
     ]);
 
     // === DECORATION EFFECT (only when at least one image was fetched) ===
     const imgs = elevatorImgCache[idx];
     const ce = elev.cabinEffect;
+    const hideCop = isDumbwaiter(elev);
     const proposalCabinCount = Math.min(3, Math.max(1, Number(elev.proposalCabinCount) || (elev.showThreeCabinsInProposal ? 3 : 1)));
     const hasAnyImage =
       imgs &&
@@ -745,7 +747,9 @@ export async function generateWordBlob(state: {
                   ? [hdrCell(`${t.cabin} 1`, effCols[0]), effectCell(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `${t.cabin} 2`, bold: true, size: 18, font: 'Arial' })] }), effCols[1] + effCols[2], { bg: 'F0F0F0', colSpan: 2 })]
                 : isProposal
                   ? [hdrCell(`${t.cabin} 1`, effCols[0]), hdrCell(`${t.cabin} 2`, effCols[1]), hdrCell(`${t.cabin} 3`, effCols[2])]
-                  : [hdrCell(t.cabin, effCols[0]), hdrCell(t.cop, effCols[1]), hdrCell(t.lop, effCols[2])],
+                  : hideCop
+                    ? [effectCell(new Paragraph({ alignment: AlignmentType.CENTER, children: [bold(t.cabin, 18)] }), effCols[0] + effCols[1], { bg: 'F0F0F0', colSpan: 2 }), hdrCell(t.lop, effCols[2])]
+                    : [hdrCell(t.cabin, effCols[0]), hdrCell(t.cop, effCols[1]), hdrCell(t.lop, effCols[2])],
             }),
             // Row 2: main images — large height to fill ~40% of page
             new TableRow({
@@ -754,6 +758,8 @@ export async function generateWordBlob(state: {
                 ? [effectCell(imgDataToPara(imgs.cabinImage, 260, 330), CONTENT_W, { colSpan: 3 })]
                 : isProposal && proposalCabinCount === 2
                   ? [effectCell(imgDataToPara(imgs.cabinImage, 188, 330), effCols[0]), effectCell(imgDataToPara(imgs.cabinImage2, 260, 330), effCols[1] + effCols[2], { colSpan: 2 })]
+                : !isProposal && hideCop
+                  ? [effectCell(imgDataToPara(imgs.cabinImage, 300, 330), effCols[0] + effCols[1], { colSpan: 2 }), effectCell(imgDataToPara(imgs.lopImage, 140, 330), effCols[2])]
                 : [
                     effectCell(imgDataToPara(imgs.cabinImage, 188, 330), effCols[0]),
                     effectCell(imgDataToPara(isProposal ? imgs.cabinImage2 : imgs.copImage, isProposal ? 188 : 110, 330), effCols[1]),
@@ -762,11 +768,15 @@ export async function generateWordBlob(state: {
             }),
             ...(isProposal ? [
               new TableRow({
-                children: [hdrCell(t.cop, effCols[0]), hdrCell(t.lop, effCols[1]), hdrCell(t.copLogo, effCols[2])],
+                children: hideCop
+                  ? [effectCell(new Paragraph({ alignment: AlignmentType.CENTER, children: [bold(t.lop, 18)] }), CONTENT_W, { bg: 'F0F0F0', colSpan: 3 })]
+                  : [hdrCell(t.cop, effCols[0]), hdrCell(t.lop, effCols[1]), hdrCell(t.copLogo, effCols[2])],
               }),
               new TableRow({
                 height: { value: 3000, rule: 'atLeast' as const },
-                children: [
+                children: hideCop
+                  ? [effectCell(imgDataToPara(imgs.lopImage, 140, 240), CONTENT_W, { colSpan: 3 })]
+                  : [
                   effectCell(imgDataToPara(imgs.copImage, 110, 240), effCols[0]),
                   effectCell(imgDataToPara(imgs.lopImage, 140, 240), effCols[1]),
                   valCell(imgs.copLogo, ce.copLogo, 150, 176, effCols[2]),
@@ -788,7 +798,7 @@ export async function generateWordBlob(state: {
             }),
             // Row 5 header: LANDING DOOR / HANDRAIL / COP LOGO
             new TableRow({
-              children: isProposal
+              children: isProposal || hideCop
                 ? showHandrail
                   ? [effectCell(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: t.landingDoor, bold: true, size: 18, font: 'Arial' })] }), effCols[0] + effCols[1], { bg: 'F0F0F0', colSpan: 2 }), hdrCell(t.handrail, effCols[2])]
                   : [effectCell(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: t.landingDoor, bold: true, size: 18, font: 'Arial' })] }), CONTENT_W, { bg: 'F0F0F0', colSpan: 3 })]
@@ -810,7 +820,7 @@ export async function generateWordBlob(state: {
             // Row 6: landing door / handrail / cop logo — large height
             new TableRow({
               height: { value: 3800, rule: 'atLeast' },
-              children: isProposal
+              children: isProposal || hideCop
                 ? showHandrail
                   ? [effectCell(imgDataToPara(imgs.landingDoor, 260, 300, ce.landingDoor?.type === 'text' ? ce.landingDoor.value ?? '' : ''), effCols[0] + effCols[1], { colSpan: 2 }), valCell(imgs.handrail, ce.handrail, 188, 220, effCols[2])]
                   : [effectCell(imgDataToPara(imgs.landingDoor, 260, 300, ce.landingDoor?.type === 'text' ? ce.landingDoor.value ?? '' : ''), CONTENT_W, { colSpan: 3 })]
