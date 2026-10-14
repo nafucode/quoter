@@ -182,6 +182,8 @@ const Quote = () => {
     exchangeRateBasisUpdatedAt,
     shaftFrame,
     temperedGlass,
+    installationFee,
+    firstYearMaintenance,
     showPartList,
     showFunctionList,
     partListTemplate,
@@ -453,6 +455,8 @@ const Quote = () => {
       showCertificationStandard: s.showCertificationStandard ?? false,
       shaftFrame: s.shaftFrame,
       temperedGlass: s.temperedGlass,
+      installationFee: s.installationFee,
+      firstYearMaintenance: s.firstYearMaintenance,
       showPartList: s.showPartList, showFunctionList: s.showFunctionList,
       partListTemplate: s.partListTemplate,
       partList: s.partList,
@@ -586,6 +590,8 @@ const Quote = () => {
         showCertificationStandard: s.showCertificationStandard ?? false,
         shaftFrame: s.shaftFrame,
         temperedGlass: s.temperedGlass,
+        installationFee: s.installationFee,
+        firstYearMaintenance: s.firstYearMaintenance,
         showPartList: s.showPartList,
         showFunctionList: s.showFunctionList,
         partListTemplate: s.partListTemplate,
@@ -730,8 +736,9 @@ const Quote = () => {
     }, 0);
     const shaftFrameTotal = shaftFrame.enabled ? (Number(shaftFrame.price) || 0) * (Number(shaftFrame.qty) || 0) : 0;
     const temperedGlassTotal = temperedGlass.enabled ? (Number(temperedGlass.price) || 0) * (Number(temperedGlass.qty) || 0) : 0;
-    return elevatorsTotal + (shouldChargeFreight ? Number(freightCost) : 0) + shaftFrameTotal + temperedGlassTotal;
-  }, [elevators, freightCost, shaftFrame, shouldChargeFreight, temperedGlass]);
+    const serviceTotal = [installationFee, firstYearMaintenance].reduce((sum, item) => sum + (item.enabled ? (Number(item.price) || 0) * (Number(item.qty) || 0) : 0), 0);
+    return elevatorsTotal + (shouldChargeFreight ? Number(freightCost) : 0) + shaftFrameTotal + temperedGlassTotal + serviceTotal;
+  }, [elevators, freightCost, shaftFrame, shouldChargeFreight, temperedGlass, installationFee, firstYearMaintenance]);
 
   const convertedTotal = useMemo(() => {
     return grandTotal * Number(exchangeRate);
@@ -1541,6 +1548,33 @@ const Quote = () => {
               )}
             </div>
 
+            {([
+              ['installationFee', 'Installation Fee 安装费', installationFee],
+              ['firstYearMaintenance', 'First-Year Repair and Maintenance 第一年维修保养费', firstYearMaintenance],
+            ] as const).map(([key, label, item]) => (
+              <div key={key} className="mt-3 border border-gray-200 rounded-md p-3">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <input type="checkbox" checked={item.enabled} onChange={e => setField(key, { ...item, enabled: e.target.checked, elevatorId: optionalItemOwner(item, elevators) })} />
+                  {label}
+                </label>
+                {item.enabled && <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
+                  <label className="sm:col-span-3 text-xs text-gray-600">所属电梯 / Elevator
+                    <select className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm" value={optionalItemOwner(item, elevators) ?? ''} onChange={e => setField(key, { ...item, elevatorId: Number(e.target.value) })}>
+                      {elevators.map(elevator => <option key={elevator.id} value={elevator.id}>{elevator.title || `Elevator #L${elevator.id}`} - {elevator.description}</option>)}
+                    </select>
+                  </label>
+                  <label className="sm:col-span-3 text-xs text-gray-600">Description 描述
+                    <input className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm" value={item.text} onChange={e => setField(key, { ...item, text: e.target.value })} />
+                  </label>
+                  <label className="text-xs text-gray-600">Quantity 数量
+                    <input type="number" min="0" className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm" value={item.qty} onChange={e => setField(key, { ...item, qty: Math.max(0, Number(e.target.value)) })} />
+                  </label>
+                  <label className="text-xs text-gray-600">Unit Price (USD) 单价
+                    <input type="number" min="0" step="0.01" className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm" value={item.price} onChange={e => setField(key, { ...item, price: Math.max(0, Number(e.target.value)) })} />
+                  </label>
+                </div>}
+              </div>
+            ))}
             </>}
 
             {/* Output Options */}
@@ -1739,6 +1773,14 @@ const Quote = () => {
                           </td>
                         </tr>
                       )}
+                        {[installationFee, firstYearMaintenance].map((item, index) => item.enabled && optionalItemOwner(item, elevators) === elevator.id && (
+                          <tr key={`service-${index}`}>
+                            <td colSpan={2} className="p-2 border border-gray-400">{item.text}</td>
+                            <td className="p-2 border border-gray-400 text-center">{item.qty}</td>
+                            <td className="p-2 border border-gray-400 text-right">{Number(item.price).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                            <td className="p-2 border border-gray-400 text-right">{(Number(item.price) * Number(item.qty)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                          </tr>
+                        ))}
                         </Fragment>
                       ))}
                       {!shouldChargeFreight ? (

@@ -54,7 +54,8 @@ const normalizeElevator = (elevator: any) => ({
 const normalizeOptionalItem = (item: any, fallback: OptionalItem) => ({
   ...fallback,
   ...(item ?? {}),
-  qty: Number(item?.qty) || fallback.qty,
+  qty: item?.qty != null && Number.isFinite(Number(item.qty)) && Number(item.qty) >= 0
+    ? Number(item.qty) : fallback.qty,
 });
 
 const normalizePartList = (partList: any) =>
@@ -98,6 +99,8 @@ const normalizeQuoteState = (state: any) => {
     exchangeRateBasisUpdatedAt: state.exchangeRateBasisUpdatedAt ?? '',
     shaftFrame: normalizeOptionalItem(state.shaftFrame, initialState.shaftFrame),
     temperedGlass: normalizeOptionalItem(state.temperedGlass, initialState.temperedGlass),
+    installationFee: normalizeOptionalItem(state.installationFee, initialState.installationFee),
+    firstYearMaintenance: normalizeOptionalItem(state.firstYearMaintenance, initialState.firstYearMaintenance),
     elevators: Array.isArray(state.elevators)
       ? state.elevators.map(normalizeElevator)
       : state.elevators,
@@ -152,6 +155,8 @@ interface QuoteState {
   exchangeRateBasisUpdatedAt: string;
   shaftFrame: OptionalItem;
   temperedGlass: OptionalItem;
+  installationFee: OptionalItem;
+  firstYearMaintenance: OptionalItem;
   showPartList: boolean;
   showFunctionList: boolean;
   partListTemplate: PartListTemplate;
@@ -203,6 +208,8 @@ const initialState = {
   exchangeRateBasisUpdatedAt: '',
   shaftFrame: { enabled: false, text: 'Aluminum/Steel shaft frame as Height _____ m', qty: 1, price: 0 },
   temperedGlass: { enabled: false, text: '10mm Tempered Glass ____ m²', qty: 1, price: 0 },
+  installationFee: { enabled: false, text: 'Installation Fee', qty: 1, price: 0 },
+  firstYearMaintenance: { enabled: false, text: 'First-Year Repair and Maintenance Fee', qty: 1, price: 0 },
   showPartList: true,
   showFunctionList: true,
   partListTemplate: 'standard' as PartListTemplate,
@@ -258,6 +265,8 @@ export const useQuoteStore = create<QuoteState>()(
           elevators,
           shaftFrame: { ...state.shaftFrame, elevatorId: optionalItemOwner(state.shaftFrame, state.elevators) },
           temperedGlass: { ...state.temperedGlass, elevatorId: optionalItemOwner(state.temperedGlass, state.elevators) },
+          installationFee: { ...state.installationFee, elevatorId: optionalItemOwner(state.installationFee, state.elevators) },
+          firstYearMaintenance: { ...state.firstYearMaintenance, elevatorId: optionalItemOwner(state.firstYearMaintenance, state.elevators) },
         };
       }),
 

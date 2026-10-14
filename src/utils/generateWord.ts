@@ -229,6 +229,8 @@ export async function generateWordBlob(state: {
   showCertificationStandard?: boolean;
   shaftFrame: { enabled: boolean; text: string; qty?: number; price: number; elevatorId?: number };
   temperedGlass: { enabled: boolean; text: string; qty?: number; price: number; elevatorId?: number };
+  installationFee?: { enabled: boolean; text: string; qty?: number; price: number; elevatorId?: number };
+  firstYearMaintenance?: { enabled: boolean; text: string; qty?: number; price: number; elevatorId?: number };
   showPartList?: boolean;
   showFunctionList?: boolean;
   partListTemplate?: string;
@@ -285,7 +287,8 @@ export async function generateWordBlob(state: {
   );
   const optionals =
     (state.shaftFrame.enabled ? (Number(state.shaftFrame.price) || 0) * (Number(state.shaftFrame.qty) || 0) : 0) +
-    (state.temperedGlass.enabled ? (Number(state.temperedGlass.price) || 0) * (Number(state.temperedGlass.qty) || 0) : 0);
+    (state.temperedGlass.enabled ? (Number(state.temperedGlass.price) || 0) * (Number(state.temperedGlass.qty) || 0) : 0) +
+    [state.installationFee, state.firstYearMaintenance].reduce((sum, item) => sum + (item?.enabled ? (Number(item.price) || 0) * Number(item.qty ?? 1) : 0), 0);
   const isExw = state.quotationType === 'EXW';
   const isDefaultExwNoChargeDestination =
     !state.freightDestination ||
@@ -466,6 +469,17 @@ export async function generateWordBlob(state: {
     );
   }
 
+  [state.installationFee, state.firstYearMaintenance].forEach(item => {
+    if (!item?.enabled || optionalItemOwner(item, state.elevators) !== elev.id) return;
+    const qty = Number(item.qty ?? 1);
+    const price = Number(item.price) || 0;
+    priceRows.push(new TableRow({ children: [
+      cell(item.text, { width: priceCols[0] + priceCols[1], colSpan: 2 }),
+      cell(String(qty), { width: priceCols[2], align: AlignmentType.CENTER }),
+      cell(`USD ${price.toLocaleString()}`, { width: priceCols[3], align: AlignmentType.RIGHT }),
+      cell(`USD ${(price * qty).toLocaleString()}`, { width: priceCols[4], align: AlignmentType.RIGHT }),
+    ] }));
+  });
   });
 
   // Freight / EXW pickup row
