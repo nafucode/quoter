@@ -1175,6 +1175,7 @@ const Quote = () => {
                 >
                   <option value="-">-</option>
                   <option>NGN</option>
+                  <option>GHS</option>
                   <option>CNY</option>
                   <option>USD</option>
                   <option>AUD</option>
