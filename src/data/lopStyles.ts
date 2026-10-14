@@ -1,10 +1,5 @@
 export const lopStyles = [
   {
-    id: 'LOP-DUMBWAITER',
-    name: '餐梯 LOP / Dumbwaiter LOP',
-    previewImage: '/lop-styles/dumbwaiter-lop.png',
-  },
-  {
     id: 'LOP-01',
     name: '家用梯触屏-观光梯适用',
     previewImage: '/lop-styles/家用梯触屏-观光梯适用.png',
@@ -68,5 +63,10 @@ export const lopStyles = [
     id: 'OZL-W2513',
     name: 'OZL-W2513',
     previewImage: '/lop-styles/OZL-W2513.png',
+  },
+  {
+    id: 'LOP-DUMBWAITER',
+    name: '餐梯 LOP / Dumbwaiter LOP',
+    previewImage: '/lop-styles/dumbwaiter-lop.png',
   },
 ];
