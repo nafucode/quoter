@@ -4,11 +4,11 @@ export const elevatorTemplate = {
 
   // Basic Info
   description: 'Passenger Lift',
-  type: 'TKJ1000/1.75-VVVF',
+  type: 'TKJW1000/1.0-VVVF',
   capacity: 1000,
-  speed: 1.75,
+  speed: '1.0',
   floorsStops: '4/4/4',
-  machineRoom: 'MR',
+  machineRoom: 'MRL',
   controlSystem: 'Simplex',
   driveSystem: 'Gearless Motor - VVVF',
   servingFloors: 'GF-1F-2F-3F',

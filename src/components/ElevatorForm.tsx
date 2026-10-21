@@ -3,6 +3,7 @@ import { ArrowUp, ArrowDown, Copy } from 'lucide-react';
 import { useQuoteStore } from '@/store/useQuoteStore';
 import StylePicker from './StylePicker';
 import HybridInput from './HybridInput';
+import PriceCalculator from './PriceCalculator';
 import { cabinStyleGroups } from '@/data/cabinStyles';
 import { copStyleGroups } from '@/data/copStyles';
 import { lopStyles } from '@/data/lopStyles';
@@ -10,6 +11,15 @@ import { landingDoorStyles } from '@/data/landingDoorStyles';
 import { handrailStyles } from '@/data/handrailStyles';
 import { logoStyles } from '@/data/logoStyles';
 import { floorStyleGroups } from '@/data/floorStyles';
+
+const FUNCTION_PRESETS = [
+  { value: 'Accessible Car Operating Panel', label: '残疾人操纵箱' },
+  { value: 'IC Card Access (30 IC Cards)', label: 'IC 卡门禁（配 30 张卡）' },
+  { value: 'Cabin Air Conditioner', label: '轿厢空调' },
+  { value: '4G IoT Elevator Monitoring System', label: '4G 物联网管理系统' },
+  { value: 'CCTV Camera', label: '监控（带摄像头）' },
+  { value: 'CCTV Interface Only', label: '监控（仅预留接口）' },
+];
 
 const DOOR_OPENING_TYPE_OPTIONS = [
   { value: 'Center Opening', label: 'Center Opening' },
@@ -198,8 +208,14 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
     setIsDoorOpeningMenuOpen(false);
   };
 
-  const addFunction = () => {
-    const newFunction = { id: Date.now(), name: 'New Function', checked: false };
+  const addFunction = (name = 'New Function') => {
+    const existing = elevator.otherFunctions.find((func: any) => func.name.trim().toLowerCase() === name.toLowerCase());
+    if (name !== 'New Function' && existing) {
+      handleFunctionChange(existing.id, 'checked', true);
+      return;
+    }
+    const id = Math.max(0, ...elevator.otherFunctions.map((func: any) => Number(func.id) || 0)) + 1;
+    const newFunction = { id, name, checked: name !== 'New Function' };
     const updatedFunctions = [...elevator.otherFunctions, newFunction];
     updateElevator(elevator.id, 'otherFunctions', updatedFunctions);
   };
@@ -349,6 +365,7 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
               {(documentMode === 'quotation' || showCommercialFields) && <div>
                 <label className="block text-sm font-medium text-gray-700">Unit Price<span className="block text-xs text-gray-500">单价</span></label>
                 <input name="unitPrice" value={elevator.unitPrice} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
+                <PriceCalculator elevator={elevator} />
               </div>}
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Type<span className="block text-xs text-gray-500">类型（根据机房 / 载重 / 速度自动生成）</span></label>
@@ -600,10 +617,28 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                   {elevator.otherFunctions.map((func: any) => (
                     <div key={func.id} className="flex items-center gap-2">
                       <input type="checkbox" checked={func.checked} onChange={(e) => handleFunctionChange(func.id, 'checked', e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"/>
-                      <input type="text" value={func.name} onChange={(e) => handleFunctionChange(func.id, 'name', e.target.value)} className="block w-full p-1 border border-gray-300 rounded-md shadow-sm"/>
+                      <div className="min-w-0 flex-1">
+                        <input aria-label="Function name" type="text" value={func.name} onChange={(e) => handleFunctionChange(func.id, 'name', e.target.value)} className="block w-full p-1 border border-gray-300 rounded-md shadow-sm"/>
+                        {FUNCTION_PRESETS.find(option => option.value === func.name)?.label && (
+                          <span className="block text-xs text-gray-500">{FUNCTION_PRESETS.find(option => option.value === func.name)?.label}</span>
+                        )}
+                      </div>
                     </div>
                   ))}
-                  <button onClick={addFunction} className="mt-2 p-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600">Add Function</button>
+                  <select
+                    aria-label="新增常用功能 / Add Function"
+                    value=""
+                    onChange={(event) => {
+                      if (event.target.value) addFunction(event.target.value === 'custom' ? undefined : event.target.value);
+                    }}
+                    className="mt-2 block w-full min-w-0 rounded-md border border-gray-300 bg-white p-2 text-sm shadow-sm"
+                  >
+                    <option value="">新增功能 / Add Function</option>
+                    {FUNCTION_PRESETS.map(option => (
+                      <option key={option.value} value={option.value}>{option.label} / {option.value}</option>
+                    ))}
+                    <option value="custom">自定义功能 / Custom Function</option>
+                  </select>
                 </div>
               </div>
             </div>
