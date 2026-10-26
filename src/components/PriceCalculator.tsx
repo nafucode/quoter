@@ -30,7 +30,7 @@ export default function PriceCalculator({ elevator }: { elevator: ConfiguredPric
   const reviewed = reviewedKey === reviewKey;
   const setReviewed = (value: boolean) => setReviewedKey(value ? reviewKey : '');
   const change = <K extends keyof PriceOptions>(key: K, value: PriceOptions[K]) => { setOptions(previous => ({ ...previous, [key]: value })); setReviewed(false); };
-  const check = (key: 'ard' | 'stainless' | 'accessible' | 'iot', label: string) => <label className="flex items-center gap-2 py-1 text-sm"><input type="checkbox" checked={options[key]} onChange={event => change(key, event.target.checked)} />{label}</label>;
+  const check = (key: 'ard' | 'stainless' | 'accessible' | 'iot' | 'firefighterPackage', label: string) => <label className="flex items-center gap-2 py-1 text-sm"><input type="checkbox" checked={options[key]} onChange={event => change(key, event.target.checked)} />{label}</label>;
   const openCalculator = () => {
     const configuration = JSON.stringify([elevator.id, input, elevator.description, elevator.otherFunctions, elevator.otherFloorsDoor]);
     if (configuration !== lastConfiguration.current) {
@@ -57,12 +57,14 @@ export default function PriceCalculator({ elevator }: { elevator: ConfiguredPric
         <p className="my-2 text-xs text-gray-600">已读取当前勾选功能；未注明冷暖的空调暂按单冷核价。非标及自定义项目需另核。</p>
         {activeMode === 'passenger' ? <>{check('ard', 'ARD 停电应急平层 · ¥1,500')}{check('stainless', '304 发纹中分层门 · 除首层外 ¥500/层')}</> : <p className="mb-2 text-sm text-gray-600">标准自动门；已含 ARD 与发纹不锈钢厅门，无机房不另加价。</p>}
         {check('accessible', '无障碍操纵箱 · ¥1,500')}{check('iot', '4G 物联网 · ¥1,500')}
+        {check('firefighterPackage', '消防电梯功能包 · 固定部分 ¥4,100 + 防火电缆核实价')}
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="text-sm">IC 卡门禁<select className={field} value={options.ic} onChange={e => change('ic', e.target.value as PriceOptions['ic'])}><option value="none">不加装</option><option value="standard">普通门禁 · ¥1,000 / 含30张卡</option><option value="floor">指定楼层 · ¥1,500 / 含30张卡</option></select></label>
           <label className="text-sm">额外 IC 卡 · ¥3/张<input className={field} type="number" min="0" step="1" disabled={options.ic === 'none'} value={options.extraCards} onChange={e => change('extraCards', Number(e.target.value))} /></label>
           <label className="text-sm">轿厢空调<select className={field} value={options.ac} onChange={e => change('ac', e.target.value as PriceOptions['ac'])}><option value="none">不加装</option><option value="cool">单冷 · ¥3,000</option><option value="heat">冷暖 · ¥4,000</option></select></label>
           <label className="text-sm">监控<select className={field} value={options.cctv} onChange={e => change('cctv', e.target.value as PriceOptions['cctv'])}><option value="none">不加装</option><option value="camera">带摄像头 · 手动核价</option><option value="interface">仅接口 · 手动核价</option></select></label>
           {options.cctv !== 'none' && <label className="text-sm">监控核实价（元）<input className={field} type="number" min="0" value={options.cctvPrice} onChange={e => change('cctvPrice', e.target.value)} /></label>}
+          {options.firefighterPackage && <label className="text-sm sm:col-span-2">防火供电电缆核实价（元）<span className="block text-xs text-gray-500">依据井道单询价；三角锁免费，对讲面板 ¥2,300，500×700 mm 逃生舱 ¥1,800。</span><input className={field} type="number" min="0" value={options.fireCablePrice} onChange={e => change('fireCablePrice', e.target.value)} /></label>}
           <label className="text-sm">其他选配名称<input className={field} value={options.customLabel} onChange={e => change('customLabel', e.target.value)} /></label>
           <label className="text-sm">其他选配核实加价（元）<input className={field} type="number" min="0" value={options.customPrice} onChange={e => change('customPrice', Number(e.target.value))} /></label>
         </div>

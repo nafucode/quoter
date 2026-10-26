@@ -4,10 +4,11 @@ import { Fragment, useState, useMemo, useEffect, useRef } from 'react';
 import { optionalItemOwner } from '@/utils/optionalItemOwner';
 import { isDumbwaiter } from '@/utils/isDumbwaiter';
 import DumbwaiterConfiguration from '@/components/DumbwaiterConfiguration';
-import Link from 'next/link';
+import QuoteToolbar from '@/components/QuoteToolbar';
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
 import { useQuoteStore } from '@/store/useQuoteStore';
+import { hasDraftReadError, quoteStorage } from '@/utils/localImageLibrary';
 import { getTranslations } from '@/data/translations';
 import { generateWordBlob } from '@/utils/generateWord';
 import { translateValueToZh } from '@/data/zhValueMap';
@@ -226,6 +227,7 @@ const Quote = () => {
 
   const [focusedSection, setFocusedSection] = useState<string>('');
   const [isClient, setIsClient] = useState(false);
+  const [storageError, setStorageError] = useState(false);
   const [libSaved, setLibSaved] = useState(false);
   const [preflightIssues, setPreflightIssues] = useState<ExportPreflightIssue[]>([]);
   const [pendingExport, setPendingExport] = useState<ExportKind | null>(null);
@@ -258,17 +260,24 @@ const Quote = () => {
   const [companyOptions, setCompanyOptions] = useState<CompanyOption[]>([]);
 
   useEffect(() => {
-    setIsClient(true);
-    try {
-      const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-      setQuoteHistory(saved);
-    } catch {}
+    const onStorageError = () => setStorageError(true);
+    if (hasDraftReadError()) onStorageError();
+    window.addEventListener('quoter-storage-error', onStorageError);
+    const finishHydration = () => setIsClient(true);
+    const unsubscribe = useQuoteStore.persist.onFinishHydration(finishHydration);
+    if (useQuoteStore.persist.hasHydrated()) finishHydration();
+    let active = true;
+    quoteStorage.getItem(HISTORY_KEY).then(raw => {
+      const saved = JSON.parse(raw || '[]');
+      if (active) setQuoteHistory(Array.isArray(saved) ? saved : []);
+    }).catch(() => { if (active) window.alert('读取本机报价失败，请检查浏览器存储权限并刷新。'); });
     try {
       const savedCompanies = JSON.parse(localStorage.getItem(COMPANY_OPTIONS_KEY) || '[]');
       if (Array.isArray(savedCompanies)) {
         setCompanyOptions(normalizeCompanyOptions(savedCompanies));
       }
     } catch {}
+    return () => { active = false; unsubscribe(); window.removeEventListener('quoter-storage-error', onStorageError); };
   }, []);
 
   useEffect(() => {
@@ -326,20 +335,19 @@ const Quote = () => {
     return sequence;
   }, [quoteHistory]);
 
-  const saveToHistory = (entry: any) => {
-    setQuoteHistory(prev => {
-      const updated = [entry, ...prev].slice(0, 300); // 最多保留300条
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-      return updated;
-    });
+  const saveToHistory = async (entry: any) => {
+    const saved = JSON.parse(await quoteStorage.getItem(HISTORY_KEY) || '[]');
+    const updated = [entry, ...saved].slice(0, 300);
+    await quoteStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+    setQuoteHistory(updated);
   };
 
-  const deleteFromHistory = (id: number) => {
-    setQuoteHistory(prev => {
-      const updated = prev.filter(e => e.id !== id);
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-      return updated;
-    });
+  const deleteFromHistory = async (id: number) => {
+    try {
+      const updated = quoteHistory.filter(e => e.id !== id);
+      await quoteStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+      setQuoteHistory(updated);
+    } catch { window.alert('删除失败，原报价仍然保留。'); }
   };
 
   const saveCompanyOption = () => {
@@ -417,7 +425,7 @@ const Quote = () => {
   const buildCurrentQuoteEntry = () => {
     const s = useQuoteStore.getState();
     const libraryImage = (value: unknown) =>
-      typeof value === 'string' && value.startsWith('/') ? value : '';
+      typeof value === 'string' && (value.startsWith('/') || /^data:image\/(?:png|jpeg|webp);base64,/.test(value)) ? value : '';
     const safeHybrid = (field: any) => {
       if (field?.type === 'text') return { type: 'text', value: field.value || '' };
       if (field?.type === 'image') return { type: 'image', value: libraryImage(field.value) };
@@ -501,7 +509,7 @@ const Quote = () => {
     return () => window.removeEventListener('message', handler);
   }, [importState]);
 
-  const handleSaveToLibrary = () => {
+  const handleSaveToLibrary = async () => {
     try {
       const s = useQuoteStore.getState();
       const historyEntry: any = buildCurrentQuoteEntry();
@@ -516,13 +524,11 @@ const Quote = () => {
         state: historyEntry.state,
       };
 
+      await saveToHistory(historyEntry);
       // 如果在 iframe 里（SEO 工作台），通知父窗口保存到报价库
       if (window.parent !== window) {
         window.parent.postMessage({ type: 'SAVE_QUOTE', quote }, '*');
       }
-
-      // 保存到本地历史
-      saveToHistory(historyEntry);
 
       setLibSaved(true);
       setTimeout(() => setLibSaved(false), 2000);
@@ -717,8 +723,8 @@ const Quote = () => {
   }, [focusedSection]);
 
   useEffect(() => {
-    fetchExchangeRate();
-  }, [targetCurrency, exchangeRateBank, fetchExchangeRate]);
+    if (isClient) fetchExchangeRate();
+  }, [isClient, targetCurrency, exchangeRateBank, fetchExchangeRate]);
 
   const isExw = quotationType === 'EXW';
   const isDefaultExwNoChargeDestination =
@@ -834,90 +840,22 @@ const Quote = () => {
   const hasCargoElevator = elevators.some(isCargoElevator);
 
   if (!isClient) {
-    return null; // Or a loading spinner
+    return <div className="p-6">{storageError ? '无法读取本机报价，请检查浏览器存储权限。为保护原数据，暂不打开编辑器。' : '正在读取本机报价…'}<button className="ml-4 underline" onClick={() => window.location.reload()}>重新加载</button></div>;
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {storageError && <div role="alert" className="p-3 bg-red-50 text-red-800 no-print">本机自动保存失败。请立即导出草稿备份，检查浏览器存储空间后再刷新。</div>}
       <div className="p-4">
-        <div className="sticky top-0 z-20 mb-4 rounded-lg bg-white/95 p-3 shadow-md backdrop-blur no-print">
-          <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:flex xl:flex-wrap">
-              <button onClick={handleImportClick} className="py-2 px-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
-                导入草稿
-              </button>
-              <Link href="/pi" className="py-2 px-3 bg-slate-900 text-white rounded-lg hover:bg-slate-700 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
-                PI 制作
-              </Link>
-              <Link href="/packing-list" className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
-                箱单制作
-              </Link>
-              <Link href="/contract-maker/index.html?from=quote" onClick={persistCurrentQuoteForContract} className="py-2 px-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
-                合同制作
-              </Link>
-              <Link href="/escalator" className="py-2 px-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all text-center">
-                扶梯报价
-              </Link>
-              <button onClick={handleExport} className="py-2 px-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
-                导出草稿
-              </button>
-              <button onClick={() => window.confirm('确认新建报价？当前草稿将会丢失。') && resetToDefaults()} className="py-2 px-3 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all">
-                新建报价
-              </button>
-              <button onClick={handleSaveToLibrary} className={`py-2 px-3 text-white rounded-lg text-sm font-semibold tracking-wide shadow-sm active:scale-95 transition-all ${libSaved ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600'}`}>
-                {libSaved ? '✓ 已保存！' : '保存到报价库'}
-              </button>
-            </div>
-            <div className="grid grid-cols-[auto_1fr_auto_auto] gap-2 xl:min-w-[560px] xl:justify-end">
-              <button
-                onClick={() => window.location.reload()}
-                disabled={versionStatus.isChecking || !versionStatus.canUpdate}
-                className={`px-3 py-2 rounded-lg shadow-md font-semibold text-sm ${
-                  versionStatus.isChecking || !versionStatus.canUpdate
-                    ? 'cursor-not-allowed bg-slate-300 text-slate-600'
-                    : 'bg-slate-600 text-white hover:bg-slate-700'
-                }`}
-                title={versionStatus.canUpdate ? '刷新页面，同步最新版本' : '当前已经是最新版本'}
-              >
-                {updateButtonText}
-              </button>
-              <button onClick={() => requestExport('pdf')} className="p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 font-semibold">
-                {isClient && window !== window.top ? '↗ 新窗口打开并生成 PDF' : '生成 PDF'}
-              </button>
-              <button
-                onClick={() => requestExport('word')}
-                className="px-4 p-2 bg-emerald-600 text-white rounded-lg shadow-md hover:bg-emerald-700 font-semibold tracking-wide"
-                title="Export as Word document"
-              >
-                📄 Word
-              </button>
-              <select
-                value={language}
-                onChange={(e) => setField('language', e.target.value)}
-                className="px-3 py-2 bg-gray-700 text-white rounded-lg shadow-md hover:bg-gray-800 font-semibold text-sm cursor-pointer"
-                title="Switch output language"
-              >
-                <option value="en">🇬🇧 EN</option>
-                <option value="zh-en">中英</option>
-                <option value="zh">🇨🇳 中文</option>
-                <option value="es">🇪🇸 ES</option>
-                <option value="pt">🇧🇷 PT</option>
-                <option value="fr">🇫🇷 FR</option>
-                <option value="vi">🇻🇳 VI</option>
-                <option value="km">🇰🇭 KM</option>
-                <option value="ar">🇸🇦 AR</option>
-                <option value="ru">🇷🇺 RU</option>
-              </select>
-            </div>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="hidden"
-              accept=".json"
-            />
-          </div>
-        </div>
+        <QuoteToolbar
+          quotationNo={quotationNo} language={language} saved={libSaved}
+          updateLabel={updateButtonText} checkingUpdate={versionStatus.isChecking} canUpdate={versionStatus.canUpdate}
+          onLanguage={value => setField('language', value)}
+          onNew={() => { if (window.confirm('确认新建报价？当前草稿将会丢失。')) resetToDefaults(); }}
+          onSave={handleSaveToLibrary} onExport={requestExport}
+          onImport={handleImportClick} onBackup={handleExport} onContract={persistCurrentQuoteForContract}
+        />
+        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".json" />
         <div className="flex flex-col md:flex-row md:space-x-4">
           {/* Left Side - Inputs */}
           <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md no-print">
@@ -1047,7 +985,7 @@ const Quote = () => {
                       const dd = String(d.getDate()).padStart(2, '0');
                       const prefix = `XFJ${yy}${mm}${dd}`;
                       // Find the highest seq used today in history
-                      const saved: any[] = (() => { try { return JSON.parse(localStorage.getItem('quoter_history') || '[]'); } catch { return []; } })();
+                      const saved = quoteHistory;
                       const used = saved
                         .map((e: any) => e.quotationNo || '')
                         .filter((n: string) => n.startsWith(prefix))
@@ -1176,6 +1114,7 @@ const Quote = () => {
                   <option value="-">-</option>
                   <option>NGN</option>
                   <option>GHS</option>
+                  <option value="XOF">XOF（西非法郎）</option>
                   <option>CNY</option>
                   <option>USD</option>
                   <option>AUD</option>
@@ -1187,8 +1126,22 @@ const Quote = () => {
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={exchangeRate}
+                  step="0.01"
+                  min="0.01"
+                  inputMode="decimal"
                   onChange={(e) => setField('exchangeRate', Number(e.target.value))}
                 />
+                {targetCurrency !== 'USD' && targetCurrency !== '-' && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    <span>1 USD = {exchangeRate} {targetCurrency} · 手动核价</span>
+                    <a
+                      href={`https://www.xe.com/currencyconverter/convert/?Amount=1&From=USD&To=${encodeURIComponent(targetCurrency)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 block text-blue-700 underline"
+                    >市场汇率参考（Xe）</a>
+                  </div>
+                )}
                 {targetCurrency !== 'USD' && targetCurrency !== '-' && (
                   <button
                     type="button"
@@ -2122,7 +2075,7 @@ const Quote = () => {
 
         {/* 历史报价 */}
         {isClient && (
-          <div className="mt-6 no-print">
+          <div id="quote-history" className="mt-6 scroll-mt-36 no-print">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold text-gray-700">
                 历史报价
@@ -2130,7 +2083,11 @@ const Quote = () => {
               </h2>
               {quoteHistory.length > 0 && (
                 <button
-                  onClick={() => { if (window.confirm('清空全部历史？')) { setQuoteHistory([]); localStorage.removeItem(HISTORY_KEY); } }}
+                  onClick={async () => {
+                    if (!window.confirm('清空全部历史？')) return;
+                    try { await quoteStorage.removeItem(HISTORY_KEY); setQuoteHistory([]); }
+                    catch { window.alert('清空失败，原报价仍然保留。'); }
+                  }}
                   className="text-xs text-red-400 hover:text-red-600"
                 >
                   清空

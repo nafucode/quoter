@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import { useQuoteStore } from "@/store/useQuoteStore";
+import { quoteStorage } from "@/utils/localImageLibrary";
 
 type PackingRow = {
   id: number;
@@ -175,12 +176,10 @@ export default function PackingListPage() {
   const quote = useQuoteStore();
 
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("quoter_history") || "[]");
+    quoteStorage.getItem('quoter_history').then(raw => {
+      const saved = JSON.parse(raw || '[]');
       setQuoteHistory(Array.isArray(saved) ? saved : []);
-    } catch {
-      setQuoteHistory([]);
-    }
+    }).catch(() => window.alert('读取本机报价失败，请刷新后重试。'));
 
     try {
       const piDraft = localStorage.getItem(PI_TO_PACKING_KEY);

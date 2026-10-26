@@ -8,6 +8,7 @@ test('reads checked quote configuration without charging unchecked options', () 
     { name: 'IC Card Access (30 IC Cards)', checked: true },
     { name: '4G IoT Elevator Monitoring System', checked: true },
     { name: 'CCTV Interface Only', checked: true },
+    { name: 'Firefighter Elevator Function Package', checked: true },
     { name: 'Cabin Air Conditioner', checked: false },
   ] });
   assert.equal(options.ard, true);
@@ -16,6 +17,7 @@ test('reads checked quote configuration without charging unchecked options', () 
   assert.equal(options.extraCards, 0);
   assert.equal(options.iot, true);
   assert.equal(options.cctv, 'interface');
+  assert.equal(options.firefighterPackage, true);
   assert.equal(options.ac, 'none');
   assert.equal(priceOptionsFromConfiguration({otherFunctions: []}).ic, 'none');
 });
@@ -44,4 +46,11 @@ test('unpriced configuration cannot apply', () => {
   assert.ok(calculatePrice({ ...input, speed: 3 }, defaultPriceOptions, 'passenger').errors.length);
   assert.ok(calculatePrice({ ...input, stops: 0 }, defaultPriceOptions, 'passenger').errors.length);
   assert.ok(calculatePrice(input, { ...defaultPriceOptions, adjustment: -100000 }, 'passenger').errors.length);
+});
+test('firefighter package adds fixed items and requires a cable quote', () => {
+  const unpriced = calculatePrice(input, { ...defaultPriceOptions, firefighterPackage: true }, 'passenger');
+  assert.match(unpriced.errors.join(' '), /防火供电电缆/);
+  const priced = calculatePrice(input, { ...defaultPriceOptions, firefighterPackage: true, fireCablePrice: '3200' }, 'passenger');
+  assert.equal(priced.standard, 72300);
+  assert.deepEqual(priced.errors, []);
 });

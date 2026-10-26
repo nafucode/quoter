@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import { useQuoteStore } from "@/store/useQuoteStore";
+import { quoteStorage } from "@/utils/localImageLibrary";
 
 type PiItem = {
   id: number;
@@ -546,12 +547,10 @@ export default function ProformaInvoicePage() {
   const quote = useQuoteStore();
 
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("quoter_history") || "[]");
+    quoteStorage.getItem('quoter_history').then(raw => {
+      const saved = JSON.parse(raw || '[]');
       setQuoteHistory(Array.isArray(saved) ? saved : []);
-    } catch {
-      setQuoteHistory([]);
-    }
+    }).catch(() => window.alert('读取本机报价失败，请刷新后重试。'));
 
     try {
       const savedPi = JSON.parse(localStorage.getItem(PI_HISTORY_KEY) || "[]");
@@ -859,6 +858,7 @@ export default function ProformaInvoicePage() {
                     >
                       <option value="NGN">NGN</option>
                       <option value="GHS">GHS</option>
+                      <option value="XOF">XOF（西非法郎）</option>
                       <option value="RMB">RMB</option>
                       <option value="CNY">CNY</option>
                     </select>

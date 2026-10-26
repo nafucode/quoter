@@ -4,6 +4,7 @@ import { elevatorTemplate } from '@/data/elevatorTemplate';
 import { defaultPartList, partListTemplates, PartListRow, PartListTemplate } from '@/data/partListDefaults';
 import { Lang } from '@/data/translations';
 import { optionalItemOwner } from '@/utils/optionalItemOwner';
+import { draftStorage } from '@/utils/localImageLibrary';
 
 const LEGACY_BUTTON_TEXT = 'Round standard';
 const DEFAULT_BUTTON_TEXT = 'Round buttons with Braille';
@@ -349,7 +350,7 @@ export const useQuoteStore = create<QuoteState>()(
     }),
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
-      storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
+      storage: createJSONStorage(() => draftStorage),
       version: 10,
       partialize: (state) => {
         const { quotationDate, ...persistedState } = state;

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ArrowUp, ArrowDown, Copy } from 'lucide-react';
 import { useQuoteStore } from '@/store/useQuoteStore';
 import StylePicker from './StylePicker';
+import { saveUpload } from '@/utils/localImageLibrary';
+import { buildServingFloors, canSyncServingFloors } from '@/utils/servingFloors';
 import HybridInput from './HybridInput';
 import PriceCalculator from './PriceCalculator';
 import { cabinStyleGroups } from '@/data/cabinStyles';
@@ -19,6 +21,7 @@ const FUNCTION_PRESETS = [
   { value: '4G IoT Elevator Monitoring System', label: '4G 物联网管理系统' },
   { value: 'CCTV Camera', label: '监控（带摄像头）' },
   { value: 'CCTV Interface Only', label: '监控（仅预留接口）' },
+  { value: 'Firefighter Elevator Function Package', label: '消防电梯功能包' },
 ];
 
 const DOOR_OPENING_TYPE_OPTIONS = [
@@ -65,13 +68,6 @@ const DESCRIPTION_OPTIONS = [
 
 const isNoneText = (value: unknown) => String(value ?? '').trim().toLowerCase() === 'none';
 
-const buildServingFloors = (floorsStops: string | number, country = '') => {
-  const floorCount = Number(String(floorsStops).match(/\d+/)?.[0] ?? 0);
-  if (!Number.isFinite(floorCount) || floorCount <= 0) return '';
-  const firstUpperFloor = country === 'Philippines' ? 2 : 1;
-  return ['GF', ...Array.from({ length: Math.max(floorCount - 1, 0) }, (_, index) => `${index + firstUpperFloor}F`)].join('-');
-};
-
 const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', country = '', showCommercialFields = false }: { elevator: any, onSectionFocus: (section: string) => void, documentMode?: 'quotation' | 'proposal', country?: string, showCommercialFields?: boolean }) => {
   const { elevators, updateElevator, removeElevator, toggleElevatorCollapse, moveElevator, duplicateElevator } = useQuoteStore();
   const elevatorIndex = elevators.findIndex(item => item.id === elevator.id);
@@ -96,17 +92,15 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
   }, [elevator.id, elevator.type, generatedType, updateElevator]);
 
   useEffect(() => {
-    const regularFloors = buildServingFloors(elevator.floorsStops);
-    const philippinesFloors = buildServingFloors(elevator.floorsStops, 'Philippines');
     const nextServingFloors = buildServingFloors(elevator.floorsStops, country);
     if (
       nextServingFloors &&
       elevator.servingFloors !== nextServingFloors &&
-      (!elevator.servingFloors || elevator.servingFloors === regularFloors || elevator.servingFloors === philippinesFloors)
+      canSyncServingFloors(elevator.servingFloors, elevator.floorsStops, elevator.servingFloorsManual)
     ) {
       updateElevator(elevator.id, 'servingFloors', nextServingFloors);
     }
-  }, [country, elevator.floorsStops, elevator.id, elevator.servingFloors, updateElevator]);
+  }, [country, elevator.floorsStops, elevator.id, elevator.servingFloors, elevator.servingFloorsManual, updateElevator]);
 
   const handleBasicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -124,15 +118,15 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    if (name === 'servingFloors') updateElevator(elevator.id, 'servingFloorsManual', Boolean(value.trim()));
     updateElevator(elevator.id, name, value);
     if (name === 'description') {
       updateElevator(elevator.id, 'type', buildElevatorType(elevator.machineRoom, elevator.capacity, elevator.speed, value));
     }
     if (name === 'floorsStops') {
-      const previousServingFloors = buildServingFloors(elevator.floorsStops, country);
       const nextServingFloors = buildServingFloors(value, country);
       const shouldSyncServingFloors =
-        !elevator.servingFloors || elevator.servingFloors === previousServingFloors;
+        canSyncServingFloors(elevator.servingFloors, elevator.floorsStops, elevator.servingFloorsManual);
       if (shouldSyncServingFloors) {
         updateElevator(elevator.id, 'servingFloors', nextServingFloors);
       }
@@ -160,16 +154,18 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
     });
   };
 
-  const handleCabinEffectFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCabinEffectFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name } = e.target;
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const newCabinEffect = { ...elevator.cabinEffect, [name]: reader.result as string };
+      e.target.value = '';
+      try {
+        const image = await saveUpload(file, name);
+        const current = useQuoteStore.getState().elevators.find(item => item.id === elevator.id);
+        if (!current) return;
+        const newCabinEffect = { ...current.cabinEffect, [name]: image.previewImage };
         updateElevator(elevator.id, 'cabinEffect', newCabinEffect);
-      };
-      reader.readAsDataURL(file);
+      } catch (err) { window.alert(err instanceof Error ? err.message : '图片保存失败，请重试。'); }
     }
   };
 
@@ -192,14 +188,16 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
     handleCabinEffectHybridChange(fieldName, 'value', value);
   };
 
-  const handleHybridFileChange = (fieldName: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleHybridFileChange = async (fieldName: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handleCabinEffectHybridChange(fieldName, 'value', reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      e.target.value = '';
+      try {
+        const image = await saveUpload(file, fieldName);
+        const current = useQuoteStore.getState().elevators.find(item => item.id === elevator.id);
+        if (!current) return;
+        updateElevator(elevator.id, 'cabinEffect', { ...current.cabinEffect, [fieldName]: { type: 'image', value: image.previewImage } });
+      } catch (err) { window.alert(err instanceof Error ? err.message : '图片保存失败，请重试。'); }
     }
   };
 
@@ -224,7 +222,7 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
     let newCabinEffect;
     switch (pickerState.type) {
       case 'cabin':
-        newCabinEffect = { ...elevator.cabinEffect, cabinImage: style.previewImage, ceiling: { type: 'text', value: style.id } };
+        newCabinEffect = { ...elevator.cabinEffect, cabinImage: style.previewImage, ...(style.id.startsWith('upload-') ? {} : { ceiling: { type: 'text', value: style.id } }) };
         break;
       case 'cabin2':
         newCabinEffect = { ...elevator.cabinEffect, cabinImage2: style.previewImage };
@@ -239,11 +237,13 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
         newCabinEffect = { ...elevator.cabinEffect, lopImage: style.previewImage };
         break;
       case 'landingDoor':
-        newCabinEffect = { ...elevator.cabinEffect, landingDoor: { type: 'image', value: style.previewImage } };
+      case 'ceiling':
+      case 'button':
+        newCabinEffect = { ...elevator.cabinEffect, [pickerState.type]: { type: 'image', value: style.previewImage } };
         break;
       case 'floor':
         newCabinEffect = { ...elevator.cabinEffect, floor: { type: 'image', value: style.previewImage } };
-        updateElevator(elevator.id, 'carFloor', style.id);
+        updateElevator(elevator.id, 'carFloor', style.id.startsWith('upload-') ? style.name : style.id);
         break;
       case 'handrail':
         newCabinEffect = { ...elevator.cabinEffect, handrail: { type: 'image', value: style.previewImage } };
@@ -270,13 +270,15 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
       case 'floor': return { styleGroups: floorStyleGroups, title: 'Choose a Floor Style' };
       case 'handrail': return { styleGroups: [{ groupName: 'Handrail Styles', styles: handrailStyles }], title: 'Choose a Handrail Style' };
       case 'copLogo': return { styleGroups: [{ groupName: 'Logo Styles', styles: logoStyles }], title: 'Choose a Logo' };
+      case 'ceiling': return { styleGroups: [], title: 'Choose a Ceiling Style' };
+      case 'button': return { styleGroups: [], title: 'Choose a Button Style' };
       default: return { styleGroups: [], title: '' };
     }
   };
 
   return (
     <div className="border-t mt-4 pt-4">
-      {pickerState.isOpen && <StylePicker {...getPickerProps()} onSelect={handleStyleSelect} onClose={() => setPickerState({ isOpen: false, type: '' })} />}
+      {pickerState.isOpen && <StylePicker {...getPickerProps()} category={pickerState.type} onSelect={handleStyleSelect} onClose={() => setPickerState({ isOpen: false, type: '' })} />}
       <div className="flex flex-wrap justify-between items-center gap-2">
         <input
           value={elevator.title || `Elevator #L${elevator.id}`}
@@ -714,6 +716,7 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                   labelChinese="天花板" 
                   fieldName="ceiling" 
                   fieldData={elevator.cabinEffect.ceiling}
+                  onChooseFromLibrary={() => openPicker('ceiling')}
                   onTypeChange={handleHybridTypeChange}
                   onValueChange={handleHybridValueChange}
                   onFileChange={handleHybridFileChange}
@@ -723,6 +726,7 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                   labelChinese="按钮" 
                   fieldName="button" 
                   fieldData={elevator.cabinEffect.button}
+                  onChooseFromLibrary={() => openPicker('button')}
                   onTypeChange={handleHybridTypeChange}
                   onValueChange={handleHybridValueChange}
                   onFileChange={handleHybridFileChange}

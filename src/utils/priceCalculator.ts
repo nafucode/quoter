@@ -8,6 +8,8 @@ export type PriceOptions = {
   iot: boolean;
   cctv: 'none' | 'camera' | 'interface';
   cctvPrice: string;
+  firefighterPackage: boolean;
+  fireCablePrice: string;
   customLabel: string;
   customPrice: number;
   adjustment: number;
@@ -17,6 +19,7 @@ export type PriceOptions = {
 export const defaultPriceOptions: PriceOptions = {
   ard: true, stainless: true, accessible: false, ic: 'none', extraCards: 0,
   ac: 'none', iot: false, cctv: 'none', cctvPrice: '', customLabel: '',
+  firefighterPackage: false, fireCablePrice: '',
   customPrice: 0, adjustment: 0, adjustmentMode: 'amount', customer: 'direct',
 };
 export type ConfiguredPriceElevator = {
@@ -39,6 +42,7 @@ export function priceOptionsFromConfiguration(elevator: ConfiguredPriceElevator)
     ac: has(/air conditioner|空调/) ? (has(/heat|冷暖/) ? 'heat' : 'cool') : 'none',
     iot: has(/\biot\b|物联网/),
     cctv: has(/cctv|监控/) ? (has(/interface|接口/) ? 'interface' : 'camera') : 'none',
+    firefighterPackage: has(/firefighter elevator function package|fire elevator function package|消防电梯功能包/),
   };
 }
 export type PriceInput = { capacity: number; speed: number; stops: number; mrl: boolean };
@@ -91,6 +95,16 @@ export function calculatePrice(input: PriceInput, options: PriceOptions, mode: '
   if (options.cctv !== 'none') {
     if (!options.cctvPrice.trim() || !Number.isFinite(Number(options.cctvPrice)) || Number(options.cctvPrice) < 0) errors.push('请填写已核实的监控价格');
     else add(options.cctv === 'camera' ? '监控含摄像头 · 手动核价' : '监控接口 · 手动核价', Number(options.cctvPrice));
+  }
+  if (options.firefighterPackage) {
+    add('消防电梯三角锁', 0);
+    if (!options.fireCablePrice.trim() || !Number.isFinite(Number(options.fireCablePrice)) || Number(options.fireCablePrice) < 0) {
+      errors.push('请根据井道单填写防火供电电缆核实价');
+    } else {
+      add('防火供电电缆 · 按井道单核价', Number(options.fireCablePrice));
+    }
+    add('消防电梯对讲面板 · 带通话和麦克风按钮', 2300);
+    add('轿顶逃生舱 · 500×700 mm', 1800);
   }
   if (!Number.isFinite(options.customPrice) || options.customPrice < 0) errors.push('其他选配加价须为非负金额');
   else if (options.customPrice) add(options.customLabel.trim() || '其他选配 · 手动核价', options.customPrice);
