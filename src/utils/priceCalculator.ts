@@ -45,12 +45,20 @@ export function priceOptionsFromConfiguration(elevator: ConfiguredPriceElevator)
     firefighterPackage: has(/firefighter elevator function package|fire elevator function package|消防电梯功能包/),
   };
 }
-export type PriceInput = { capacity: number; speed: number; stops: number; mrl: boolean };
+export function priceScheduleForCountry(country = '') {
+  const vietnam = /^(vietnam|viet nam|vn|越南|việt nam)$/i.test(country.trim());
+  return vietnam
+    ? { id: 'vietnam-2026-05', label: '越南价格表 · 2026年5月', homeBase: 42000, passengerBase: [55000,56000,57000,66000,72000] }
+    : { id: 'overseas-2026-04', label: '海外价格表 · 2026年4月', homeBase: 48000, passengerBase: [61000,62000,63000,71000,78000] };
+}
+
+export type PriceInput = { capacity: number; speed: number; stops: number; mrl: boolean; country?: string };
 export type PriceResult = { lines: { label: string; amount: number }[]; errors: string[]; standard: number; adjustment: number; total: number };
 
 // Prices are CNY per elevator. Source: 2026 overseas price list, April 1.
 export function calculatePrice(input: PriceInput, options: PriceOptions, mode: 'passenger' | 'home'): PriceResult {
   const { capacity, speed, stops, mrl } = input;
+  const schedule = priceScheduleForCountry(input.country);
   const lines: PriceResult['lines'] = [];
   const errors: string[] = [];
   const add = (label: string, amount: number) => lines.push({ label, amount });
@@ -59,7 +67,7 @@ export function calculatePrice(input: PriceInput, options: PriceOptions, mode: '
     if (![400, 450, 630].includes(capacity) || stops > 6 || !((speed >= 0.4 && speed <= 0.63) || speed === 1)) {
       errors.push('别墅梯试算限 400/450/630 kg、2–6 层站、0.4–0.63 或 1.0 m/s');
     }
-    add('曳引式别墅梯 · 2层站自动门基价', 48000);
+    add('曳引式别墅梯 · 2层站自动门基价', schedule.homeBase);
     add(`${stops - 2} 层 × ¥2,000`, (stops - 2) * 2000);
     if (capacity === 630) add('630 kg 升级', 2000);
     if (speed === 1) add('1.0 m/s 升级', 2000);
@@ -69,7 +77,7 @@ export function calculatePrice(input: PriceInput, options: PriceOptions, mode: '
     const tier = speed >= 1 && speed <= 1.75 ? 0 : speed === 2 ? 1 : speed === 2.5 ? 2 : speed === 3 ? 3 : -1;
     if (index < 0 || tier < 0) errors.push('该载重或速度无客梯基价，需单独核价');
     if (index >= 0 && tier >= 0) {
-      const base = [[61000,62000,63000,71000,78000],[69000,70000,71000,81000,88000],[125000,127000,130000,145000,155000],[273000,276000,280000,298000,310000]][tier][index];
+      const base = [schedule.passengerBase,[69000,70000,71000,81000,88000],[125000,127000,130000,145000,155000],[273000,276000,280000,298000,310000]][tier][index];
       const baseline = tier < 2 ? 10 : 30;
       const up = [[2000,2000,2000,2500,3000],[2200,2200,2200,2500,3000],[2500,2500,2500,2700,3000],[3600,3600,3600,4000,4000]][tier][index];
       const down = tier === 3 ? [2500,2500,2500,2800,3000][index] : 2000;

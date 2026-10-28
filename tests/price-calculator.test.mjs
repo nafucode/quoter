@@ -1,6 +1,39 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { calculatePrice, defaultPriceOptions, priceOptionsFromConfiguration } from '../src/utils/priceCalculator.ts';
+import { calculatePrice, defaultPriceOptions, priceOptionsFromConfiguration, priceScheduleForCountry } from '../src/utils/priceCalculator.ts';
+
+test('Vietnam country selects its schedule and other countries retain overseas prices', () => {
+  for (const country of ['Vietnam', ' Viet Nam ', '越南', 'VN', 'Việt Nam']) {
+    assert.equal(priceScheduleForCountry(country).id, 'vietnam-2026-05');
+  }
+  for (const country of ['', 'Thailand', 'Cambodia']) {
+    assert.equal(priceScheduleForCountry(country).id, 'overseas-2026-04');
+  }
+});
+test('Vietnam passenger bases match all five capacity bands', () => {
+  for (const [capacity, base] of [[630,55000],[800,56000],[1000,57000],[1150,66000],[1350,66000],[1600,72000]]) {
+    for (const speed of [1,1.5,1.75]) {
+      const result = calculatePrice({capacity,speed,stops:10,mrl:false,country:'Vietnam'}, {...defaultPriceOptions,ard:false,stainless:false}, 'passenger');
+      assert.equal(result.total,base);
+      assert.deepEqual(result.errors,[]);
+    }
+  }
+});
+test('Vietnam floor adjustments, MRL and optional extras remain additive', () => {
+  const config = {capacity:630,speed:1,stops:8,mrl:true,country:'Vietnam'};
+  assert.equal(calculatePrice(config,defaultPriceOptions,'passenger').total,59000);
+  assert.equal(calculatePrice({...config,stops:11},defaultPriceOptions,'passenger').total,66500);
+  assert.equal(calculatePrice(config,{...defaultPriceOptions,ic:'standard'},'passenger').total,60000);
+  assert.equal(calculatePrice({...config,country:'Thailand'},defaultPriceOptions,'passenger').total,65000);
+});
+test('Vietnam villa comparison uses local base; higher speeds retain original tariffs and safeguards', () => {
+  assert.equal(calculatePrice({capacity:450,speed:0.4,stops:3,mrl:true,country:'Vietnam'},defaultPriceOptions,'home').total,44000);
+  assert.equal(calculatePrice({capacity:630,speed:1,stops:6,mrl:true,country:'Vietnam'},defaultPriceOptions,'home').total,54000);
+  for (const speed of [2,2.5,3]) {
+    const config={capacity:1000,speed,stops:12,mrl:true};
+    assert.deepEqual(calculatePrice({...config,country:'Vietnam'},defaultPriceOptions,'passenger'),calculatePrice(config,defaultPriceOptions,'passenger'));
+  }
+});
 
 test('reads checked quote configuration without charging unchecked options', () => {
   const options = priceOptionsFromConfiguration({ otherFloorsDoor: 'Hairline Stainless Steel 304 1.2mm', otherFunctions: [

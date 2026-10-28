@@ -3,19 +3,19 @@
 import { useRef, useState } from 'react';
 import { Calculator, X } from 'lucide-react';
 import { useQuoteStore } from '@/store/useQuoteStore';
-import { calculatePrice, defaultPriceOptions, priceOptionsFromConfiguration, type ConfiguredPriceElevator, type PriceOptions } from '@/utils/priceCalculator';
+import { calculatePrice, defaultPriceOptions, priceOptionsFromConfiguration, priceScheduleForCountry, type ConfiguredPriceElevator, type PriceOptions } from '@/utils/priceCalculator';
 
 const money = (value: number) => value.toLocaleString('en-US', { maximumFractionDigits: 2 });
 const field = 'mt-1 w-full min-w-0 rounded border border-gray-300 bg-white p-2 text-sm';
 
 export default function PriceCalculator({ elevator }: { elevator: ConfiguredPriceElevator & { id: number; capacity: string | number; speed: string | number; floorsStops: string; machineRoom: string; description: string } }) {
   const dialog = useRef<HTMLDialogElement>(null);
-  const { updateElevator, exchangeRateBasis, exchangeRate, targetCurrency } = useQuoteStore();
+  const { updateElevator, exchangeRateBasis, exchangeRate, targetCurrency, country } = useQuoteStore();
   const [options, setOptions] = useState<PriceOptions>({ ...defaultPriceOptions });
   const [mode, setMode] = useState<'passenger' | 'home'>('passenger');
   const [reviewedKey, setReviewedKey] = useState('');
   const lastConfiguration = useRef('');
-  const input = { capacity: Number(elevator.capacity), speed: Number(elevator.speed), stops: Number(String(elevator.floorsStops).split('/')[1]), mrl: elevator.machineRoom === 'MRL' };
+  const input = { capacity: Number(elevator.capacity), speed: Number(elevator.speed), stops: Number(String(elevator.floorsStops).split('/')[1]), mrl: elevator.machineRoom === 'MRL', country };
   const supported = /passenger|home/i.test(elevator.description);
   const regularLayout = /^\s*(\d+)\s*\/\s*\1\s*\/\s*\1\s*$/.test(elevator.floorsStops);
   const compare = supported && input.capacity === 630 && input.stops >= 2 && input.stops <= 6;
@@ -46,7 +46,7 @@ export default function PriceCalculator({ elevator }: { elevator: ConfiguredPric
     <button type="button" onClick={openCalculator} className="mt-2 inline-flex items-center gap-2 rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"><Calculator size={16} />价格试算</button>
     <dialog ref={dialog} aria-labelledby={`price-title-${elevator.id}`} className="m-auto max-h-[90dvh] w-[calc(100%-24px)] max-w-xl overflow-y-auto rounded-lg bg-white p-4 text-gray-900 shadow-xl backdrop:bg-black/40 sm:p-6 print:hidden">
       <div className="flex items-center justify-between gap-3"><h2 id={`price-title-${elevator.id}`} className="text-lg font-semibold">标准价试算 · 每台</h2><button type="button" title="关闭" aria-label="关闭试算器" onClick={() => dialog.current?.close()} className="p-2"><X size={20} /></button></div>
-      <p className="mt-2 text-sm text-gray-600">2026年4月价格表 · 人民币 · 内部核价</p>
+      <p className="mt-2 text-sm text-gray-600">{priceScheduleForCountry(country).label} · 人民币 · 内部核价</p>
       <p className="my-3 text-sm">{elevator.capacity} kg · {elevator.speed} m/s · {elevator.floorsStops} · {elevator.machineRoom}</p>
       {compare && <fieldset className="mb-4 grid grid-cols-2 gap-2"><legend className="mb-2 text-sm font-medium">630 kg · 6层及以下方案比较</legend>{(['passenger', 'home'] as const).map(value => {
         const estimate = calculatePrice(input, options, value);

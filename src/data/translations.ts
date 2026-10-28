@@ -17,7 +17,7 @@ export const translations = {
     colUnitPrice: 'Unit Price',
     colTotalPrice: 'Total Price',
     freight: (dest: string) => `Local fee and Freight from factory to ${dest} :`,
-    exwPickup: 'Pickup from factory arranged by the customer. 客户安排工厂自提。',
+    exwPickup: 'Pickup from factory arranged by the customer.',
     totalAmount: 'Total amount :',
 
     // Terms
@@ -119,7 +119,7 @@ export const translations = {
     colUnitPrice: '单价',
     colTotalPrice: '总价',
     freight: (dest: string) => `当地费用及从工厂至 ${dest} 的运费：`,
-    exwPickup: 'Pickup from factory arranged by the customer. 客户安排工厂自提。',
+    exwPickup: '客户安排工厂自提。',
     totalAmount: '合计金额：',
 
     // Terms
@@ -221,7 +221,7 @@ export const translations = {
     colUnitPrice: 'Precio Unitario',
     colTotalPrice: 'Precio Total',
     freight: (dest: string) => `Flete local y desde fábrica hasta ${dest} :`,
-    exwPickup: 'Pickup from factory arranged by the customer. 客户安排工厂自提。',
+    exwPickup: 'Recogida en fábrica organizada por el cliente.',
     totalAmount: 'Monto Total :',
 
     // Terms
@@ -323,7 +323,7 @@ export const translations = {
     colUnitPrice: 'Preço Unitário',
     colTotalPrice: 'Preço Total',
     freight: (dest: string) => `Taxa local e Frete da fábrica até ${dest} :`,
-    exwPickup: 'Pickup from factory arranged by the customer. 客户安排工厂自提。',
+    exwPickup: 'Recolha na fábrica organizada pelo cliente.',
     totalAmount: 'Valor Total :',
 
     // Terms
@@ -424,7 +424,7 @@ export const translations = {
     colUnitPrice: 'Prix Unitaire',
     colTotalPrice: 'Prix Total',
     freight: (dest: string) => `Frais locaux et fret de l'usine à ${dest} :`,
-    exwPickup: 'Pickup from factory arranged by the customer. 客户安排工厂自提。',
+    exwPickup: 'Enlèvement à l’usine organisé par le client.',
     totalAmount: 'Montant Total :',
 
     // Terms
@@ -526,7 +526,7 @@ export const translations = {
     colUnitPrice: 'Đơn giá',
     colTotalPrice: 'Thành tiền',
     freight: (dest: string) => `Phí địa phương và vận chuyển từ nhà máy đến ${dest} :`,
-    exwPickup: 'Pickup from factory arranged by the customer. 客户安排工厂自提。',
+    exwPickup: 'Khách hàng tự thu xếp nhận hàng tại nhà máy.',
     totalAmount: 'Tổng cộng :',
 
     // Terms
@@ -628,7 +628,7 @@ export const translations = {
     colUnitPrice: 'តម្លៃឯកតា',
     colTotalPrice: 'តម្លៃសរុប',
     freight: (dest: string) => `ថ្លៃក្នុងស្រុក និងដឹកជញ្ជូនពីរោងចក្រ ទៅ ${dest} :`,
-    exwPickup: 'Pickup from factory arranged by the customer. 客户安排工厂自提。',
+    exwPickup: 'អតិថិជនរៀបចំការទទួលទំនិញនៅរោងចក្រដោយខ្លួនឯង។',
     totalAmount: 'ចំនួនសរុប :',
 
     // Terms
@@ -730,7 +730,7 @@ export const translations = {
     colUnitPrice: 'سعر الوحدة',
     colTotalPrice: 'السعر الإجمالي',
     freight: (dest: string) => `الرسوم المحلية والشحن من المصنع إلى ${dest} :`,
-    exwPickup: 'Pickup from factory arranged by the customer. 客户安排工厂自提。',
+    exwPickup: 'يتولى العميل ترتيب استلام البضاعة من المصنع.',
     totalAmount: 'المبلغ الإجمالي :',
 
     // Terms
@@ -832,7 +832,7 @@ export const translations = {
     colUnitPrice: 'Цена за ед.',
     colTotalPrice: 'Итоговая цена',
     freight: (dest: string) => `Местные сборы и фрахт с завода до ${dest} :`,
-    exwPickup: 'Pickup from factory arranged by the customer. 客户安排工厂自提。',
+    exwPickup: 'Самовывоз с завода организуется заказчиком.',
     totalAmount: 'Итого :',
 
     // Terms

@@ -1038,7 +1038,7 @@ const Quote = () => {
               {isExw ? (
                 <>
                   <div className="sm:col-span-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm font-medium text-amber-800">
-                    {t.exwPickup}
+                    {EXW_PICKUP_DESTINATION}
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-gray-700">EXW Delivery Option<span className="block text-xs text-gray-500">EXW 交货选项</span></label>

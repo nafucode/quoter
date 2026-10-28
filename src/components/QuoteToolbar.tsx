@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Building2, ChevronDown, Check, Download, FileText, FolderOpen, Languages, MoreHorizontal, Package, Plus, RefreshCw, Save, Upload, ArrowUpRight } from 'lucide-react';
+import Image from 'next/image';
+import { ChevronDown, Check, Download, FileText, FolderOpen, Languages, MoreHorizontal, Package, Plus, RefreshCw, Save, Upload, ArrowUpRight } from 'lucide-react';
 
 interface Props {
   quotationNo: string;
@@ -47,7 +48,9 @@ export default function QuoteToolbar(props: Props) {
   }}>
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
       <div className="relative flex min-w-0 flex-1 items-center gap-3 lg:flex-none">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-700"><Building2 size={20}/></span>
+        <span className="relative block h-9 w-[62px] shrink-0 overflow-hidden">
+          <Image src="/xinfuji-toolbar-logo.png" alt="XINFUJI" fill sizes="62px" priority className="scale-[1.07] object-contain"/>
+        </span>
         <div className="min-w-0">
           <button type="button" data-menu="modules" aria-expanded={menu === 'modules'} aria-controls="quote-modules" className="flex items-center gap-2 rounded text-sm font-semibold text-gray-900 focus-visible:outline-2 focus-visible:outline-blue-600" onClick={() => setMenu(menu === 'modules' ? null : 'modules')}>
             Quoter <span className="font-normal text-gray-500">电梯报价</span><ChevronDown size={14}/>
