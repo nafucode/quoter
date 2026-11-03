@@ -90,3 +90,17 @@ body {
   .company-showcase-grid figure { height: 25mm; grid-template-rows: 19mm 6mm; break-inside: avoid; }
   .company-showcase-grid img { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }
+/* Compact editing is isolated from quotation preview and print output. */
+@media screen {
+  .compact-editor .gap-4 { gap: 0.65rem; }
+  .compact-editor .mt-4 { margin-top: 0.65rem; }
+  .compact-editor .mt-6 { margin-top: 1rem; }
+  .compact-editor .mb-4 { margin-bottom: 0.65rem; }
+  .compact-editor input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .compact-editor select, .compact-editor textarea {
+    font-size: 13px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+  .compact-editor label > span { font-size: 11px; }
+}

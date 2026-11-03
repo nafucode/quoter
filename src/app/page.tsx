@@ -7,6 +7,8 @@ import DumbwaiterConfiguration from '@/components/DumbwaiterConfiguration';
 import QuoteToolbar from '@/components/QuoteToolbar';
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
+import { quoteFingerprint } from '@/utils/quoteFingerprint';
+import EditorNavigator from '@/components/EditorNavigator';
 import { useQuoteStore } from '@/store/useQuoteStore';
 import { hasDraftReadError, quoteStorage } from '@/utils/localImageLibrary';
 import { getTranslations } from '@/data/translations';
@@ -229,6 +231,17 @@ const Quote = () => {
   const [isClient, setIsClient] = useState(false);
   const [storageError, setStorageError] = useState(false);
   const [libSaved, setLibSaved] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState('');
+  useEffect(() => {
+    const saved = () => setDraftSavedAt(new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }));
+    const failed = () => setDraftSavedAt('');
+    window.addEventListener('quoter-draft-saved', saved);
+    window.addEventListener('quoter-storage-error', failed);
+    return () => {
+      window.removeEventListener('quoter-draft-saved', saved);
+      window.removeEventListener('quoter-storage-error', failed);
+    };
+  }, []);
   const [preflightIssues, setPreflightIssues] = useState<ExportPreflightIssue[]>([]);
   const [pendingExport, setPendingExport] = useState<ExportKind | null>(null);
   const [quoteHistory, setQuoteHistory] = useState<any[]>([]);
@@ -337,9 +350,12 @@ const Quote = () => {
 
   const saveToHistory = async (entry: any) => {
     const saved = JSON.parse(await quoteStorage.getItem(HISTORY_KEY) || '[]');
+    const fingerprint = quoteFingerprint(entry.state);
+    if (saved.some((old: typeof entry) => old.quotationNo === entry.quotationNo && quoteFingerprint(old.state) === fingerprint)) return false;
     const updated = [entry, ...saved].slice(0, 300);
     await quoteStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
     setQuoteHistory(updated);
+    return true;
   };
 
   const deleteFromHistory = async (id: number) => {
@@ -455,6 +471,7 @@ const Quote = () => {
       quotationType: s.quotationType, quotationDate: s.quotationDate,
       elevators: safeElevators, freightDestination: s.freightDestination,
       freightCost: s.freightCost, exchangeRate: s.exchangeRate, targetCurrency: s.targetCurrency,
+      exchangeRateBasis: s.exchangeRateBasis, language: s.language,
       nextId: s.nextId, deliveryDays: s.deliveryDays, paymentTerm: s.paymentTerm,
       warrantyMonths: s.warrantyMonths, warrantyText: s.warrantyText, priceValidityDays: s.priceValidityDays,
       quoteRemarks: s.quoteRemarks,
@@ -509,7 +526,7 @@ const Quote = () => {
     return () => window.removeEventListener('message', handler);
   }, [importState]);
 
-  const handleSaveToLibrary = async () => {
+  const handleSaveToLibrary = async (beforeNew = false) => {
     try {
       const s = useQuoteStore.getState();
       const historyEntry: any = buildCurrentQuoteEntry();
@@ -524,9 +541,10 @@ const Quote = () => {
         state: historyEntry.state,
       };
 
-      await saveToHistory(historyEntry);
+      const inserted = await saveToHistory(historyEntry);
+      if (beforeNew) resetToDefaults();
       // 如果在 iframe 里（SEO 工作台），通知父窗口保存到报价库
-      if (window.parent !== window) {
+      if (inserted && window.parent !== window) {
         window.parent.postMessage({ type: 'SAVE_QUOTE', quote }, '*');
       }
 
@@ -851,14 +869,15 @@ const Quote = () => {
           quotationNo={quotationNo} language={language} saved={libSaved}
           updateLabel={updateButtonText} checkingUpdate={versionStatus.isChecking} canUpdate={versionStatus.canUpdate}
           onLanguage={value => setField('language', value)}
-          onNew={() => { if (window.confirm('确认新建报价？当前草稿将会丢失。')) resetToDefaults(); }}
-          onSave={handleSaveToLibrary} onExport={requestExport}
+          onNew={() => { void handleSaveToLibrary(true); }}
+          onSave={() => handleSaveToLibrary()} onExport={requestExport}
           onImport={handleImportClick} onBackup={handleExport} onContract={persistCurrentQuoteForContract}
         />
         <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".json" />
         <div className="flex flex-col md:flex-row md:space-x-4">
           {/* Left Side - Inputs */}
           <div className="w-full md:w-1/2 p-4 bg-white rounded-lg shadow-md no-print">
+            <EditorNavigator />
             <div className="mb-3 flex flex-wrap items-center gap-2 border-b border-gray-200 pb-3">
               <span className="text-xs font-semibold text-gray-600">文档用途</span>
               <div className="inline-grid grid-cols-2 overflow-hidden rounded-md border border-gray-300 bg-gray-50 p-0.5">
@@ -901,10 +920,10 @@ const Quote = () => {
               </div>
             </div>
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <h2 className="text-xl font-semibold">{isProposal ? '参数方案详情' : '报价详情'}</h2>
+              <h2 className="flex flex-wrap items-center justify-between gap-2 text-xl font-semibold">{isProposal ? '参数方案详情' : '报价详情'}<span role="status" className="text-xs font-normal text-gray-400 no-print">{draftSavedAt ? `草稿已保存到本机 · ${draftSavedAt}` : '本机自动保存'}</span></h2>
               <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-end">
                 <div className="w-full sm:w-64">
-                  <label className="block text-sm font-medium text-gray-700">Country<span className="block text-xs text-gray-500">国家</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Country">国家</label>
                   <select
                     className="mt-1 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
                     value={country}
@@ -924,7 +943,7 @@ const Quote = () => {
                 </div>
                 {country === 'Peru' && (
                   <div className="w-full sm:w-48">
-                    <label className="block text-sm font-medium text-gray-700">RUC<span className="block text-xs text-gray-500">秘鲁税号</span></label>
+                    <label className="block text-sm font-medium text-gray-700" title="RUC">秘鲁税号</label>
                     <input
                       className="mt-1 block w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm"
                       value={ruc}
@@ -937,7 +956,7 @@ const Quote = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Company Name<span className="block text-xs text-gray-500">公司名称</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Company Name">公司名称</label>
                 <div className="mt-1 flex gap-2">
                   <input
                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -1000,7 +1019,7 @@ const Quote = () => {
                 </div>
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Project Name<span className="block text-xs text-gray-500">项目名称</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Project Name">项目名称</label>
                 <input
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={projectName}
@@ -1008,7 +1027,7 @@ const Quote = () => {
                 />
               </div>
               {showCommercialContent && <div>
-                <label className="block text-sm font-medium text-gray-700">Quotation Type<span className="block text-xs text-gray-500">报价类型</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Quotation Type">报价类型</label>
                 <select
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={quotationType}
@@ -1033,7 +1052,7 @@ const Quote = () => {
             </div>
             
             {showCommercialContent && <>
-            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Freight & Currency<span className="block text-sm font-normal text-gray-500">运费和货币</span></h3>
+            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4" title="Freight & Currency">运费和货币</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {isExw ? (
                 <>
@@ -1041,7 +1060,7 @@ const Quote = () => {
                     {EXW_PICKUP_DESTINATION}
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">EXW Delivery Option<span className="block text-xs text-gray-500">EXW 交货选项</span></label>
+                    <label className="block text-sm font-medium text-gray-700" title="EXW Delivery Option">EXW 交货选项</label>
                     <select
                       className="mt-1 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
                       value={exwDeliveryOptions.some((option) => option.value === freightDestination) ? freightDestination : ''}
@@ -1054,7 +1073,7 @@ const Quote = () => {
                     </select>
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Freight Destination<span className="block text-xs text-gray-500">目的地</span></label>
+                    <label className="block text-sm font-medium text-gray-700" title="Freight Destination">目的地</label>
                     <input
                       className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                       value={freightDestination}
@@ -1062,7 +1081,7 @@ const Quote = () => {
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Freight Cost<span className="block text-xs text-gray-500">运费</span></label>
+                    <label className="block text-sm font-medium text-gray-700" title="Freight Cost">运费</label>
                     <input
                       type="number"
                       className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -1074,7 +1093,7 @@ const Quote = () => {
               ) : (
                 <>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Freight Destination<span className="block text-xs text-gray-500">目的地</span></label>
+                    <label className="block text-sm font-medium text-gray-700" title="Freight Destination">目的地</label>
                     <input
                       className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                       value={freightDestination}
@@ -1094,7 +1113,7 @@ const Quote = () => {
                     )}
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Freight Cost<span className="block text-xs text-gray-500">运费</span></label>
+                    <label className="block text-sm font-medium text-gray-700" title="Freight Cost">运费</label>
                     <input
                       type="number"
                       className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -1105,7 +1124,7 @@ const Quote = () => {
                 </>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Target Currency<span className="block text-xs text-gray-500">目标货币</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Target Currency">目标货币</label>
                 <select
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
                   value={targetCurrency}
@@ -1121,7 +1140,7 @@ const Quote = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Exchange Rate<span className="block text-xs text-gray-500">汇率</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Exchange Rate">汇率</label>
                 <input
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -1154,10 +1173,10 @@ const Quote = () => {
               </div>
             </div>
 
-            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Terms & Validity<span className="block text-sm font-normal text-gray-500">条款与有效期</span></h3>
+            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4" title="Terms & Validity">条款与有效期</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Delivery (days)<span className="block text-xs text-gray-500">交货期 (天)</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Delivery (days)">交货期 (天)</label>
                 <input
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -1166,7 +1185,7 @@ const Quote = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Warranty (months)<span className="block text-xs text-gray-500">质保期 (月)</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Warranty (months)">质保期 (月)</label>
                 <input
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -1175,7 +1194,7 @@ const Quote = () => {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Warranty Text<span className="block text-xs text-gray-500">质保条款文字</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Warranty Text">质保条款文字</label>
                 <select
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-white"
                   value=""
@@ -1204,7 +1223,7 @@ const Quote = () => {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Payment Term<span className="block text-xs text-gray-500">付款方式</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Payment Term">付款方式</label>
                 <select
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-white"
                   value=""
@@ -1227,7 +1246,7 @@ const Quote = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Price Validity (days)<span className="block text-xs text-gray-500">价格有效期 (天)</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Price Validity (days)">价格有效期 (天)</label>
                 <input
                   type="number"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -1236,7 +1255,7 @@ const Quote = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Exchange Rate Basis (vs. RMB)<span className="block text-xs text-gray-500">汇率基准 (对人民币)</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Exchange Rate Basis (vs. RMB)">汇率基准 (对人民币)</label>
                 <select
                   aria-label="汇率参考银行"
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
@@ -1274,7 +1293,7 @@ const Quote = () => {
                 </p>
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Remarks<span className="block text-xs text-gray-500">备注（项目特殊要求）</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Remarks">备注（项目特殊要求）</label>
                 <textarea
                   rows={3}
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm resize-y"
@@ -1285,7 +1304,7 @@ const Quote = () => {
               </div>
               <div className="sm:col-span-2">
                 <div className="flex items-center justify-between gap-3">
-                  <label className="block text-sm font-medium text-gray-700">Compliance Standard<span className="block text-xs text-gray-500">符合标准</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Compliance Standard">符合标准</label>
                   <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
                     <input
                       type="checkbox"
@@ -1309,7 +1328,7 @@ const Quote = () => {
             </div>
 
             {/* Optional Additional Items — above elevator specs */}
-            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4">Additional Items (Optional)<span className="block text-sm font-normal text-gray-500">附加项目（可选）</span></h3>
+            <h3 className="text-lg font-semibold mt-6 mb-4 border-t pt-4" title="Additional Items (Optional)">附加项目（可选）</h3>
 
             {/* Shaft Frame Row */}
             <div className="border border-gray-200 rounded-md p-3 mb-3">
@@ -1336,7 +1355,7 @@ const Quote = () => {
                     </select>
                   </label>
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-medium text-gray-600">Description<span className="ml-1 text-gray-400">描述</span></label>
+                    <label className="block text-xs font-medium text-gray-600" title="Description">描述</label>
                     <input
                       value={shaftFrame.text}
                       onChange={(e) => setField('shaftFrame', { ...shaftFrame, text: e.target.value })}
@@ -1344,7 +1363,7 @@ const Quote = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600">Qty<span className="ml-1 text-gray-400">数量</span></label>
+                    <label className="block text-xs font-medium text-gray-600" title="Qty">数量</label>
                     <input
                       type="number"
                       value={shaftFrame.qty ?? 1}
@@ -1353,7 +1372,7 @@ const Quote = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600">Price (USD)<span className="ml-1 text-gray-400">价格</span></label>
+                    <label className="block text-xs font-medium text-gray-600" title="Price (USD)">价格</label>
                     <input
                       type="number"
                       value={shaftFrame.price}
@@ -1364,7 +1383,7 @@ const Quote = () => {
                   <div className="sm:col-span-3 mt-2 rounded-md border border-blue-100 bg-blue-50/60 p-3">
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <div>
-                        <h4 className="text-sm font-semibold text-gray-800">Shaft Frame Calculator<span className="ml-1 text-xs font-normal text-gray-500">井道框架计算器</span></h4>
+                        <h4 className="text-sm font-semibold text-gray-800" title="Shaft Frame Calculator">井道框架计算器</h4>
                         <p className="text-xs text-gray-500">Formula: glass area × ¥250/m² + frame height × rate, converted by USD = RMB basis.</p>
                       </div>
                       <div className="flex flex-wrap justify-end gap-2">
@@ -1473,7 +1492,7 @@ const Quote = () => {
                     </select>
                   </label>
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-medium text-gray-600">Description<span className="ml-1 text-gray-400">描述</span></label>
+                    <label className="block text-xs font-medium text-gray-600" title="Description">描述</label>
                     <input
                       value={temperedGlass.text}
                       onChange={(e) => setField('temperedGlass', { ...temperedGlass, text: e.target.value })}
@@ -1481,7 +1500,7 @@ const Quote = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600">Qty<span className="ml-1 text-gray-400">数量</span></label>
+                    <label className="block text-xs font-medium text-gray-600" title="Qty">数量</label>
                     <input
                       type="number"
                       value={temperedGlass.qty ?? 1}
@@ -1490,7 +1509,7 @@ const Quote = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600">Price (USD)<span className="ml-1 text-gray-400">价格</span></label>
+                    <label className="block text-xs font-medium text-gray-600" title="Price (USD)">价格</label>
                     <input
                       type="number"
                       value={temperedGlass.price}
@@ -1532,7 +1551,7 @@ const Quote = () => {
             </>}
 
             {/* Output Options */}
-            <h3 className="text-lg font-semibold mt-6 mb-3 border-t pt-4">Print Options<span className="block text-sm font-normal text-gray-500">打印选项</span></h3>
+            <h3 className="text-lg font-semibold mt-6 mb-3 border-t pt-4" title="Print Options">打印选项</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="flex items-center gap-2 border border-gray-200 rounded-md p-3 text-sm font-medium text-gray-700">
                 <input
@@ -1562,9 +1581,9 @@ const Quote = () => {
             {/* Part List Editor */}
             {hasDumbwaiter && <DumbwaiterConfiguration parts={true} functions={true} />}
             {hasOtherLift && <>
-            <h3 className="text-lg font-semibold mt-6 mb-3 border-t pt-4">Part List<span className="block text-sm font-normal text-gray-500">零部件清单</span></h3>
+            <h3 className="text-lg font-semibold mt-6 mb-3 border-t pt-4" title="Part List">零部件清单</h3>
             <div className="mb-3">
-              <label className="block text-sm font-medium text-gray-700">Part List Template<span className="block text-xs text-gray-500">配置表模板</span></label>
+              <label className="block text-sm font-medium text-gray-700" title="Part List Template">配置表模板</label>
               <select
                 className="mt-1 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-700 shadow-sm"
                 value={partListTemplate || 'standard'}
@@ -1852,6 +1871,8 @@ const Quote = () => {
                             {renderSpec(t.specDoorType, elevator.doorOpeningType)}
                             {renderSpec(t.specDoorSize, elevator.doorOpeningSize)}
                             {renderSpec(t.specDoorHeader, elevator.doorHeaderType)}
+                            {renderSpec(language === 'zh' ? '地坎类型' : 'Door Sill', elevator.doorSill ?? 'Aluminum Alloy')}
+                            {elevator.fireRatedDoors && renderSpec(language === 'zh' ? '层门防火等级' : 'Landing Door Fire Rating', elevator.doorFireRating ?? 'E30')}
                             {renderSpec(t.specDoor1st, elevator.firstFloorDoor)}
                             {renderSpec(t.specDoorOther, elevator.otherFloorsDoor)}
                             {renderSpec(t.specDoorJambBase, elevator.baseFloorJamb ?? 'Standard Narrow Jamb')}

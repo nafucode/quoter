@@ -1,6 +1,18 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { elevatorTemplate } from '@/data/elevatorTemplate';
+import { priceScheduleForCountry } from '@/utils/priceCalculator';
+
+const isFreight = (description: string) => /freight|cargo|货梯|载货/i.test(description);
+const overseasFreight = (description: string, country: string) =>
+  isFreight(description) && !priceScheduleForCountry(country).id.startsWith('vietnam');
+function freightFinish(e: Elevator, before: boolean, after: boolean) {
+  if (before === after) return e;
+  const powder = 'Powder-coated Steel';
+  const finish = (value: string, standard: string) => value === (before ? powder : standard) ? (after ? powder : standard) : value;
+  return { ...e, carWall: Object.fromEntries(Object.entries(elevatorTemplate.carWall).map(([k,v]) => [k, finish(e.carWall?.[k] ?? v, v)])),
+    firstFloorDoor: finish(e.firstFloorDoor, elevatorTemplate.firstFloorDoor), otherFloorsDoor: finish(e.otherFloorsDoor, elevatorTemplate.otherFloorsDoor) };
+}
 import { defaultPartList, partListTemplates, PartListRow, PartListTemplate } from '@/data/partListDefaults';
 import { Lang } from '@/data/translations';
 import { optionalItemOwner } from '@/utils/optionalItemOwner';
@@ -226,6 +238,7 @@ export const useQuoteStore = create<QuoteState>()(
       
       // Actions
       setField: (field, value) => set((state) => {
+        if (field === 'country') return { country: value, elevators: state.elevators.map(e => freightFinish(e, overseasFreight(e.description, state.country), overseasFreight(e.description, value))) };
         if (field === 'warrantyMonths') {
           const shouldSyncWarrantyText =
             !state.warrantyText || state.warrantyText === buildDefaultWarrantyText(state.warrantyMonths);
@@ -294,9 +307,15 @@ export const useQuoteStore = create<QuoteState>()(
       })),
 
       updateElevator: (id, name, value) => set((state) => ({
-        elevators: state.elevators.map(elevator => 
-          elevator.id === id ? { ...elevator, [name]: value } : elevator
-        ),
+        elevators: state.elevators.map(elevator => {
+          if (elevator.id !== id) return elevator;
+          if (name !== 'description') return { ...elevator, [name]: value };
+          return {
+            ...freightFinish(elevator, overseasFreight(elevator.description, state.country), overseasFreight(value, state.country)),
+            description: value,
+            ...(!isFreight(elevator.description) && isFreight(value) ? { speed: '0.5' } : {}),
+          };
+        }),
       })),
 
       toggleElevatorCollapse: (id) => set((state) => ({

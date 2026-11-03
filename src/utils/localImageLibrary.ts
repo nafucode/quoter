@@ -65,7 +65,10 @@ export const draftStorage = {
     }
   },
   async setItem(key: string, value: string) {
-    try { await quoteStorage.setItem(key, value); }
+    try {
+      await quoteStorage.setItem(key, value);
+      window.dispatchEvent(new Event('quoter-draft-saved'));
+    }
     catch {
       window.dispatchEvent(new Event('quoter-storage-error'));
     }

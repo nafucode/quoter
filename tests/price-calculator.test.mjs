@@ -54,6 +54,22 @@ test('reads checked quote configuration without charging unchecked options', () 
   assert.equal(options.ac, 'none');
   assert.equal(priceOptionsFromConfiguration({otherFunctions: []}).ic, 'none');
 });
+test('contact-only integration functions do not create paid CCTV or IC options', () => {
+  const options = priceOptionsFromConfiguration({ otherFunctions: [
+    { name: 'Card Reader (Only provide Contact)', checked: true },
+    { name: 'CCTV Camera (Support Analog Camera, provide Contacts at Car Top and Controller)', checked: true },
+    { name: 'Building Manager System (BMS) (Only provide Contact)', checked: true },
+  ] });
+  assert.equal(options.ic, 'none');
+  assert.equal(options.cctv, 'none');
+});
+test('paid CCTV selection still prices when contact-only CCTV is also selected', () => {
+  const options = priceOptionsFromConfiguration({ otherFunctions: [
+    { name: 'CCTV Camera (Support Analog Camera, provide Contacts at Car Top and Controller)', checked: true },
+    { name: 'CCTV Camera', checked: true },
+  ] });
+  assert.equal(options.cctv, 'camera');
+});
 
 const input = { capacity: 630, speed: 1, stops: 8, mrl: true };
 test('8 stop passenger example is CNY 65000', () => {

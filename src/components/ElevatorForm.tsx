@@ -22,6 +22,9 @@ const FUNCTION_PRESETS = [
   { value: 'CCTV Camera', label: '监控（带摄像头）' },
   { value: 'CCTV Interface Only', label: '监控（仅预留接口）' },
   { value: 'Firefighter Elevator Function Package', label: '消防电梯功能包' },
+  { value: 'Card Reader (Only provide Contact)', label: '读卡器（仅提供触点）' },
+  { value: 'CCTV Camera (Support Analog Camera, provide Contacts at Car Top and Controller)', label: 'CCTV 监控（支持模拟摄像头，仅在轿顶和控制柜提供触点）' },
+  { value: 'Building Manager System (BMS) (Only provide Contact)', label: '楼宇管理系统 BMS（仅提供触点）' },
 ];
 
 const DOOR_OPENING_TYPE_OPTIONS = [
@@ -307,7 +310,7 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
             {/* Basic Info */}
             <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4" onFocus={() => onSectionFocus('basic-spec')}>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description<span className="block text-xs text-gray-500">描述</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Description">描述</label>
                 <textarea name="description" value={elevator.description} onChange={handleChange} rows={2} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm resize-y" />
                 <select
                   aria-label="Description preset"
@@ -326,7 +329,7 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Machine Room<span className="block text-xs text-gray-500">机房</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Machine Room">机房</label>
                 <div className="mt-2 flex flex-wrap gap-4 rounded-md border border-gray-200 p-3">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -353,34 +356,34 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Capacity (kg)<span className="block text-xs text-gray-500">载重 (kg)</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Capacity (kg)">载重 (kg)</label>
                 <input name="capacity" value={elevator.capacity} onChange={handleBasicChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Speed (m/s)<span className="block text-xs text-gray-500">速度 (m/s)</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Speed (m/s)">速度 (m/s)</label>
                 <input name="speed" value={elevator.speed} onChange={handleBasicChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Qty<span className="block text-xs text-gray-500">数量</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Qty">数量</label>
                 <input name="qty" value={elevator.qty} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
               </div>
               {(documentMode === 'quotation' || showCommercialFields) && <div>
-                <label className="block text-sm font-medium text-gray-700">Unit Price<span className="block text-xs text-gray-500">单价</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Unit Price">单价</label>
                 <input name="unitPrice" value={elevator.unitPrice} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 <PriceCalculator elevator={elevator} />
               </div>}
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Type<span className="block text-xs text-gray-500">类型（根据机房 / 载重 / 速度自动生成）</span></label>
+                <label className="block text-sm font-medium text-gray-700" title="Type">类型（根据机房 / 载重 / 速度自动生成）</label>
                 <input name="type" value={generatedType} readOnly className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 shadow-sm" />
               </div>
             </div>
 
             {/* Specifications */}
             <div className="sm:col-span-2" onFocus={() => onSectionFocus('basic-spec')}>
-              <h4 className="text-md font-semibold mt-4 border-b">I. Basic specification<span className="block text-sm font-normal text-gray-500">基本规格</span></h4>
+              <h4 className="text-md font-semibold mt-4 border-b" title="I. Basic specification">基本规格</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Control system<span className="block text-xs text-gray-500">控制系统</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Control system">控制系统</label>
                   <select name="controlSystem" value={elevator.controlSystem} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
                     <option>Simplex</option>
                     <option>Duplex</option>
@@ -388,15 +391,15 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Floors/Stops/Doors<span className="block text-xs text-gray-500">楼层/站/门</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Floors/Stops/Doors">楼层/站/门</label>
                   <input name="floorsStops" value={elevator.floorsStops} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Serving floors (COP display)<span className="block text-xs text-gray-500">服务楼层</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Serving floors (COP display)">服务楼层</label>
                   <input name="servingFloors" value={elevator.servingFloors} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Entrances<span className="block text-xs text-gray-500">入口</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Entrances">入口</label>
                   <select name="entrances" value={elevator.entrances} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
                     {ENTRANCE_OPTIONS.map((option) => (
                       <option key={option} value={option}>
@@ -406,29 +409,29 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Power voltage<span className="block text-xs text-gray-500">电源电压</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Power voltage">电源电压</label>
                   <input name="powerVoltage" value={elevator.powerVoltage} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Lighting voltage<span className="block text-xs text-gray-500">照明电压</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Lighting voltage">照明电压</label>
                   <input name="lightingVoltage" value={elevator.lightingVoltage} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Frequency<span className="block text-xs text-gray-500">频率</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Frequency">频率</label>
                   <input name="frequency" value={elevator.frequency} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Drive System<span className="block text-xs text-gray-500">驱动系统</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Drive System">驱动系统</label>
                   <input name="driveSystem" value={elevator.driveSystem} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
               </div>
             </div>
 
             <div className="sm:col-span-2" onFocus={() => onSectionFocus('hoistway-spec')}>
-              <h4 className="text-md font-semibold mt-4 border-b">II. Hoistway specification<span className="block text-sm font-normal text-gray-500">井道规格</span></h4>
+              <h4 className="text-md font-semibold mt-4 border-b" title="II. Hoistway specification">井道规格</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Shaft construction<span className="block text-xs text-gray-500">井道结构</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Shaft construction">井道结构</label>
                   <select name="shaftConstruction" value={elevator.shaftConstruction} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
                     {!SHAFT_CONSTRUCTION_OPTIONS.some((option) => option.value === elevator.shaftConstruction) && elevator.shaftConstruction && (
                       <option value={elevator.shaftConstruction}>{elevator.shaftConstruction}（历史值）</option>
@@ -439,24 +442,24 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Travel (mm)<span className="block text-xs text-gray-500">提升高度 (mm)</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Travel (mm)">提升高度 (mm)</label>
                   <input type="text" name="travel" value={elevator.travel} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Headroom (mm)<span className="block text-xs text-gray-500">顶层高度 (mm)</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Headroom (mm)">顶层高度 (mm)</label>
                   <input type="text" name="headroom" value={elevator.headroom} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Pit Depth (mm)<span className="block text-xs text-gray-500">底坑深度 (mm)</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Pit Depth (mm)">底坑深度 (mm)</label>
                   <input type="text" name="pitDepth" value={elevator.pitDepth} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Shaft Size (W x D mm)<span className="block text-xs text-gray-500">井道尺寸 (宽 x 深 mm)</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Shaft Size (W x D mm)">井道尺寸 (宽 x 深 mm)</label>
                   <input name="shaftSize" value={elevator.shaftSize} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 {elevator.machineRoom === 'MR' && (
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700">Machine Room Size (W x D x H mm)<span className="block text-xs text-gray-500">机房尺寸 (宽 x 深 x 高 mm)</span></label>
+                    <label className="block text-sm font-medium text-gray-700" title="Machine Room Size (W x D x H mm)">机房尺寸 (宽 x 深 x 高 mm)</label>
                     <input name="machineRoomSize" value={elevator.machineRoomSize} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                   </div>
                 )}
@@ -464,22 +467,22 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
             </div>
 
             <div className="sm:col-span-2" onFocus={() => onSectionFocus('car-spec')}>
-              <h4 className="text-md font-semibold mt-4 border-b">III. Car Specification<span className="block text-sm font-normal text-gray-500">轿厢规格</span></h4>
+              <h4 className="text-md font-semibold mt-4 border-b" title="III. Car Specification">轿厢规格</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">COP Plate<span className="block text-xs text-gray-500">操纵盘</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="COP Plate">操纵盘</label>
                   <input name="copPlate" value={elevator.copPlate} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Car Net Dimension<span className="block text-xs text-gray-500">轿厢净尺寸</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Car Net Dimension">轿厢净尺寸</label>
                   <input name="carNetDimension" value={elevator.carNetDimension} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Car Ceiling<span className="block text-xs text-gray-500">轿顶</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Car Ceiling">轿顶</label>
                   <input name="carCeiling" value={elevator.carCeiling} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Car Floor<span className="block text-xs text-gray-500">轿底</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Car Floor">轿底</label>
                   <select
                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-white"
                     value=""
@@ -502,7 +505,7 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Handrail<span className="block text-xs text-gray-500">扶手</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Handrail">扶手</label>
                   <input name="carHandrail" value={elevator.carHandrail} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                   {isNoneText(elevator.carHandrail) && (
                     <label className="mt-2 flex items-center gap-2 text-sm text-gray-600">
@@ -517,18 +520,18 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                   )}
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Car wall finish<span className="block text-xs text-gray-500">轿壁装饰</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Car wall finish">轿壁装饰</label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1">
                     <div>
-                      <label className="block text-xs font-medium text-gray-500">Left wall<span className="block text-xs text-gray-500">左壁</span></label>
+                      <label className="block text-xs font-medium text-gray-500" title="Left wall">左壁</label>
                       <input name="carWall.left" value={elevator.carWall.left} onChange={handleCarWallChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-500">Right wall<span className="block text-xs text-gray-500">右壁</span></label>
+                      <label className="block text-xs font-medium text-gray-500" title="Right wall">右壁</label>
                       <input name="carWall.right" value={elevator.carWall.right} onChange={handleCarWallChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-500">Rear wall<span className="block text-xs text-gray-500">后壁</span></label>
+                      <label className="block text-xs font-medium text-gray-500" title="Rear wall">后壁</label>
                       <input name="carWall.rear" value={elevator.carWall.rear} onChange={handleCarWallChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                     </div>
                   </div>
@@ -537,10 +540,10 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
             </div>
 
             <div className="sm:col-span-2" onFocus={() => onSectionFocus('door-spec')}>
-              <h4 className="text-md font-semibold mt-4 border-b">IV. Door specification<span className="block text-sm font-normal text-gray-500">门规格</span></h4>
+              <h4 className="text-md font-semibold mt-4 border-b" title="IV. Door specification">门规格</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Door Opening Type<span className="block text-xs text-gray-500">开门方式</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Door Opening Type">开门方式</label>
                   <div
                     className="relative mt-1"
                     onBlur={() => window.setTimeout(() => setIsDoorOpeningMenuOpen(false), 120)}
@@ -581,41 +584,52 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Door Opening Size (W x H mm)<span className="block text-xs text-gray-500">开门尺寸 (宽 x 高 mm)</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Door Opening Size (W x H mm)">开门尺寸 (宽 x 高 mm)</label>
                   <input name="doorOpeningSize" value={elevator.doorOpeningSize} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Door Header Type<span className="block text-xs text-gray-500">门头类型</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Door Header Type">门头类型</label>
                   <input name="doorHeaderType" value={elevator.doorHeaderType} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Base Floor Door Decoration<span className="block text-xs text-gray-500">基站层门装饰</span></label>
+                  <label className="block text-sm font-medium text-gray-700">地坎类型</label>
+                  <select name="doorSill" value={elevator.doorSill ?? 'Aluminum Alloy'} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    <option value="Aluminum Alloy">Aluminum Alloy 铝合金</option>
+                    <option value="Cast Iron">Cast Iron 铸铁（常用于货梯）</option>
+                  </select>
+                </div>
+                <div className="sm:col-span-2 flex flex-wrap items-center gap-3">
+                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={elevator.fireRatedDoors ?? false} onChange={e => updateElevator(elevator.id, 'fireRatedDoors', e.target.checked)} />防火层门</label>
+                  {elevator.fireRatedDoors && <><input aria-label="防火等级" list={`fire-ratings-${elevator.id}`} value={elevator.doorFireRating ?? 'E30'} onChange={e => updateElevator(elevator.id, 'doorFireRating', e.target.value)} className="w-36 rounded-md border border-gray-300 p-2" /><datalist id={`fire-ratings-${elevator.id}`}>{['E30', 'E60', 'E120', 'EI30', 'EI60'].map(value => <option key={value} value={value} />)}</datalist></>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" title="Base Floor Door Decoration">基站层门装饰</label>
                   <input name="firstFloorDoor" value={elevator.firstFloorDoor} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Other Floors Door Decoration<span className="block text-xs text-gray-500">其它楼层门装饰</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Other Floors Door Decoration">其它楼层门装饰</label>
                   <input name="otherFloorsDoor" value={elevator.otherFloorsDoor} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Base Floor Door Jamb<span className="block text-xs text-gray-500">基站层门套</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Base Floor Door Jamb">基站层门套</label>
                   <input name="baseFloorJamb" value={elevator.baseFloorJamb ?? 'Standard Narrow Jamb'} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Other Floors Door Jamb<span className="block text-xs text-gray-500">其它楼层门套</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Other Floors Door Jamb">其它楼层门套</label>
                   <input name="otherFloorsJamb" value={elevator.otherFloorsJamb ?? 'Standard Narrow Jamb'} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
               </div>
             </div>
 
             <div className="sm:col-span-2" onFocus={() => onSectionFocus('function-spec')}>
-              <h4 className="text-md font-semibold mt-4 border-b">V. Function<span className="block text-sm font-normal text-gray-500">功能</span></h4>
+              <h4 className="text-md font-semibold mt-4 border-b" title="V. Function">功能</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">COP/LOP<span className="block text-xs text-gray-500">操纵盘/外呼</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="COP/LOP">操纵盘/外呼</label>
                   <input name="copLop" value={elevator.copLop} onChange={handleChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
                 </div>
                 <div className="sm:col-span-2 space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Other Functions<span className="block text-xs text-gray-500">其它功能</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="Other Functions">其它功能</label>
                   {elevator.otherFunctions.map((func: any) => (
                     <div key={func.id} className="flex items-center gap-2">
                       <input type="checkbox" checked={func.checked} onChange={(e) => handleFunctionChange(func.id, 'checked', e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"/>
@@ -646,7 +660,7 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
             </div>
 
             <div className="sm:col-span-2" onFocus={() => onSectionFocus('cabin-effect')}>
-              <h4 className="text-md font-semibold mt-4 border-b">VI. Cabin Effect<span className="block text-sm font-normal text-gray-500">效果图</span></h4>
+              <h4 className="text-md font-semibold mt-4 border-b" title="VI. Cabin Effect">效果图</h4>
               {documentMode === 'proposal' && (
                 <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
                   <span className="text-sm font-medium text-gray-700">Cabin options<span className="ml-2 text-xs font-normal text-gray-500">展示轿厢数量</span></span>
@@ -679,25 +693,25 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                 </div>
                 {documentMode === 'proposal' && proposalCabinCount >= 2 && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Cabin Image 2<span className="block text-xs text-gray-500">轿厢图片 2</span></label>
+                      <label className="block text-sm font-medium text-gray-700" title="Cabin Image 2">轿厢图片 2</label>
                       <input type="file" name="cabinImage2" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                       <button onClick={() => openPicker('cabin2')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
                     </div>
                 )}
                 {documentMode === 'proposal' && proposalCabinCount >= 3 && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Cabin Image 3<span className="block text-xs text-gray-500">轿厢图片 3</span></label>
+                      <label className="block text-sm font-medium text-gray-700" title="Cabin Image 3">轿厢图片 3</label>
                       <input type="file" name="cabinImage3" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                       <button onClick={() => openPicker('cabin3')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
                     </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">COP Image<span className="block text-xs text-gray-500">操纵盘图片</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="COP Image">操纵盘图片</label>
                   <input type="file" name="copImage" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                   <button onClick={() => openPicker('cop')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">LOP Image<span className="block text-xs text-gray-500">外呼图片</span></label>
+                  <label className="block text-sm font-medium text-gray-700" title="LOP Image">外呼图片</label>
                   <input type="file" name="lopImage" onChange={handleCabinEffectFileChange} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                   <button onClick={() => openPicker('lop')} className="mt-2 p-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Choose from Library</button>
                 </div>

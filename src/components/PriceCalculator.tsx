@@ -16,11 +16,12 @@ export default function PriceCalculator({ elevator }: { elevator: ConfiguredPric
   const [reviewedKey, setReviewedKey] = useState('');
   const lastConfiguration = useRef('');
   const input = { capacity: Number(elevator.capacity), speed: Number(elevator.speed), stops: Number(String(elevator.floorsStops).split('/')[1]), mrl: elevator.machineRoom === 'MRL', country };
-  const supported = /passenger|home/i.test(elevator.description);
+  const freight = /freight|cargo|货梯|载货/i.test(elevator.description);
+  const supported = freight || /passenger|home/i.test(elevator.description);
   const regularLayout = /^\s*(\d+)\s*\/\s*\1\s*\/\s*\1\s*$/.test(elevator.floorsStops);
   const compare = supported && input.capacity === 630 && input.stops >= 2 && input.stops <= 6;
   const homeOnly = /home/i.test(elevator.description) && !compare;
-  const activeMode = homeOnly ? 'home' : compare ? mode : 'passenger';
+  const activeMode = freight ? 'freight' : homeOnly ? 'home' : compare ? mode : 'passenger';
   const result = calculatePrice(input, options, activeMode);
   const basis = Number(exchangeRateBasis);
   const usd = Math.round(result.total / basis * 100) / 100;
@@ -55,7 +56,7 @@ export default function PriceCalculator({ elevator }: { elevator: ConfiguredPric
       <div className="my-3 flex justify-between text-lg font-semibold"><span>标准价 · 每台</span><span>{errors.length ? '待核价' : `¥${money(result.standard)}`}</span></div>
       <details className="border-t py-3"><summary className="cursor-pointer text-sm font-medium">已选配置与加价</summary>
         <p className="my-2 text-xs text-gray-600">已读取当前勾选功能；未注明冷暖的空调暂按单冷核价。非标及自定义项目需另核。</p>
-        {activeMode === 'passenger' ? <>{check('ard', 'ARD 停电应急平层 · ¥1,500')}{check('stainless', '304 发纹中分层门 · 除首层外 ¥500/层')}</> : <p className="mb-2 text-sm text-gray-600">标准自动门；已含 ARD 与发纹不锈钢厅门，无机房不另加价。</p>}
+        {freight ? <p>标准单入口货梯。贯通、交叉开门、超高及非标尺寸请另行核价并录入加价。</p> : activeMode === 'passenger' ? <>{check('ard', 'ARD 停电应急平层 · ¥1,500')}{check('stainless', '304 发纹中分层门 · 除首层外 ¥500/层')}</> : <p className="mb-2 text-sm text-gray-600">标准自动门；已含 ARD 与发纹不锈钢厅门，无机房不另加价。</p>}
         {check('accessible', '无障碍操纵箱 · ¥1,500')}{check('iot', '4G 物联网 · ¥1,500')}
         {check('firefighterPackage', '消防电梯功能包 · 固定部分 ¥4,100 + 防火电缆核实价')}
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">

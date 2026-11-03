@@ -57,6 +57,7 @@ const asiaCountries: CountryOption[] = [
   { value: 'Philippines', label: 'Philippines 菲律宾' },
   { value: 'Qatar', label: 'Qatar 卡塔尔' },
   { value: 'Saudi Arabia', label: 'Saudi Arabia 沙特阿拉伯' },
+  { value: 'Yemen', label: 'Yemen 也门' },
   { value: 'Syria', label: 'Syria 叙利亚' },
   { value: 'Tajikistan', label: 'Tajikistan 塔吉克斯坦' },
   { value: 'Thailand', label: 'Thailand 泰国' },

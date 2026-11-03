@@ -31,6 +31,9 @@ export function priceOptionsFromConfiguration(elevator: ConfiguredPriceElevator)
   const names = (elevator.otherFunctions ?? []).filter(item => item.checked).map(item => item.name.toLowerCase());
   const has = (pattern: RegExp) => names.some(name => pattern.test(name));
   const cards = names.find(name => /ic card|ic卡|刷卡/i.test(name));
+  const paidCctv = names.find(name =>
+    /cctv|监控/.test(name) && !/provide contacts?|only provide contact|仅提供触点/.test(name)
+  );
   const cardCount = Number(cards?.match(/(\d+)\s*(?:ic\s*cards?|张)/i)?.[1] ?? 30);
   return {
     ...defaultPriceOptions,
@@ -41,7 +44,7 @@ export function priceOptionsFromConfiguration(elevator: ConfiguredPriceElevator)
     extraCards: cards ? Math.max(0, cardCount - 30) : 0,
     ac: has(/air conditioner|空调/) ? (has(/heat|冷暖/) ? 'heat' : 'cool') : 'none',
     iot: has(/\biot\b|物联网/),
-    cctv: has(/cctv|监控/) ? (has(/interface|接口/) ? 'interface' : 'camera') : 'none',
+    cctv: paidCctv ? (/interface|接口/.test(paidCctv) ? 'interface' : 'camera') : 'none',
     firefighterPackage: has(/firefighter elevator function package|fire elevator function package|消防电梯功能包/),
   };
 }
@@ -56,14 +59,25 @@ export type PriceInput = { capacity: number; speed: number; stops: number; mrl: 
 export type PriceResult = { lines: { label: string; amount: number }[]; errors: string[]; standard: number; adjustment: number; total: number };
 
 // Prices are CNY per elevator. Source: 2026 overseas price list, April 1.
-export function calculatePrice(input: PriceInput, options: PriceOptions, mode: 'passenger' | 'home'): PriceResult {
+export function calculatePrice(input: PriceInput, options: PriceOptions, mode: 'passenger' | 'home' | 'freight'): PriceResult {
   const { capacity, speed, stops, mrl } = input;
   const schedule = priceScheduleForCountry(input.country);
   const lines: PriceResult['lines'] = [];
   const errors: string[] = [];
   const add = (label: string, amount: number) => lines.push({ label, amount });
   if (!Number.isInteger(stops) || stops < 2) errors.push('层站数须为至少 2 的整数');
-  if (mode === 'home') {
+  if (mode === 'freight') {
+    const i = [2000,2500,3000,3500,5000,6000,8000,10000].indexOf(capacity);
+    if (i < 0 || schedule.id.startsWith('vietnam')) errors.push('此地区或载重的货梯需单独核价');
+    else {
+      add('货梯二层二站基价', [62000,71000,72000,77000,102000,123000,186000,190000][i]);
+      add('增加层站', (stops - 2) * [3500,4000,4000,4000,6500,7000,12000,12000][i]);
+      if (mrl && i > 4) errors.push('此载重无机房需另询价');
+      else if (mrl) add('无机房', [4000,4000,4000,5000,6000][i]);
+      if (speed === 1 && mrl && i <= 4) add('1.0 m/s 无机房同步', [5000,5000,6000,6000,15000][i]);
+      else if (!(speed >= 0.25 && speed <= 0.5)) errors.push('此速度需按主机配置单独核价');
+    }
+  } else if (mode === 'home') {
     if (![400, 450, 630].includes(capacity) || stops > 6 || !((speed >= 0.4 && speed <= 0.63) || speed === 1)) {
       errors.push('别墅梯试算限 400/450/630 kg、2–6 层站、0.4–0.63 或 1.0 m/s');
     }

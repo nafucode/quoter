@@ -23,7 +23,7 @@ export const elevatorTemplate = {
   headroom: 4500,
   pitDepth: 1500,
   shaftSize: '2100x2100',
-  machineRoomSize: '2100x3000x2500',
+  machineRoomSize: 'H=2500',
   shaftConstruction: 'Concrete',
   travel: 10650,
 
@@ -43,6 +43,9 @@ export const elevatorTemplate = {
   doorOpeningType: 'Center Opening',
   doorOpeningSize: '800x2100',
   doorHeaderType: 'Standard',
+  doorSill: 'Aluminum Alloy',
+  fireRatedDoors: false,
+  doorFireRating: 'E30',
   firstFloorDoor: 'Hairline Stainless Steel 304 1.2mm',
   otherFloorsDoor: 'Hairline Stainless Steel 304 1.2mm',
   baseFloorJamb: 'Standard Narrow Jamb',

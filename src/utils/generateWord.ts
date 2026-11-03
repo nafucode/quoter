@@ -684,6 +684,8 @@ export async function generateWordBlob(state: {
       [t.specDoorType, elev.doorOpeningType ?? ''],
       [t.specDoorSize, elev.doorOpeningSize ?? ''],
       [t.specDoorHeader, elev.doorHeaderType ?? ''],
+      ['Door Sill', elev.doorSill ?? 'Aluminum Alloy'],
+      ...(elev.fireRatedDoors ? [['Landing Door Fire Rating', elev.doorFireRating ?? 'E30'] as [string, string]] : []),
       [t.specDoor1st, elev.firstFloorDoor ?? ''],
       [t.specDoorOther, elev.otherFloorsDoor ?? ''],
       [t.specDoorJambBase, elev.baseFloorJamb ?? 'Standard Narrow Jamb'],
