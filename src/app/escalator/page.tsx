@@ -21,9 +21,11 @@ import {
   translateEscalatorValue,
 } from '@/data/escalatorTranslations';
 import { Lang } from '@/data/translations';
+import { countryGroups } from '@/data/countryOptions';
 import { generateEscalatorWordBlob } from '@/utils/generateEscalatorWord';
 
 type EscalatorQuoteState = {
+  country: string;
   customer: string;
   quotationNo: string;
   projectName: string;
@@ -54,6 +56,7 @@ const todayQuotationNo = () => {
 };
 
 const initialState: EscalatorQuoteState = {
+  country: '',
   customer: 'PA',
   quotationNo: todayQuotationNo(),
   projectName: 'Escalator Project',
@@ -106,9 +109,19 @@ export default function EscalatorQuotePage() {
   const [saved, setSaved] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [quoteHistory, setQuoteHistory] = useState<any[]>([]);
+  const [companies, setCompanies] = useState<{name: string; country?: string}[]>([]);
+  const customers = new Map<string, string>();
+  for (const c of [...quoteHistory].reverse()) {
+    if (c.customer) customers.set(c.customer, c.state?.country || customers.get(c.customer) || '');
+  }
+  for (const c of companies) if (c?.name) customers.set(c.name, c.country || customers.get(c.name) || '');
 
   useEffect(() => {
     setIsClient(true);
+    try {
+      const list = JSON.parse(localStorage.getItem('quoter_company_options') || '[]');
+      if (Array.isArray(list)) setCompanies(list.map(c => typeof c === 'string' ? {name: c} : c));
+    } catch { /* Manual entry remains available. */ }
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
@@ -371,8 +384,25 @@ export default function EscalatorQuotePage() {
           <div className={sectionClass}>
             <h2 className="mb-3 text-lg font-semibold">基本信息</h2>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div>
+                <label className="text-sm font-medium text-gray-700">客户名称
+                  <input className={inputClass} value={state.customer} onChange={e => setField('customer', e.target.value)} />
+                </label>
+                <select aria-label="选择已保存客户" className={inputClass} value="" onChange={e => {
+                  const name = e.target.value;
+                  if (name) setState(s => ({...s, customer: name, country: customers.get(name) || ''}));
+                }}>
+                  <option value="">选择已保存客户</option>
+                  {[...customers.keys()].map(name => <option key={name}>{name}</option>)}
+                </select>
+              </div>
+              <label className="text-sm font-medium text-gray-700">国家
+                <select className={inputClass} value={state.country} onChange={e => setField('country', e.target.value)}>
+                  <option value="">选择国家</option>
+                  {countryGroups.map(g => <optgroup key={g.group} label={g.group}>{g.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</optgroup>)}
+                </select>
+              </label>
               {[
-                ['customer', 'Customer'],
                 ['quotationNo', 'Quotation No.'],
                 ['projectName', 'Project Name'],
                 ['quotationDate', 'Quotation Date'],
@@ -581,7 +611,7 @@ export default function EscalatorQuotePage() {
               {et.intro}
             </p>
             <div className="mb-3 grid grid-cols-2 gap-2">
-              <p><b>{et.customer}:</b> {state.customer}</p>
+              <p><b>{et.customer}:</b> {state.customer}{state.country && ` · ${state.country}`}</p>
               <p><b>{et.term}:</b> {state.quotationType}</p>
               <p><b>{et.quotationNo}:</b> {state.quotationNo}</p>
               <p><b>{et.project}:</b> {state.projectName}</p>

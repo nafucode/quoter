@@ -27,6 +27,7 @@ import { Lang } from '@/data/translations';
 
 export type EscalatorQuoteWordState = {
   customer: string;
+  country?: string;
   quotationNo: string;
   projectName: string;
   quotationType: string;
@@ -117,7 +118,7 @@ export async function generateEscalatorWordBlob(state: EscalatorQuoteWordState) 
   const children: (Paragraph | Table)[] = [
     para(et.quotation, { bold: true, size: 32, align: AlignmentType.CENTER }),
     para(et.intro),
-    para(`${et.customer}: ${state.customer}        ${et.term}: ${state.quotationType}`, { bold: true }),
+    para(`${et.customer}: ${state.customer}${state.country ? ' · ' + state.country : ''}        ${et.term}: ${state.quotationType}`, { bold: true }),
     para(`${et.quotationNo}: ${state.quotationNo}        ${et.project}: ${state.projectName}`),
     para(`${et.date}: ${state.quotationDate}`),
     para(et.productPrice, { bold: true, size: 22 }),
