@@ -32,7 +32,7 @@ export default function EditorNavigator() {
   useEffect(() => {
     root.current?.parentElement?.classList.toggle('compact-editor', compact);
   }, [compact]);
-  return <div ref={root} className="sticky top-0 z-20 -mx-4 -mt-4 mb-4 flex items-center gap-2 border-b border-gray-200 bg-white px-4 py-2 shadow-sm">
+  return <div ref={root} style={{ top: 'var(--quote-toolbar-height, 0px)' }} className="sticky z-20 -mx-4 -mt-4 mb-4 flex items-center gap-2 border-b border-gray-200 bg-white px-4 py-2 shadow-sm">
     <label className="shrink-0 text-xs text-gray-500" htmlFor="editor-section">当前位置</label>
     <select id="editor-section" className="min-w-0 flex-1 rounded border border-gray-200 bg-white px-2 py-1.5 text-sm" value={active} onChange={event => {
       const index = Number(event.target.value);

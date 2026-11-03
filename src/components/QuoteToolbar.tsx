@@ -29,6 +29,16 @@ export default function QuoteToolbar(props: Props) {
   const [saving, setSaving] = useState(false);
   const root = useRef<HTMLElement>(null);
   useEffect(() => {
+    const header = root.current;
+    const container = header?.parentElement;
+    if (!header || !container) return;
+    const update = () => container.style.setProperty('--quote-toolbar-height', header.offsetHeight + 'px');
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    return () => { observer.disconnect(); container.style.removeProperty('--quote-toolbar-height'); };
+  }, []);
+  useEffect(() => {
     if (!menu) return;
     const outside = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setMenu(null); };
     const escape = (event: KeyboardEvent) => {
@@ -43,7 +53,7 @@ export default function QuoteToolbar(props: Props) {
   }, [menu]);
   const run = (action: () => void) => { setMenu(null); action(); };
 
-  return <header ref={root} aria-label="报价工具栏" className="sticky top-0 z-20 mb-4 border-b border-gray-200 bg-white px-3 py-2 no-print sm:px-4" onBlur={event => {
+  return <header ref={root} aria-label="报价工具栏" className="sticky top-0 z-30 mb-4 border-b border-gray-200 bg-white px-3 py-2 no-print sm:px-4" onBlur={event => {
     if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setMenu(null);
   }}>
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
