@@ -8,6 +8,8 @@ import QuoteToolbar from '@/components/QuoteToolbar';
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
 import { quoteFingerprint } from '@/utils/quoteFingerprint';
+import { CopyPlus } from 'lucide-react';
+import { elevatorCategories, createQuoteFromTemplate } from '@/utils/quoteTemplate';
 import EditorNavigator from '@/components/EditorNavigator';
 import { useQuoteStore } from '@/store/useQuoteStore';
 import { hasDraftReadError, quoteStorage } from '@/utils/localImageLibrary';
@@ -352,11 +354,13 @@ const Quote = () => {
     return sequence;
   }, [quoteHistory]);
 
-  const saveToHistory = async (entry: any) => {
+  const saveToHistory = async (entry: any, preserveId?: number) => {
     const saved = JSON.parse(await quoteStorage.getItem(HISTORY_KEY) || '[]');
     const fingerprint = quoteFingerprint(entry.state);
     if (saved.some((old: typeof entry) => old.quotationNo === entry.quotationNo && quoteFingerprint(old.state) === fingerprint)) return false;
     const updated = [entry, ...saved].slice(0, 300);
+    const preserved = saved.find((item: any) => item.id === preserveId);
+    if (preserved && !updated.some((item: any) => item.id === preserveId)) updated[updated.length - 1] = preserved;
     await quoteStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
     setQuoteHistory(updated);
     return true;
@@ -442,6 +446,23 @@ const Quote = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const useAsTemplate = async (entry: any) => {
+    if (!window.confirm('用这份报价新建？将保留参数、图片和价格，清空公司、项目名称及客户税号。当前草稿会先保存到报价库，原报价不会改变。')) return;
+    try {
+      const saved = JSON.parse(await quoteStorage.getItem(HISTORY_KEY) || '[]');
+      const next = createQuoteFromTemplate(entry.state, [quotationNo, ...saved.map((item: any) => item.quotationNo || '')]);
+      const current: any = buildCurrentQuoteEntry();
+      current.id = Date.now();
+      delete current.source;
+      await saveToHistory(current, entry.id);
+      importState(next);
+      setLibSaved(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error: any) {
+      window.alert(`未能创建模板报价：${error.message}。当前草稿未替换。`);
+    }
+  };
+
   const buildCurrentQuoteEntry = () => {
     const s = useQuoteStore.getState();
     const libraryImage = (value: unknown) =>
@@ -503,6 +524,7 @@ const Quote = () => {
       targetCurrency: s.targetCurrency,
       elevatorCount: s.elevators.length,
       elevatorTypes: s.elevators.map((e: any) => e.type).filter(Boolean),
+      elevatorCategories: elevatorCategories({ state: s }),
       savedAt: new Date().toISOString(),
       state: safeState,
       source: 'current-quote',
@@ -541,6 +563,7 @@ const Quote = () => {
         companyName: s.companyName, country: s.country, ruc: s.ruc, quotationType: s.quotationType,
         quotationDate: s.quotationDate, grandTotal,
         targetCurrency: s.targetCurrency, elevatorCount: s.elevators.length,
+        elevatorCategories: historyEntry.elevatorCategories,
         savedAt: new Date().toISOString(),
         state: historyEntry.state,
       };
@@ -2141,7 +2164,7 @@ const Quote = () => {
                 还没有保存的报价。填好报价后点击「Save to Library」即可保存。
               </div>
             ) : (
-              <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+              <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100 overflow-x-auto">
                 {quoteHistory.map(entry => {
                   const date = new Date(entry.savedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                   const total = entry.grandTotal
@@ -2155,7 +2178,7 @@ const Quote = () => {
                     ? types.join(' / ')
                     : '—';
                   return (
-                    <div key={entry.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 transition-colors group">
+                    <div key={entry.id} className="flex min-w-[1120px] items-center gap-3 px-4 py-2.5 hover:bg-blue-50 transition-colors group">
                       {/* Sequence — oldest saved quote starts from 001 */}
                       <span className="shrink-0 text-xs font-bold text-gray-500 w-10 text-center tabular-nums">
                         {historySequenceById.get(String(entry.id)) || '---'}
@@ -2172,6 +2195,10 @@ const Quote = () => {
                         <div className="text-xs text-gray-400 truncate">{entry.projectName}</div>
                       </div>
                       {/* Elevator type — placed right after No so there's no big gap */}
+                      <div className="w-24 shrink-0 text-xs text-gray-700" title={elevatorCategories(entry).join(' / ')}>
+                        <div className="text-[11px] text-gray-400">梯种</div>
+                        <div className="break-words">{elevatorCategories(entry).join(' / ')}</div>
+                      </div>
                       <div className="w-48 shrink-0 text-xs text-gray-600 truncate font-mono" title={typeLabel}>
                         {typeLabel}
                         {entry.elevatorCount > 1 && <span className="ml-1 text-gray-400">×{entry.elevatorCount}</span>}
@@ -2184,6 +2211,12 @@ const Quote = () => {
                       <span className="shrink-0 text-xs text-gray-400 w-20 text-right">{date}</span>
                       {/* Actions */}
                       <div className="shrink-0 flex gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => void useAsTemplate(entry)}
+                          title="用作模板：保留配置，清空公司和项目，生成新报价"
+                          className="inline-flex items-center gap-1 text-xs text-gray-700 px-2 py-1 rounded border border-gray-300 hover:bg-gray-100"
+                        ><CopyPlus size={14} />用作模板</button>
                         <button
                           onClick={() => loadFromHistory(entry)}
                           className="text-xs bg-blue-500 text-white rounded px-3 py-1 hover:bg-blue-600 transition-colors"
