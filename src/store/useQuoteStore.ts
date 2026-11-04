@@ -13,7 +13,7 @@ function freightFinish(e: Elevator, before: boolean, after: boolean) {
   return { ...e, carWall: Object.fromEntries(Object.entries(elevatorTemplate.carWall).map(([k,v]) => [k, finish(e.carWall?.[k] ?? v, v)])),
     firstFloorDoor: finish(e.firstFloorDoor, elevatorTemplate.firstFloorDoor), otherFloorsDoor: finish(e.otherFloorsDoor, elevatorTemplate.otherFloorsDoor) };
 }
-import { defaultPartList, partListTemplates, PartListRow, PartListTemplate } from '@/data/partListDefaults';
+import { defaultPartList, partListTemplates, PartListRow, PartListTemplate, syncPartLists } from '@/data/partListDefaults';
 import { Lang } from '@/data/translations';
 import { optionalItemOwner } from '@/utils/optionalItemOwner';
 import { draftStorage } from '@/utils/localImageLibrary';
@@ -265,6 +265,7 @@ export const useQuoteStore = create<QuoteState>()(
         };
         return {
           elevators: [...state.elevators, newElevator],
+          ...syncPartLists([...state.elevators, newElevator], state.partList),
           nextId: state.nextId + 1,
         };
       }),
@@ -299,15 +300,16 @@ export const useQuoteStore = create<QuoteState>()(
         };
         const elevators = [...state.elevators];
         elevators.splice(index + 1, 0, duplicate);
-        return { elevators, nextId: nextId + 1 };
+        return { elevators, nextId: nextId + 1, ...syncPartLists(elevators, state.partList) };
       }),
 
-      removeElevator: (id) => set((state) => ({
-        elevators: state.elevators.filter(elevator => elevator.id !== id),
-      })),
+      removeElevator: (id) => set((state) => {
+        const elevators = state.elevators.filter(elevator => elevator.id !== id);
+        return { elevators, ...syncPartLists(elevators, state.partList) };
+      }),
 
-      updateElevator: (id, name, value) => set((state) => ({
-        elevators: state.elevators.map(elevator => {
+      updateElevator: (id, name, value) => set((state) => {
+        const elevators = state.elevators.map(elevator => {
           if (elevator.id !== id) return elevator;
           if (name !== 'description') return { ...elevator, [name]: value };
           return {
@@ -315,8 +317,9 @@ export const useQuoteStore = create<QuoteState>()(
             description: value,
             ...(!isFreight(elevator.description) && isFreight(value) ? { speed: '0.5' } : {}),
           };
-        }),
-      })),
+        });
+        return { elevators, ...(name === 'description' ? syncPartLists(elevators, state.partList) : {}) };
+      }),
 
       toggleElevatorCollapse: (id) => set((state) => ({
         elevators: state.elevators.map(elevator =>

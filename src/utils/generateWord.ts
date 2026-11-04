@@ -4,7 +4,8 @@ import {
   PageBreak, ImageRun,
 } from 'docx';
 import { getTranslations, Lang } from '@/data/translations';
-import { PartListRow } from '@/data/partListDefaults';
+import { PartListRow, isPlatformLift, platformText } from '@/data/partListDefaults';
+import { platformFeatures } from '@/data/platformFeatures';
 import { standardFeatures } from '@/data/standardFeatures';
 import { translateStandardFeature } from '@/data/standardFeatureTranslations';
 import { translateValueToZh } from '@/data/zhValueMap';
@@ -864,6 +865,8 @@ export async function generateWordBlob(state: {
 
   const hasDumbwaiter = state.elevators.some(isDumbwaiter);
   const hasOtherLift = state.elevators.some(elevator => !isDumbwaiter(elevator));
+  const hasPlatformLift = state.elevators.some(isPlatformLift);
+  const hasStandardLift = state.elevators.some(elevator => !isDumbwaiter(elevator) && !isPlatformLift(elevator));
   if (hasDumbwaiter && (showPartList || showFunctionList)) {
     children.push(para([bold(dumbwaiterConfigurationTitle, 24)], { spacingAfter: 120 }));
     const widths = [600, 2700, CONTENT_W - 3300];
@@ -896,7 +899,7 @@ export async function generateWordBlob(state: {
     ];
 
     partListGroups.forEach((group, groupIndex) => {
-      if (state.partListTemplate === 'both') {
+      if (state.partListTemplate === 'both' || group.isPlatform) {
         if (groupIndex) children.push(para([], { spacingAfter: 80 }));
         children.push(para([bold(group.title, 20)], { spacingAfter: 80 }));
       }
@@ -912,9 +915,9 @@ export async function generateWordBlob(state: {
         group.isPlatform
           ? headerRow([
               { text: 'No.', width: partCols[0] },
-              { text: 'Category 类别', width: partCols[1] },
-              { text: 'Component 名称', width: partCols[2] },
-              { text: 'Brand 品牌', width: partCols[3] },
+              { text: platformText('Category 类别', state.language), width: partCols[1] },
+              { text: platformText('Component 名称', state.language), width: partCols[2] },
+              { text: platformText('Brand 品牌', state.language), width: partCols[3] },
             ])
           : headerRow([
               { text: t.partListColPart, width: partCols[0] },
@@ -931,8 +934,8 @@ export async function generateWordBlob(state: {
         } else if (group.isPlatform) {
           partRows.push(new TableRow({ children: [
             cell(row.no || '', { width: partCols[0] }),
-            cell(row.category || '', { width: partCols[1] }),
-            cell(row.label, { width: partCols[2] }),
+            cell(platformText(row.category || '', state.language), { width: partCols[1] }),
+            cell(platformText(row.label, state.language), { width: partCols[2] }),
             cell(row.brand, { width: partCols[3] }),
           ] }));
         } else {
@@ -957,7 +960,7 @@ export async function generateWordBlob(state: {
     );
   }
 
-  if (showFunctionList && hasOtherLift) {
+  if (showFunctionList && hasStandardLift) {
     if (showPartList) {
       children.push(new Paragraph({ children: [new PageBreak()], spacing: { after: 0 } }));
     }
@@ -1000,6 +1003,22 @@ export async function generateWordBlob(state: {
         rows: featureRows,
       }),
     );
+  }
+
+  if (showFunctionList && hasPlatformLift) {
+    if (showPartList || hasStandardLift) children.push(new Paragraph({ children: [new PageBreak()] }));
+    children.push(para([bold(platformText('Platform Lift Functions 平台梯功能表', state.language), 24)], { spacingAfter: 120 }));
+    const widths = [600, 5300, CONTENT_W - 5900];
+    children.push(new Table({
+      width: { size: CONTENT_W, type: WidthType.DXA }, columnWidths: widths,
+      rows: [headerRow(['No. 序号', 'Function 功能', 'Remarks 备注'].map((text, i) => ({ text: platformText(text, state.language), width: widths[i] }))),
+        ...platformFeatures.map(feature => new TableRow({ cantSplit: true, children: [
+          cell(String(feature.no), { width: widths[0] }),
+          cell(platformText(feature.name, state.language), { width: widths[1] }),
+          cell(platformText(feature.remark || '', state.language), { width: widths[2] }),
+        ] })),
+      ],
+    }));
   }
 
   if (showCompanyShowcase) {

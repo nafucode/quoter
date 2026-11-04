@@ -20,6 +20,8 @@ import { translateValueToVi } from '@/data/viValueMap';
 import { translateValueToKm } from '@/data/kmValueMap';
 import { translateValueToAr } from '@/data/arValueMap';
 import { standardFeatures } from '@/data/standardFeatures';
+import { isPlatformLift, platformText } from '@/data/partListDefaults';
+import { platformFeatures } from '@/data/platformFeatures';
 import { translateStandardFeature } from '@/data/standardFeatureTranslations';
 import { countryGroups } from '@/data/countryOptions';
 import { countryPorts } from '@/data/countryPorts';
@@ -203,6 +205,8 @@ const Quote = () => {
   const isProposal = documentMode === 'proposal';
   const hasDumbwaiter = elevators.some(isDumbwaiter);
   const hasOtherLift = elevators.some(elevator => !isDumbwaiter(elevator));
+  const hasPlatformLift = elevators.some(isPlatformLift);
+  const hasStandardLift = elevators.some(elevator => !isDumbwaiter(elevator) && !isPlatformLift(elevator));
   const showCommercialContent = !isProposal || showProposalCommercial;
 
   const partListGroups = [
@@ -2008,15 +2012,15 @@ const Quote = () => {
                         <h3 className="text-lg font-semibold mb-3">{t.partListTitle}</h3>
                         {partListGroups.map((group) => (
                         <div key={group.key} className="mb-5">
-                          {partListTemplate === 'both' && <h4 className="mb-2 font-semibold">{group.title}</h4>}
+                          {(partListTemplate === 'both' || group.isPlatform) && <h4 className="mb-2 font-semibold">{platformText(group.title, language)}</h4>}
                         <table className="w-full text-sm border-collapse printable-table">
                           <thead className="bg-gray-200">
                             {group.isPlatform ? (
                               <tr>
                                 <th className="p-2 border border-gray-400 text-left">No.</th>
-                                <th className="p-2 border border-gray-400 text-left">Category 类别</th>
-                                <th className="p-2 border border-gray-400 text-left">Component 名称</th>
-                                <th className="p-2 border border-gray-400 text-left">Brand 品牌</th>
+                                <th className="p-2 border border-gray-400 text-left">{platformText('Category 类别', language)}</th>
+                                <th className="p-2 border border-gray-400 text-left">{platformText('Component 名称', language)}</th>
+                                <th className="p-2 border border-gray-400 text-left">{platformText('Brand 品牌', language)}</th>
                               </tr>
                             ) : (
                               <tr>
@@ -2035,8 +2039,8 @@ const Quote = () => {
                               ) : group.isPlatform ? (
                                 <tr key={row.id}>
                                   <td className="p-2 border border-gray-400">{row.no}</td>
-                                  <td className="p-2 border border-gray-400">{row.category}</td>
-                                  <td className="p-2 border border-gray-400">{row.label}</td>
+                                  <td className="p-2 border border-gray-400">{platformText(row.category || '', language)}</td>
+                                  <td className="p-2 border border-gray-400">{platformText(row.label, language)}</td>
                                   <td className="p-2 border border-gray-400">{row.brand}</td>
                                 </tr>
                               ) : (
@@ -2055,7 +2059,7 @@ const Quote = () => {
                       </div>
                     )}
 
-                    {showFunctionList && hasOtherLift && (
+                    {showFunctionList && hasStandardLift && (
                       <div className="mt-6 pt-4 border-t break-before-page">
                         <h3 className="text-lg font-semibold mb-3">{t.standardFeaturesTitle}</h3>
                         <table className="w-full text-sm border-collapse printable-table">
@@ -2077,6 +2081,22 @@ const Quote = () => {
                               ))
                             )}
                           </tbody>
+                        </table>
+                      </div>
+                    )}
+                    {showFunctionList && hasPlatformLift && (
+                      <div className="mt-6 pt-4 border-t break-before-page">
+                        <h3 className="text-lg font-semibold mb-3">{platformText('Platform Lift Functions 平台梯功能表', language)}</h3>
+                        <table className="w-full text-sm border-collapse printable-table print:[&_td]:py-1 print:[&_th]:py-1">
+                          <colgroup><col className="w-[7%]" /><col className="w-[65%]" /><col className="w-[28%]" /></colgroup>
+                          <thead className="bg-gray-200"><tr>
+                            {['No. 序号', 'Function 功能', 'Remarks 备注'].map(label => <th key={label} className="p-2 border border-gray-400 text-left">{platformText(label, language)}</th>)}
+                          </tr></thead>
+                          <tbody>{platformFeatures.map(feature => <tr key={feature.no}>
+                            <td className="p-2 border border-gray-400">{feature.no}</td>
+                            <td className="p-2 border border-gray-400">{platformText(feature.name, language)}</td>
+                            <td className="p-2 border border-gray-400">{platformText(feature.remark || '', language)}</td>
+                          </tr>)}</tbody>
                         </table>
                       </div>
                     )}
