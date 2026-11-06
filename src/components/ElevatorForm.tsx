@@ -60,6 +60,9 @@ const CAR_FLOOR_OPTIONS = [
   { label: 'Checkered Steel Plate 花纹钢板', value: 'Checkered Steel Plate' },
 ];
 
+const FIRE_RATING_OPTIONS = ['E30', 'E60', 'E120', 'EI30', 'EI60'];
+const CUSTOM_FIRE_RATING = '__custom__';
+
 const DESCRIPTION_OPTIONS = [
   'Passenger Lift',
   'Home Lift',
@@ -600,7 +603,28 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
                 </div>
                 <div className="sm:col-span-2 flex flex-wrap items-center gap-3">
                   <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={elevator.fireRatedDoors ?? false} onChange={e => updateElevator(elevator.id, 'fireRatedDoors', e.target.checked)} />防火层门</label>
-                  {elevator.fireRatedDoors && <><input aria-label="防火等级" list={`fire-ratings-${elevator.id}`} value={elevator.doorFireRating ?? 'E30'} onChange={e => updateElevator(elevator.id, 'doorFireRating', e.target.value)} className="w-36 rounded-md border border-gray-300 p-2" /><datalist id={`fire-ratings-${elevator.id}`}>{['E30', 'E60', 'E120', 'EI30', 'EI60'].map(value => <option key={value} value={value} />)}</datalist></>}
+                  {elevator.fireRatedDoors && (() => {
+                    const rating = String(elevator.doorFireRating ?? 'E30');
+                    const isCustom = !FIRE_RATING_OPTIONS.includes(rating);
+                    return <>
+                      <select
+                        aria-label="防火等级"
+                        value={isCustom ? CUSTOM_FIRE_RATING : rating}
+                        onChange={e => updateElevator(elevator.id, 'doorFireRating', e.target.value === CUSTOM_FIRE_RATING ? '' : e.target.value)}
+                        className="w-36 rounded-md border border-gray-300 bg-white p-2"
+                      >
+                        {FIRE_RATING_OPTIONS.map(value => <option key={value} value={value}>{value}</option>)}
+                        <option value={CUSTOM_FIRE_RATING}>自定义...</option>
+                      </select>
+                      {isCustom && <input
+                        aria-label="自定义防火等级"
+                        value={rating}
+                        placeholder="输入防火等级"
+                        onChange={e => updateElevator(elevator.id, 'doorFireRating', e.target.value)}
+                        className="min-w-44 flex-1 rounded-md border border-gray-300 p-2 sm:max-w-64"
+                      />}
+                    </>;
+                  })()}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700" title="Base Floor Door Decoration">基站层门装饰</label>
