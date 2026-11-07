@@ -102,7 +102,7 @@ const normalizeQuoteState = (state: any) => {
     ...state,
     documentMode: state.documentMode ?? 'quotation',
     showProposalCommercial: state.showProposalCommercial ?? false,
-    showCompanyShowcase: state.showCompanyShowcase ?? false,
+    showCompanyShowcase: state.showCompanyShowcase ?? true,
     warrantyText: state.warrantyText || buildDefaultWarrantyText(state.warrantyMonths),
     quoteRemarks: state.quoteRemarks ?? '',
     exchangeRateBasis: state.exchangeRateBasis ?? DEFAULT_EXCHANGE_RATE_BASIS,
@@ -193,7 +193,7 @@ interface QuoteState {
 const initialState = {
   documentMode: 'quotation' as const,
   showProposalCommercial: false,
-  showCompanyShowcase: false,
+  showCompanyShowcase: true,
   companyName: 'Your Company Name',
   country: '',
   ruc: '',
