@@ -74,6 +74,16 @@ body {
   .print-elevator-header {
     color: darkblue !important;
   }
+  .escalator-spec-print-page {
+    box-sizing: border-box;
+    width: 100%;
+    break-before: page;
+    page-break-before: always;
+  }
+  .escalator-spec-print-page table {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
   .company-showcase-page {
     box-sizing: border-box;
     height: 247mm;

@@ -103,6 +103,8 @@ const sanitizeFilePart = (value: string) => value.replace(/[/\\?%*:|"<>]/g, '-')
 const buildFileTitle = (state: EscalatorQuoteState) =>
   `Xinfuji-Escalator_${sanitizeFilePart(state.quotationNo || state.projectName || 'quotation')}`;
 const isPriceExtraRow = (row: EscalatorPriceRow) => !row.speed && !row.inclination;
+const chunkSpecGroups = (groups: EscalatorSpecGroup[], size = 3) =>
+  Array.from({ length: Math.ceil(groups.length / size) }, (_, index) => groups.slice(index * size, (index + 1) * size));
 
 export default function EscalatorQuotePage() {
   const [state, setState] = useState<EscalatorQuoteState>(initialState);
@@ -145,6 +147,7 @@ export default function EscalatorQuotePage() {
   const grandTotal = priceSubtotal + (isExw ? 0 : Number(state.freightCost || 0));
   const et = getEscalatorLabels(state.language, state.englishOnly);
   const outputText = (value: string | number) => translateEscalatorValue(value, state.language, state.englishOnly);
+  const specGroupPages = chunkSpecGroups(state.specGroups);
 
   const setField = <K extends keyof EscalatorQuoteState>(field: K, value: EscalatorQuoteState[K]) => {
     setState((prev) => ({ ...prev, [field]: value }));
@@ -675,27 +678,72 @@ export default function EscalatorQuotePage() {
               <p>{et.warrantyText(state.warrantyMonths)}</p>
             </div>
 
-            <h3 className="mb-2 mt-6 text-center text-lg font-bold break-before-page">{et.specification}</h3>
-            <table className={previewTable}>
-              <thead>
-                <tr>
-                  <th className={thClass}>{et.specificationHeader}</th>
-                  {state.specGroups.map((group) => <th key={group.id} className={thClass}>{group.no}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                {escalatorSpecRows.map((row) => (
-                  <tr key={row.key}>
-                    <td className={`${tdClass} font-medium`}>{translateEscalatorSpecLabel(row.label, row.key, state.language, state.englishOnly)}</td>
-                    {state.specGroups.map((group) => (
-                      <td key={`${group.id}-${row.key}`} className={`${tdClass} text-center`}>
-                        {outputText(String(group[row.key] ?? ''))}
-                      </td>
-                    ))}
+            <div className="mt-6 overflow-x-auto print:hidden">
+              <h3 className="mb-2 text-center text-lg font-bold">{et.specification}</h3>
+              <table className={`${previewTable} min-w-max`}>
+                <thead>
+                  <tr>
+                    <th className={`${thClass} min-w-36`}>{et.specificationHeader}</th>
+                    {state.specGroups.map((group) => <th key={group.id} className={`${thClass} min-w-28`}>{group.no}</th>)}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {escalatorSpecRows.map((row) => (
+                    <tr key={row.key}>
+                      <td className={`${tdClass} font-medium`}>{translateEscalatorSpecLabel(row.label, row.key, state.language, state.englishOnly)}</td>
+                      {state.specGroups.map((group) => (
+                        <td key={`${group.id}-${row.key}`} className={`${tdClass} text-center`}>
+                          {outputText(String(group[row.key] ?? ''))}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="hidden print:block">
+              {specGroupPages.map((groups, pageIndex) => (
+                <section key={`spec-page-${pageIndex}`} className="escalator-spec-print-page">
+                  <div className="mb-1 flex items-end justify-between border-b border-gray-400 pb-1">
+                    <h3 className="text-center text-[13px] font-bold">{et.specification}</h3>
+                    <span className="text-[8px] text-gray-500">
+                      {state.quotationNo} · {pageIndex + 1}/{specGroupPages.length}
+                    </span>
+                  </div>
+                  <table className="w-full table-fixed border-collapse text-[8px] leading-[1.12]">
+                    <colgroup>
+                      <col className="w-[25%]" />
+                      <col className="w-[25%]" />
+                      <col className="w-[25%]" />
+                      <col className="w-[25%]" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th className="border border-gray-400 bg-gray-100 p-1 text-center font-bold">{et.specificationHeader}</th>
+                        {groups.map((group) => <th key={group.id} className="border border-gray-400 bg-gray-100 p-1 text-center font-bold">{group.no}</th>)}
+                        {Array.from({ length: 3 - groups.length }, (_, index) => <th key={`empty-head-${index}`} className="border-0 p-0" />)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {escalatorSpecRows.map((row) => (
+                        <tr key={row.key} className="break-inside-avoid">
+                          <td className="border border-gray-400 p-1 font-medium">
+                            {translateEscalatorSpecLabel(row.label, row.key, state.language, state.englishOnly)}
+                          </td>
+                          {groups.map((group) => (
+                            <td key={`${group.id}-${row.key}`} className="border border-gray-400 p-1 text-center break-words">
+                              {outputText(String(group[row.key] ?? ''))}
+                            </td>
+                          ))}
+                          {Array.from({ length: 3 - groups.length }, (_, index) => <td key={`empty-${row.key}-${index}`} className="border-0 p-0" />)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </section>
+              ))}
+            </div>
 
             <h3 className="mb-2 mt-6 text-center text-lg font-bold break-before-page">{et.configuration}</h3>
             <table className={previewTable}>
