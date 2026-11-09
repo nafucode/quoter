@@ -82,8 +82,16 @@ const ElevatorForm = ({ elevator, onSectionFocus, documentMode = 'quotation', co
   const proposalCabinCount = Math.min(3, Math.max(1, Number(elevator.proposalCabinCount) || (elevator.showThreeCabinsInProposal ? 3 : 1)));
 
   const buildElevatorType = (machineRoom: string, capacity: string | number, speed: string | number, description: string) => {
-    const isCargoLift = /freight|cargo/i.test(description);
-    const modelPrefix = isCargoLift
+    const hasFreightDescription = /freight|cargo/i.test(description);
+    const hasPassengerDescription = /passenger/i.test(description);
+    const normalizedCapacity = Number(String(capacity ?? '').replace(/[^\d.]/g, ''));
+    const isPassengerFreightLift =
+      hasPassengerDescription &&
+      hasFreightDescription &&
+      Number.isFinite(normalizedCapacity) &&
+      normalizedCapacity <= 2000;
+    const useFreightModel = hasFreightDescription && !isPassengerFreightLift;
+    const modelPrefix = useFreightModel
       ? (machineRoom === 'MRL' ? 'THJW' : 'THJ')
       : (machineRoom === 'MRL' ? 'TKJW' : 'TKJ');
     return `${modelPrefix}${capacity || ''}/${speed || ''}-VVVF`;
