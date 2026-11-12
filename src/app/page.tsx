@@ -58,8 +58,8 @@ const paymentTermOptions = [
 
 type CompanyOption = { name: string; country: string };
 
-const normalizeCompanyOptions = (options: unknown[]): CompanyOption[] =>
-  options
+const normalizeCompanyOptions = (options: unknown[]): CompanyOption[] => {
+  const normalized = options
     .map((option) =>
       typeof option === 'string'
         ? { name: option.trim(), country: '' }
@@ -68,8 +68,17 @@ const normalizeCompanyOptions = (options: unknown[]): CompanyOption[] =>
             country: typeof (option as CompanyOption)?.country === 'string' ? (option as CompanyOption).country : '',
           },
     )
-    .filter((option) => option.name)
+    .filter((option) => option.name);
+  const unique = new Map<string, CompanyOption>();
+  normalized.forEach((option) => {
+    const key = option.name.toLocaleLowerCase();
+    const existing = unique.get(key);
+    if (!existing) unique.set(key, option);
+    else if (!existing.country && option.country) unique.set(key, { ...existing, country: option.country });
+  });
+  return Array.from(unique.values())
     .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true }));
+};
 
 const DEFAULT_FREIGHT_PLACEHOLDER = 'e.g., Port of Shanghai';
 const EXW_PICKUP_DESTINATION = 'Pickup from factory arranged by the customer. 客户安排工厂自提。';
