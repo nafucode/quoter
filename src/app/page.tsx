@@ -293,7 +293,24 @@ const Quote = () => {
     let active = true;
     quoteStorage.getItem(HISTORY_KEY).then(raw => {
       const saved = JSON.parse(raw || '[]');
-      if (active) setQuoteHistory(Array.isArray(saved) ? saved : []);
+      const historyEntries = Array.isArray(saved) ? saved : [];
+      if (active) {
+        setQuoteHistory(historyEntries);
+        let storedCompanies: unknown[] = [];
+        try {
+          const parsed = JSON.parse(localStorage.getItem(COMPANY_OPTIONS_KEY) || '[]');
+          if (Array.isArray(parsed)) storedCompanies = parsed;
+        } catch { /* Rebuild from quote history below. */ }
+        const recoveredCompanies = normalizeCompanyOptions([
+          ...storedCompanies,
+          ...historyEntries.map((entry: any) => ({
+            name: entry.companyName || entry.state?.companyName || '',
+            country: entry.country || entry.state?.country || '',
+          })),
+        ]).filter((option) => option.name !== '-' && option.name !== 'Your Company Name').slice(0, 100);
+        setCompanyOptions(recoveredCompanies);
+        localStorage.setItem(COMPANY_OPTIONS_KEY, JSON.stringify(recoveredCompanies));
+      }
     }).catch(() => { if (active) window.alert('读取本机报价失败，请检查浏览器存储权限并刷新。'); });
     try {
       const savedCompanies = JSON.parse(localStorage.getItem(COMPANY_OPTIONS_KEY) || '[]');
