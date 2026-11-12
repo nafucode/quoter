@@ -148,7 +148,9 @@ const getExportPreflightIssues = (state: ReturnType<typeof useQuoteStore.getStat
   if (['CIF', 'CFR', 'FOB'].includes(state.quotationType) && destinationMissing) {
     issues.push({ category: '港口', message: `${state.quotationType} 报价尚未填写目的港。` });
   }
-  if (['CIF', 'CFR'].includes(state.quotationType) && !(Number(state.freightCost) > 0)) {
+  const usesCifBreakdown = state.quotationType === 'CIF' && state.cifPriceDisplay === 'fob-breakdown';
+  const freightAmount = usesCifBreakdown ? state.cifFreightInsurance : state.freightCost;
+  if (['CIF', 'CFR'].includes(state.quotationType) && !(Number(freightAmount) > 0)) {
     issues.push({ category: '价格', message: `${state.quotationType} 报价的运费为空或为 0。` });
   }
   if (!state.paymentTerm.trim()) {
@@ -168,6 +170,9 @@ const Quote = () => {
     quotationNo,
     projectName,
     quotationType,
+    cifPriceDisplay,
+    fobShanghaiLocalCost,
+    cifFreightInsurance,
     quotationDate,
     elevators,
     freightDestination,
@@ -414,6 +419,13 @@ const Quote = () => {
     }
   };
 
+  const handleCifPriceDisplayChange = (value: 'total' | 'fob-breakdown') => {
+    setField('cifPriceDisplay', value);
+    if (value === 'fob-breakdown' && !(Number(cifFreightInsurance) > 0)) {
+      setField('cifFreightInsurance', Number(freightCost) || 0);
+    }
+  };
+
   const handleCountryChange = (value: string) => {
     setField('country', value);
     const ports = countryPorts[value] || [];
@@ -496,6 +508,9 @@ const Quote = () => {
       quotationType: s.quotationType, quotationDate: s.quotationDate,
       elevators: safeElevators, freightDestination: s.freightDestination,
       freightCost: s.freightCost, exchangeRate: s.exchangeRate, targetCurrency: s.targetCurrency,
+      cifPriceDisplay: s.cifPriceDisplay,
+      fobShanghaiLocalCost: s.fobShanghaiLocalCost,
+      cifFreightInsurance: s.cifFreightInsurance,
       exchangeRateBasis: s.exchangeRateBasis, language: s.language,
       nextId: s.nextId, deliveryDays: s.deliveryDays, paymentTerm: s.paymentTerm,
       warrantyMonths: s.warrantyMonths, warrantyText: s.warrantyText, priceValidityDays: s.priceValidityDays,
@@ -629,6 +644,9 @@ const Quote = () => {
         elevators: s.elevators,
         freightDestination: s.freightDestination,
         freightCost: s.freightCost,
+        cifPriceDisplay: s.cifPriceDisplay,
+        fobShanghaiLocalCost: s.fobShanghaiLocalCost,
+        cifFreightInsurance: s.cifFreightInsurance,
         exchangeRate: s.exchangeRate,
         targetCurrency: s.targetCurrency,
         deliveryDays: s.deliveryDays,
@@ -778,8 +796,9 @@ const Quote = () => {
     freightDestination === DEFAULT_FREIGHT_PLACEHOLDER ||
     freightDestination === 'SHANGHAI PORT';
   const shouldChargeFreight = !isExw || (!isDefaultExwNoChargeDestination && Number(freightCost) > 0);
+  const usesCifBreakdown = quotationType === 'CIF' && cifPriceDisplay === 'fob-breakdown';
 
-  const grandTotal = useMemo(() => {
+  const goodsAndServicesTotal = useMemo(() => {
     const elevatorsTotal = elevators.reduce((total, elevator) => {
       const price = Number(elevator.unitPrice) || 0;
       const quantity = Number(elevator.qty) || 0;
@@ -788,8 +807,25 @@ const Quote = () => {
     const shaftFrameTotal = shaftFrame.enabled ? (Number(shaftFrame.price) || 0) * (Number(shaftFrame.qty) || 0) : 0;
     const temperedGlassTotal = temperedGlass.enabled ? (Number(temperedGlass.price) || 0) * (Number(temperedGlass.qty) || 0) : 0;
     const serviceTotal = [installationFee, firstYearMaintenance].reduce((sum, item) => sum + (item.enabled ? (Number(item.price) || 0) * (Number(item.qty) || 0) : 0), 0);
-    return elevatorsTotal + (shouldChargeFreight ? Number(freightCost) : 0) + shaftFrameTotal + temperedGlassTotal + serviceTotal;
-  }, [elevators, freightCost, shaftFrame, shouldChargeFreight, temperedGlass, installationFee, firstYearMaintenance]);
+    return elevatorsTotal + shaftFrameTotal + temperedGlassTotal + serviceTotal;
+  }, [elevators, shaftFrame, temperedGlass, installationFee, firstYearMaintenance]);
+  const fobShanghaiTotal = goodsAndServicesTotal + Number(fobShanghaiLocalCost || 0);
+  const grandTotal = usesCifBreakdown
+    ? fobShanghaiTotal + Number(cifFreightInsurance || 0)
+    : goodsAndServicesTotal + (shouldChargeFreight ? Number(freightCost) : 0);
+  const fobShanghaiLabel = language === 'zh'
+    ? 'FOB 上海港'
+    : language === 'zh-en' ? 'FOB SHANGHAI PORT / FOB 上海港' : 'FOB SHANGHAI PORT';
+  const oceanFreightInsuranceLabel = language === 'zh'
+    ? `海运费和保险费至 ${localizedFreightDestination(freightDestination, language)}`
+    : language === 'zh-en'
+      ? `Ocean Freight & Insurance to ${freightDestination} / 海运费和保险费`
+      : `Ocean Freight & Insurance to ${freightDestination}`;
+  const cifTotalLabel = language === 'zh'
+    ? `CIF ${localizedFreightDestination(freightDestination, language)} 总价`
+    : language === 'zh-en'
+      ? `TOTAL CIF ${freightDestination} / CIF 总价`
+      : `TOTAL CIF ${freightDestination}`;
 
   const convertedTotal = useMemo(() => {
     return grandTotal * Number(exchangeRate);
@@ -1139,15 +1175,61 @@ const Quote = () => {
                       </select>
                     )}
                   </div>
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700" title="Freight Cost">运费</label>
-                    <input
-                      type="number"
-                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-                      value={freightCost}
-                      onChange={(e) => setField('freightCost', Number(e.target.value))}
-                    />
-                  </div>
+                  {quotationType === 'CIF' && (
+                    <div className="sm:col-span-2">
+                      <span className="block text-sm font-medium text-gray-700">CIF 价格显示方式</span>
+                      <div className="mt-1 grid grid-cols-2 rounded-md border border-gray-300 bg-gray-50 p-1" role="group" aria-label="CIF 价格显示方式">
+                        <button
+                          type="button"
+                          aria-pressed={cifPriceDisplay === 'total'}
+                          onClick={() => handleCifPriceDisplayChange('total')}
+                          className={`rounded px-3 py-2 text-sm font-medium ${cifPriceDisplay === 'total' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600'}`}
+                        >
+                          CIF 总价（原格式）
+                        </button>
+                        <button
+                          type="button"
+                          aria-pressed={cifPriceDisplay === 'fob-breakdown'}
+                          onClick={() => handleCifPriceDisplayChange('fob-breakdown')}
+                          className={`rounded px-3 py-2 text-sm font-medium ${cifPriceDisplay === 'fob-breakdown' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600'}`}
+                        >
+                          FOB + 海运保险明细
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {usesCifBreakdown ? (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700" title="FOB Shanghai Local Charge">FOB 上海本地费用</label>
+                        <input
+                          type="number"
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                          value={fobShanghaiLocalCost}
+                          onChange={(e) => setField('fobShanghaiLocalCost', Number(e.target.value))}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700" title="Ocean Freight & Insurance">海运费和保险费</label>
+                        <input
+                          type="number"
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                          value={cifFreightInsurance}
+                          onChange={(e) => setField('cifFreightInsurance', Number(e.target.value))}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700" title="Freight Cost">运费</label>
+                      <input
+                        type="number"
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                        value={freightCost}
+                        onChange={(e) => setField('freightCost', Number(e.target.value))}
+                      />
+                    </div>
+                  )}
                 </>
               )}
               <div>
@@ -1787,6 +1869,17 @@ const Quote = () => {
                         <tr>
                           <td colSpan={5} className="p-2 text-right font-semibold">{t.exwPickup}</td>
                         </tr>
+                      ) : usesCifBreakdown ? (
+                        <>
+                          <tr>
+                            <td colSpan={4} className="p-2 text-right font-semibold">{fobShanghaiLabel}:</td>
+                            <td className="p-2 text-right">{fobShanghaiTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                          </tr>
+                          <tr>
+                            <td colSpan={4} className="p-2 text-right font-semibold">{oceanFreightInsuranceLabel}:</td>
+                            <td className="p-2 text-right">{Number(cifFreightInsurance).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                          </tr>
+                        </>
                       ) : (
                         <tr>
                           <td colSpan={4} className="p-2 text-right font-semibold">{formatFreightText(localizedFreightDestination(freightDestination, language), t.freight)}</td>
@@ -1794,7 +1887,7 @@ const Quote = () => {
                         </tr>
                       )}
                       <tr className="font-bold bg-gray-100">
-                        <td colSpan={4} className="p-2 text-right">{t.totalAmount}</td>
+                        <td colSpan={4} className="p-2 text-right">{usesCifBreakdown ? cifTotalLabel : t.totalAmount}</td>
                         <td className="p-2 text-right">{grandTotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                       </tr>
                       {targetCurrency !== 'USD' && targetCurrency !== '-' && (

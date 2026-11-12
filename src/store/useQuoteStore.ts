@@ -103,6 +103,9 @@ const normalizeQuoteState = (state: any) => {
     documentMode: state.documentMode ?? 'quotation',
     showProposalCommercial: state.showProposalCommercial ?? false,
     showCompanyShowcase: state.showCompanyShowcase ?? true,
+    cifPriceDisplay: state.cifPriceDisplay === 'fob-breakdown' ? 'fob-breakdown' : 'total',
+    fobShanghaiLocalCost: Number(state.fobShanghaiLocalCost) || 0,
+    cifFreightInsurance: Number(state.cifFreightInsurance) || 0,
     warrantyText: state.warrantyText || buildDefaultWarrantyText(state.warrantyMonths),
     quoteRemarks: state.quoteRemarks ?? '',
     exchangeRateBasis: state.exchangeRateBasis ?? DEFAULT_EXCHANGE_RATE_BASIS,
@@ -147,6 +150,9 @@ interface QuoteState {
   quotationNo: string;
   projectName: string;
   quotationType: string;
+  cifPriceDisplay: 'total' | 'fob-breakdown';
+  fobShanghaiLocalCost: number;
+  cifFreightInsurance: number;
   quotationDate: string;
   elevators: Elevator[];
   freightDestination: string;
@@ -200,6 +206,9 @@ const initialState = {
   quotationNo: (() => { const d = new Date(); const yy = String(d.getFullYear()).slice(2); const mm = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0'); return `XFJ${yy}${mm}${dd}01`; })(),
   projectName: 'Sample Project',
   quotationType: 'FOB',
+  cifPriceDisplay: 'total' as const,
+  fobShanghaiLocalCost: 0,
+  cifFreightInsurance: 0,
   quotationDate: todayDate(),
   elevators: [{...elevatorTemplate, id: 1}],
   freightDestination: DEFAULT_FREIGHT_DESTINATION,
@@ -373,7 +382,7 @@ export const useQuoteStore = create<QuoteState>()(
     {
       name: 'quote-storage', // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => draftStorage),
-      version: 10,
+      version: 11,
       partialize: (state) => {
         const { quotationDate, ...persistedState } = state;
         return persistedState;
@@ -418,6 +427,9 @@ export const useQuoteStore = create<QuoteState>()(
           nextState = normalizeQuoteState(nextState);
         }
         if (version < 10) {
+          nextState = normalizeQuoteState(nextState);
+        }
+        if (version < 11) {
           nextState = normalizeQuoteState(nextState);
         }
         return nextState;

@@ -214,6 +214,9 @@ export async function generateWordBlob(state: {
   quotationNo: string;
   projectName: string;
   quotationType: string;
+  cifPriceDisplay?: 'total' | 'fob-breakdown';
+  fobShanghaiLocalCost?: number;
+  cifFreightInsurance?: number;
   quotationDate: string;
   elevators: any[];
   freightDestination: string;
@@ -298,7 +301,12 @@ export async function generateWordBlob(state: {
     state.freightDestination === 'SHANGHAI PORT';
   const shouldChargeFreight =
     !isExw || (!isDefaultExwNoChargeDestination && Number(state.freightCost) > 0);
-  const grandTotal = elevatorsTotal + (shouldChargeFreight ? Number(state.freightCost) : 0) + optionals;
+  const usesCifBreakdown = state.quotationType === 'CIF' && state.cifPriceDisplay === 'fob-breakdown';
+  const goodsAndServicesTotal = elevatorsTotal + optionals;
+  const fobShanghaiTotal = goodsAndServicesTotal + Number(state.fobShanghaiLocalCost || 0);
+  const grandTotal = usesCifBreakdown
+    ? fobShanghaiTotal + Number(state.cifFreightInsurance || 0)
+    : goodsAndServicesTotal + (shouldChargeFreight ? Number(state.freightCost) : 0);
   const validUntil = (() => {
     try {
       const d = new Date(state.quotationDate);
@@ -484,33 +492,48 @@ export async function generateWordBlob(state: {
   });
 
   // Freight / EXW pickup row
-  priceRows.push(
-    new TableRow({
-      children: !shouldChargeFreight
-        ? [
-            cell(t.exwPickup, {
-              width: priceCols.reduce((sum, col) => sum + col, 0),
-              colSpan: 5,
-            }),
-          ]
-        : [
-            cell(formatFreightText(localizedFreightDestination(state.freightDestination, state.language), t.freight), {
-              width: priceCols[0] + priceCols[1] + priceCols[2] + priceCols[3],
-              colSpan: 4,
-            }),
-            cell(`USD ${Number(state.freightCost).toLocaleString()}`, {
-              width: priceCols[4],
-              align: AlignmentType.RIGHT,
-            }),
-          ],
-    }),
-  );
+  if (!shouldChargeFreight) {
+    priceRows.push(new TableRow({ children: [cell(t.exwPickup, {
+      width: priceCols.reduce((sum, col) => sum + col, 0),
+      colSpan: 5,
+    })] }));
+  } else if (usesCifBreakdown) {
+    const fobLabel = state.language === 'zh'
+      ? 'FOB 上海港'
+      : state.language === 'zh-en' ? 'FOB SHANGHAI PORT / FOB 上海港' : 'FOB SHANGHAI PORT';
+    const oceanLabel = state.language === 'zh'
+      ? `海运费和保险费至 ${localizedFreightDestination(state.freightDestination, state.language)}`
+      : state.language === 'zh-en'
+        ? `Ocean Freight & Insurance to ${state.freightDestination} / 海运费和保险费`
+        : `Ocean Freight & Insurance to ${state.freightDestination}`;
+    priceRows.push(
+      new TableRow({ children: [
+        cell(`${fobLabel}:`, { width: priceCols[0] + priceCols[1] + priceCols[2] + priceCols[3], colSpan: 4 }),
+        cell(`USD ${fobShanghaiTotal.toLocaleString()}`, { width: priceCols[4], align: AlignmentType.RIGHT }),
+      ] }),
+      new TableRow({ children: [
+        cell(`${oceanLabel}:`, { width: priceCols[0] + priceCols[1] + priceCols[2] + priceCols[3], colSpan: 4 }),
+        cell(`USD ${Number(state.cifFreightInsurance || 0).toLocaleString()}`, { width: priceCols[4], align: AlignmentType.RIGHT }),
+      ] }),
+    );
+  } else {
+    priceRows.push(new TableRow({ children: [
+      cell(formatFreightText(localizedFreightDestination(state.freightDestination, state.language), t.freight), {
+        width: priceCols[0] + priceCols[1] + priceCols[2] + priceCols[3],
+        colSpan: 4,
+      }),
+      cell(`USD ${Number(state.freightCost).toLocaleString()}`, {
+        width: priceCols[4],
+        align: AlignmentType.RIGHT,
+      }),
+    ] }));
+  }
 
   // Total row
   priceRows.push(
     new TableRow({
       children: [
-        cell(t.totalAmount, {
+        cell(usesCifBreakdown ? `TOTAL CIF ${state.freightDestination}` : t.totalAmount, {
           width: priceCols[0] + priceCols[1] + priceCols[2] + priceCols[3],
           colSpan: 4,
           bold: true,
