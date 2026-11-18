@@ -34,7 +34,6 @@ export type EscalatorSpecGroup = {
   stepColor: string;
   combColor: string;
   combStructure: string;
-  movableCoverPlate: string;
   machineRoomStandard: string;
   upperMachineRoomLengthening: string;
   lowerMachineRoomLengthening: string;
@@ -61,6 +60,43 @@ export type EscalatorFunctionRow = {
   no: string;
   name: string;
   description: string;
+};
+
+export const indoorEscalatorSchemeOne: Pick<
+  EscalatorSpecGroup,
+  | 'handrailColor'
+  | 'handrailSpec'
+  | 'railingHeight'
+  | 'railingMaterial'
+  | 'supportMaterial'
+  | 'coverPlateMaterial'
+  | 'apronPlateMaterial'
+  | 'stepType'
+  | 'stepColor'
+  | 'combColor'
+  | 'combStructure'
+  | 'machineRoomStandard'
+  | 'upperMachineRoomLengthening'
+> = {
+  handrailColor: 'Black',
+  handrailSpec: 'Width 100 mm',
+  railingHeight: '900 mm',
+  railingMaterial: 'Glass/Transparent',
+  supportMaterial: 'SUS 304',
+  coverPlateMaterial: 'SUS430',
+  apronPlateMaterial: 'SUS 430',
+  stepType: 'SUS 430',
+  stepColor: 'Stainless steel color',
+  combColor: 'Stainless steel color',
+  combStructure: 'Aluminum alloy',
+  machineRoomStandard: '√',
+  upperMachineRoomLengthening: 'None',
+};
+
+export const indoorEscalatorSchemeOneConfigRemarks: Record<string, string> = {
+  'skirt-panel': '1.5mm SUS430不锈钢',
+  'interior-exterior': '1.2mm SUS430不锈钢',
+  'front-edge': '1.2mm SUS430不锈钢',
 };
 
 export const defaultEscalatorPriceRows: EscalatorPriceRow[] = [
@@ -100,20 +136,7 @@ export const defaultEscalatorSpecGroups: EscalatorSpecGroup[] = [
     horizontalSpan: '11472 mm',
     motorPower: 'kW',
     frequencyConversion: 'Yes',
-    handrailColor: 'Black',
-    handrailSpec: 'Width 100 mm',
-    railingHeight: '900 mm',
-    railingMaterial: 'Glass/Transparent',
-    supportMaterial: 'St.St. 304',
-    coverPlateMaterial: 'St.St. 304',
-    apronPlateMaterial: 'St.St. 304',
-    stepType: 'St.St. 430',
-    stepColor: 'Stainless steel color',
-    combColor: 'Stainless steel color',
-    combStructure: 'Aluminum alloy',
-    movableCoverPlate: 'St.St.304',
-    machineRoomStandard: '√',
-    upperMachineRoomLengthening: 'None',
+    ...indoorEscalatorSchemeOne,
     lowerMachineRoomLengthening: 'None',
     lowerMachineRoomShortening: 'None',
     intermediateSupports: 'None',
@@ -138,20 +161,7 @@ export const defaultEscalatorSpecGroups: EscalatorSpecGroup[] = [
     horizontalSpan: '9809 mm',
     motorPower: 'kW',
     frequencyConversion: 'Yes',
-    handrailColor: 'Black',
-    handrailSpec: 'Width 100 mm',
-    railingHeight: '900 mm',
-    railingMaterial: 'Glass/Transparent',
-    supportMaterial: 'St.St. 304',
-    coverPlateMaterial: 'St.St. 304',
-    apronPlateMaterial: 'St.St. 304',
-    stepType: 'St.St. 430',
-    stepColor: 'Stainless steel color',
-    combColor: 'Stainless steel color',
-    combStructure: 'Aluminum alloy',
-    movableCoverPlate: 'St.St.304',
-    machineRoomStandard: '√',
-    upperMachineRoomLengthening: 'None',
+    ...indoorEscalatorSchemeOne,
     lowerMachineRoomLengthening: 'None',
     lowerMachineRoomShortening: 'None',
     intermediateSupports: 'None',
@@ -188,7 +198,6 @@ export const escalatorSpecRows: { label: string; key: keyof EscalatorSpecGroup }
   { label: '梯级颜色 Step color', key: 'stepColor' },
   { label: '梳齿颜色 Comb color', key: 'combColor' },
   { label: '梳齿结构 Comb structure', key: 'combStructure' },
-  { label: '活动盖板类型 Type of movable cover plate', key: 'movableCoverPlate' },
   { label: '机房长度标准 Machine room length standard', key: 'machineRoomStandard' },
   { label: '上机房加长 Upper machine room lengthening', key: 'upperMachineRoomLengthening' },
   { label: '下机房加长 Lower machine room lengthening', key: 'lowerMachineRoomLengthening' },
@@ -221,11 +230,11 @@ export const defaultEscalatorConfigRows: EscalatorConfigRow[] = [
   { id: 'handrail', no: '1', name: '扶手带(室外) Handrail(Waterproof)', brand: '南龙/斌腾 Nanlong / Binteng', remarks: '' },
   { id: 'handrail-material', no: '2', name: '扶手型材 Handrail Material', brand: '新达 XINDA', remarks: '1.5mm SUS304不锈钢' },
   { id: 'wainscot', no: '3', name: '护壁板(玻璃) Wainscot (Glass)', brand: '山川 SHANCHUAN', remarks: '10mm钢化玻璃' },
-  { id: 'skirt-panel', no: '4', name: '围裙板 Skirt Panel', brand: '新达 XINDA', remarks: '1.5mm SUS304不锈钢' },
+  { id: 'skirt-panel', no: '4', name: '围裙板 Skirt Panel', brand: '新达 XINDA', remarks: indoorEscalatorSchemeOneConfigRemarks['skirt-panel'] },
   { id: 'skirt-deflector', no: '5', name: '围裙板防夹装置 Skirt Deflector', brand: '新达 XINDA', remarks: '' },
-  { id: 'interior-exterior', no: '六', name: '内外盖板 Interior-exterior profile', brand: '新达 XINDA', remarks: '1.5mm SUS304不锈钢' },
+  { id: 'interior-exterior', no: '六', name: '内外盖板 Interior-exterior profile', brand: '新达 XINDA', remarks: indoorEscalatorSchemeOneConfigRemarks['interior-exterior'] },
   { id: 'oiling-device', no: '七', name: '加油装置 Oiling device', brand: '哈德 HADE', remarks: '' },
-  { id: 'front-edge', no: '八', name: '前沿板 Front edge panel', brand: '新达 XINDA', remarks: '1.5mm SUS304不锈钢蚀刻' },
+  { id: 'front-edge', no: '八', name: '前沿板 Front edge panel', brand: '新达 XINDA', remarks: indoorEscalatorSchemeOneConfigRemarks['front-edge'] },
   { id: 'inverter', no: '九', name: '变频器 Inverter', brand: '默纳克一体机 MONARCH', remarks: '' },
   { id: 'safety-function', no: '十', name: '安全功能 Safety Function', brand: '', remarks: '', section: true },
   { id: 'drive-chain', no: '1', name: '驱动链断裂保护装置 Broken drive-chain protection device', brand: '', remarks: '' },

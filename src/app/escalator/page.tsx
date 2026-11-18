@@ -8,6 +8,8 @@ import {
   defaultEscalatorFunctionRows,
   defaultEscalatorPriceRows,
   defaultEscalatorSpecGroups,
+  indoorEscalatorSchemeOne,
+  indoorEscalatorSchemeOneConfigRemarks,
   escalatorSpecRows,
   EscalatorConfigRow,
   EscalatorFunctionRow,
@@ -36,6 +38,10 @@ type EscalatorQuoteState = {
   validityDays: number;
   warrantyMonths: number;
   exchangeRateBasis: number;
+  exchangeRateBank: 'szrcb' | 'boc';
+  exchangeRateBasisSource: string;
+  exchangeRateBasisMarketRate: number | null;
+  exchangeRateBasisUpdatedAt: string;
   containerEstimate: string;
   freightDestination: string;
   freightCost: number;
@@ -66,7 +72,11 @@ const initialState: EscalatorQuoteState = {
   deliveryDays: 35,
   validityDays: 45,
   warrantyMonths: 12,
-  exchangeRateBasis: 6.7,
+  exchangeRateBasis: 6.65,
+  exchangeRateBank: 'szrcb',
+  exchangeRateBasisSource: '苏州农商行汇买价 - 0.05',
+  exchangeRateBasisMarketRate: null,
+  exchangeRateBasisUpdatedAt: '',
   containerEstimate: '8*40HQ',
   freightDestination: 'SHANGHAI PORT',
   freightCost: 8000,
@@ -110,6 +120,8 @@ export default function EscalatorQuotePage() {
   const [state, setState] = useState<EscalatorQuoteState>(initialState);
   const [saved, setSaved] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState('');
   const [quoteHistory, setQuoteHistory] = useState<any[]>([]);
   const [companies, setCompanies] = useState<{name: string; country?: string}[]>([]);
   const customers = new Map<string, string>();
@@ -137,7 +149,46 @@ export default function EscalatorQuotePage() {
     } catch {
       setQuoteHistory([]);
     }
+    setHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const saveLocalDraft = () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      setDraftSavedAt(new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }));
+    };
+    const debounce = window.setTimeout(saveLocalDraft, 900);
+    const interval = window.setInterval(saveLocalDraft, 5 * 60 * 1000);
+    return () => {
+      window.clearTimeout(debounce);
+      window.clearInterval(interval);
+    };
+  }, [hydrated, state]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    let cancelled = false;
+    const loadRate = async () => {
+      try {
+        const response = await fetch(`/api/exchange-rate?currency=USD&bank=${state.exchangeRateBank}`);
+        if (!response.ok) return;
+        const data = await response.json();
+        if (cancelled) return;
+        setState((prev) => ({
+          ...prev,
+          exchangeRateBasis: Number.isFinite(data.usdRmbBasis) ? data.usdRmbBasis : prev.exchangeRateBasis,
+          exchangeRateBasisSource: data.usdRmbSource || prev.exchangeRateBasisSource,
+          exchangeRateBasisMarketRate: Number.isFinite(data.usdRmbMarketRate) ? data.usdRmbMarketRate : null,
+          exchangeRateBasisUpdatedAt: data.usdRmbUpdatedAt || '',
+        }));
+      } catch {
+        // Keep the saved/manual rate when the bank source is temporarily unavailable.
+      }
+    };
+    loadRate();
+    return () => { cancelled = true; };
+  }, [hydrated, state.exchangeRateBank]);
 
   const priceSubtotal = useMemo(
     () => state.priceRows.reduce((sum, row) => sum + Number(row.quantity || 0) * Number(row.unitPrice || 0), 0),
@@ -161,10 +212,24 @@ export default function EscalatorQuotePage() {
   };
 
   const updateSpecGroup = <K extends keyof EscalatorSpecGroup>(id: number, field: K, value: EscalatorSpecGroup[K]) => {
-    setState((prev) => ({
-      ...prev,
-      specGroups: prev.specGroups.map((group) => (group.id === id ? { ...group, [field]: value } : group)),
-    }));
+    setState((prev) => {
+      const applyIndoorScheme = field === 'installationEnvironment' && /^(indoor|室内)$/i.test(String(value).trim());
+      const specGroups = prev.specGroups.map((group) => (
+        group.id === id
+          ? { ...group, [field]: value, ...(applyIndoorScheme ? indoorEscalatorSchemeOne : {}) }
+          : group
+      ));
+      const allIndoor = specGroups.every((group) => /^(indoor|室内)$/i.test(group.installationEnvironment.trim()));
+      return {
+        ...prev,
+        specGroups,
+        configRows: applyIndoorScheme && allIndoor
+          ? prev.configRows.map((row) => indoorEscalatorSchemeOneConfigRemarks[row.id]
+            ? { ...row, remarks: indoorEscalatorSchemeOneConfigRemarks[row.id] }
+            : row)
+          : prev.configRows,
+      };
+    });
   };
 
   const updateConfigRow = <K extends keyof EscalatorConfigRow>(id: string, field: K, value: EscalatorConfigRow[K]) => {
@@ -224,18 +289,23 @@ export default function EscalatorQuotePage() {
   };
 
   const addSpecGroup = () => {
-    setState((prev) => ({
-      ...prev,
-      specGroups: [
-        ...prev.specGroups,
-        {
-          ...prev.specGroups[prev.specGroups.length - 1],
-          id: Math.max(0, ...prev.specGroups.map((group) => group.id)) + 1,
-          no: `E${prev.specGroups.length + 1}`,
-          qty: '1',
-        },
-      ],
-    }));
+    setState((prev) => {
+      const source = prev.specGroups[prev.specGroups.length - 1] || defaultEscalatorSpecGroups[0];
+      const isIndoor = /^(indoor|室内)$/i.test(source.installationEnvironment.trim());
+      return {
+        ...prev,
+        specGroups: [
+          ...prev.specGroups,
+          {
+            ...source,
+            ...(isIndoor ? indoorEscalatorSchemeOne : {}),
+            id: Math.max(0, ...prev.specGroups.map((group) => group.id)) + 1,
+            no: `E${prev.specGroups.length + 1}`,
+            qty: '1',
+          },
+        ],
+      };
+    });
   };
 
   const saveDraft = () => {
@@ -255,6 +325,7 @@ export default function EscalatorQuotePage() {
     const updated = [historyEntry, ...quoteHistory.filter((entry) => entry.quotationNo !== state.quotationNo)].slice(0, 200);
     setQuoteHistory(updated);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+    setDraftSavedAt(new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }));
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
   };
@@ -385,7 +456,12 @@ export default function EscalatorQuotePage() {
           </div>
 
           <div className={sectionClass}>
-            <h2 className="mb-3 text-lg font-semibold">基本信息</h2>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold">基本信息</h2>
+              <span role="status" className="text-xs font-normal text-gray-400">
+                {draftSavedAt ? `草稿已保存到本机 · ${draftSavedAt}` : '本机自动保存'}
+              </span>
+            </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div>
                 <label className="text-sm font-medium text-gray-700">客户名称
@@ -450,7 +526,6 @@ export default function EscalatorQuotePage() {
                 ['deliveryDays', 'Delivery Days'],
                 ['validityDays', 'Validity Days'],
                 ['warrantyMonths', 'Warranty Months'],
-                ['exchangeRateBasis', 'USD = RMB'],
                 ...(!isExw ? [['freightCost', 'Freight Cost']] : []),
               ].map(([field, label]) => (
                 <label key={field} className="text-sm font-medium text-gray-700">
@@ -463,6 +538,41 @@ export default function EscalatorQuotePage() {
                   />
                 </label>
               ))}
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700">汇率基准 (USD = RMB)</label>
+                <div className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_150px]">
+                  <select
+                    aria-label="汇率参考银行"
+                    className={inputClass.replace('mt-1 ', '')}
+                    value={state.exchangeRateBank}
+                    onChange={(e) => setField('exchangeRateBank', e.target.value as 'szrcb' | 'boc')}
+                  >
+                    <option value="szrcb">苏州农商行汇买价 - 0.05（默认）</option>
+                    <option value="boc">中国银行现汇买入价 - 0.05</option>
+                  </select>
+                  <input
+                    aria-label="USD = RMB"
+                    type="number"
+                    step="0.01"
+                    className={inputClass.replace('mt-1 ', '')}
+                    value={state.exchangeRateBasis}
+                    onChange={(e) => setField('exchangeRateBasis', Number(e.target.value))}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  <a
+                    className="text-blue-600 hover:underline"
+                    href={state.exchangeRateBank === 'boc' ? 'https://www.boc.cn/sourcedb/whpj/' : 'https://www.szrcb.com/szrcb/bjfw/whpj/index.shtml'}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {state.exchangeRateBasisSource}
+                  </a>
+                  {state.exchangeRateBasisMarketRate ? `（市场买入价 ${state.exchangeRateBasisMarketRate.toFixed(2)}` : ''}
+                  {state.exchangeRateBasisMarketRate && state.exchangeRateBasisUpdatedAt ? `，更新 ${state.exchangeRateBasisUpdatedAt}）` : state.exchangeRateBasisMarketRate ? '）' : ''}
+                  <span className="ml-2">可手动调整</span>
+                </p>
+              </div>
             </div>
           </div>
 
