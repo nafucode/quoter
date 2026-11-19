@@ -191,10 +191,12 @@ const headerRow = (cells: { text: string; width: number }[]) =>
   });
 
 const EXW_PICKUP_DESTINATION = 'Pickup from factory arranged by the customer. 客户安排工厂自提。';
-const formatFreightText = (dest: string, freight: (dest: string) => string) =>
-  dest.trim().toLowerCase().startsWith('to ')
-    ? `Local fee and Freight from factory ${dest} :`
-    : freight(dest);
+const formatFreightText = (dest: string, freight: (dest: string) => string) => {
+  const normalized = dest.trim().toLowerCase();
+  if (normalized.startsWith('from factory')) return `${dest} :`;
+  if (normalized.startsWith('to ')) return `Local fee and Freight from factory ${dest} :`;
+  return freight(dest);
+};
 const localizedFreightDestination = (dest: string, language: Lang) =>
   (language === 'zh' || language === 'zh-en') && dest === 'SHANGHAI PORT' ? '上海港' : dest;
 const isCargoElevator = (elevator: any) =>
@@ -299,8 +301,7 @@ export async function generateWordBlob(state: {
     state.freightDestination === EXW_PICKUP_DESTINATION ||
     state.freightDestination === 'e.g., Port of Shanghai' ||
     state.freightDestination === 'SHANGHAI PORT';
-  const shouldChargeFreight =
-    !isExw || (!isDefaultExwNoChargeDestination && Number(state.freightCost) > 0);
+  const shouldChargeFreight = !isExw || !isDefaultExwNoChargeDestination;
   const usesCifBreakdown = state.quotationType === 'CIF' && state.cifPriceDisplay === 'fob-breakdown';
   const goodsAndServicesTotal = elevatorsTotal + optionals;
   const fobShanghaiTotal = goodsAndServicesTotal + Number(state.fobShanghaiLocalCost || 0);

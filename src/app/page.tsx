@@ -83,11 +83,14 @@ const normalizeCompanyOptions = (options: unknown[]): CompanyOption[] => {
 const DEFAULT_FREIGHT_PLACEHOLDER = 'e.g., Port of Shanghai';
 const EXW_PICKUP_DESTINATION = 'Pickup from factory arranged by the customer. 客户安排工厂自提。';
 const NIGERIA_YY_CARGO_DESTINATION = 'To YY cargo Yiwu Warehouse China';
+const GHANA_SF_YIWU_DESTINATION = 'From factory to SF Yiwu warehouse China.';
 
-const formatFreightText = (dest: string, freight: (dest: string) => string) =>
-  dest.trim().toLowerCase().startsWith('to ')
-    ? `Local fee and Freight from factory ${dest} :`
-    : freight(dest);
+const formatFreightText = (dest: string, freight: (dest: string) => string) => {
+  const normalized = dest.trim().toLowerCase();
+  if (normalized.startsWith('from factory')) return `${dest} :`;
+  if (normalized.startsWith('to ')) return `Local fee and Freight from factory ${dest} :`;
+  return freight(dest);
+};
 
 const localizedFreightDestination = (dest: string, language: string) =>
   (language === 'zh' || language === 'zh-en') && dest === 'SHANGHAI PORT' ? '上海港' : dest;
@@ -239,6 +242,9 @@ const Quote = () => {
     { value: EXW_PICKUP_DESTINATION, label: EXW_PICKUP_DESTINATION, freightCost: 0 },
     ...(country === 'Nigeria'
       ? [{ value: NIGERIA_YY_CARGO_DESTINATION, label: NIGERIA_YY_CARGO_DESTINATION, freightCost: 500 }]
+      : []),
+    ...(country === 'Ghana'
+      ? [{ value: GHANA_SF_YIWU_DESTINATION, label: GHANA_SF_YIWU_DESTINATION, freightCost: 0 }]
       : []),
   ];
 
@@ -466,6 +472,10 @@ const Quote = () => {
       setField('freightDestination', ports[0]);
     }
     if (quotationType === 'EXW' && value !== 'Nigeria' && freightDestination === NIGERIA_YY_CARGO_DESTINATION) {
+      setField('freightDestination', EXW_PICKUP_DESTINATION);
+      setField('freightCost', 0);
+    }
+    if (quotationType === 'EXW' && value !== 'Ghana' && freightDestination === GHANA_SF_YIWU_DESTINATION) {
       setField('freightDestination', EXW_PICKUP_DESTINATION);
       setField('freightCost', 0);
     }
@@ -821,7 +831,7 @@ const Quote = () => {
     freightDestination === EXW_PICKUP_DESTINATION ||
     freightDestination === DEFAULT_FREIGHT_PLACEHOLDER ||
     freightDestination === 'SHANGHAI PORT';
-  const shouldChargeFreight = !isExw || (!isDefaultExwNoChargeDestination && Number(freightCost) > 0);
+  const shouldChargeFreight = !isExw || !isDefaultExwNoChargeDestination;
   const usesCifBreakdown = quotationType === 'CIF' && cifPriceDisplay === 'fob-breakdown';
 
   const goodsAndServicesTotal = useMemo(() => {
