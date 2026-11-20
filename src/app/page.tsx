@@ -8,8 +8,9 @@ import QuoteToolbar from '@/components/QuoteToolbar';
 import Header from '@/components/Header';
 import ElevatorForm from '@/components/ElevatorForm';
 import { quoteFingerprint } from '@/utils/quoteFingerprint';
-import { CopyPlus } from 'lucide-react';
+import { CopyPlus, Search, X } from 'lucide-react';
 import { elevatorCategories, createQuoteFromTemplate } from '@/utils/quoteTemplate';
+import { filterQuoteHistory } from '@/utils/filterQuoteHistory';
 import EditorNavigator from '@/components/EditorNavigator';
 import { useQuoteStore } from '@/store/useQuoteStore';
 import { hasDraftReadError, quoteStorage } from '@/utils/localImageLibrary';
@@ -271,6 +272,7 @@ const Quote = () => {
   const [preflightIssues, setPreflightIssues] = useState<ExportPreflightIssue[]>([]);
   const [pendingExport, setPendingExport] = useState<ExportKind | null>(null);
   const [quoteHistory, setQuoteHistory] = useState<any[]>([]);
+  const [historySearch, setHistorySearch] = useState('');
   const [versionStatus, setVersionStatus] = useState<{
     currentSha: string;
     latestSha: string;
@@ -390,6 +392,11 @@ const Quote = () => {
       });
     return sequence;
   }, [quoteHistory]);
+
+  const filteredQuoteHistory = useMemo(
+    () => filterQuoteHistory(quoteHistory, historySearch),
+    [quoteHistory, historySearch],
+  );
 
   const saveToHistory = async (entry: any, preserveId?: number) => {
     const saved = JSON.parse(await quoteStorage.getItem(HISTORY_KEY) || '[]');
@@ -2269,32 +2276,65 @@ const Quote = () => {
         {/* 历史报价 */}
         {isClient && (
           <div id="quote-history" className="mt-6 scroll-mt-36 no-print">
-            <div className="flex items-center justify-between mb-3">
+            <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-lg font-semibold text-gray-700">
                 历史报价
-                <span className="ml-2 text-sm font-normal text-gray-400">{quoteHistory.length} 份</span>
+                <span className="ml-2 text-sm font-normal text-gray-400">
+                  {historySearch.trim() ? `${filteredQuoteHistory.length} / ${quoteHistory.length}` : quoteHistory.length} 份
+                </span>
               </h2>
-              {quoteHistory.length > 0 && (
-                <button
-                  onClick={async () => {
-                    if (!window.confirm('清空全部历史？')) return;
-                    try { await quoteStorage.removeItem(HISTORY_KEY); setQuoteHistory([]); }
-                    catch { window.alert('清空失败，原报价仍然保留。'); }
-                  }}
-                  className="text-xs text-red-400 hover:text-red-600"
-                >
-                  清空
-                </button>
-              )}
+              <div className="flex w-full items-center gap-2 sm:w-auto">
+                <label className="relative min-w-0 flex-1 sm:w-80 sm:flex-none">
+                  <span className="sr-only">搜索历史报价</span>
+                  <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="search"
+                    value={historySearch}
+                    onChange={(event) => setHistorySearch(event.target.value)}
+                    placeholder="搜索客户名称、单号、项目、国家或型号"
+                    className="h-9 w-full rounded-md border border-gray-300 bg-white pl-9 pr-9 text-sm text-gray-700 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
+                  {historySearch && (
+                    <button
+                      type="button"
+                      onClick={() => setHistorySearch('')}
+                      aria-label="清除搜索"
+                      title="清除搜索"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                    >
+                      <X size={15} />
+                    </button>
+                  )}
+                </label>
+                {quoteHistory.length > 0 && (
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm('清空全部历史？')) return;
+                      try { await quoteStorage.removeItem(HISTORY_KEY); setQuoteHistory([]); }
+                      catch { window.alert('清空失败，原报价仍然保留。'); }
+                    }}
+                    className="shrink-0 text-xs text-red-400 hover:text-red-600"
+                  >
+                    清空
+                  </button>
+                )}
+              </div>
             </div>
 
             {quoteHistory.length === 0 ? (
               <div className="bg-white rounded-lg p-6 text-center text-gray-400 text-sm border border-dashed border-gray-200">
                 还没有保存的报价。填好报价后点击「Save to Library」即可保存。
               </div>
+            ) : filteredQuoteHistory.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-gray-200 bg-white p-6 text-center text-sm text-gray-400">
+                没有找到匹配的历史报价。
+                <button type="button" onClick={() => setHistorySearch('')} className="ml-2 text-blue-600 hover:text-blue-700">
+                  清除搜索
+                </button>
+              </div>
             ) : (
               <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100 overflow-x-auto">
-                {quoteHistory.map(entry => {
+                {filteredQuoteHistory.map(entry => {
                   const date = new Date(entry.savedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                   const total = entry.grandTotal
                     ? '$' + Math.round(entry.grandTotal).toLocaleString()
@@ -2306,6 +2346,8 @@ const Quote = () => {
                   const typeLabel = types.length
                     ? types.join(' / ')
                     : '—';
+                  const customerName = entry.companyName || entry.customer || entry.buyerName || entry.clientName
+                    || entry.state?.companyName || entry.state?.customer || entry.state?.buyerName || entry.state?.clientName || '—';
                   return (
                     <div key={entry.id} className="flex min-w-[1120px] items-center gap-3 px-4 py-2.5 hover:bg-blue-50 transition-colors group">
                       {/* Sequence — oldest saved quote starts from 001 */}
@@ -2333,7 +2375,7 @@ const Quote = () => {
                         {entry.elevatorCount > 1 && <span className="ml-1 text-gray-400">×{entry.elevatorCount}</span>}
                       </div>
                       {/* Company — flex-1 fills the remaining space */}
-                      <div className="flex-1 min-w-0 text-xs text-gray-400 truncate">{entry.companyName}</div>
+                      <div className="flex-1 min-w-0 text-xs text-gray-400 truncate">{customerName}</div>
                       {/* Total */}
                       <span className="shrink-0 text-sm font-semibold text-gray-700 w-20 text-right">{total}</span>
                       {/* Saved time */}
